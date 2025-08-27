@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio de Projetos Mecânicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Customizados -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1b2a; /* Tom de azul escuro */
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.04) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 2px, transparent 2px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+        }
+        ::placeholder { color: #9ca3af; opacity: 1; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader {
+            border: 4px solid #f3f3f340; border-top: 4px solid #3498db;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
+    </style>
+</head>
+<body>
+
+    <!-- Container de Autenticação (Visível por padrão) -->
+    <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+            <div class="flex justify-center">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-32 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
+            </div>
+            <div class="flex border-b border-gray-500">
+                <button id="tab-login" class="flex-1 py-2 text-center font-semibold text-white border-b-2 border-indigo-500 transition-colors duration-300">Login</button>
+                <button id="tab-register" class="flex-1 py-2 text-center font-semibold text-gray-400 border-b-2 border-transparent transition-colors duration-300">Cadastro</button>
+            </div>
+            <div id="message-box" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+            <!-- Formulário de Login -->
+            <div id="form-login">
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="login-email" class="text-sm font-medium text-gray-300">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label for="login-password" class="text-sm font-medium text-gray-300">Senha</label>
+                            <a href="#" id="forgot-password" class="text-xs font-medium text-indigo-400 hover:underline">Esqueceu a senha?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="login-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="********">
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
+                </form>
+            </div>
+            <!-- Formulário de Cadastro -->
+            <div id="form-register" class="hidden">
+                 <form id="register-form" class="space-y-4">
+                    <input type="text" id="register-name" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Nome Completo">
+                    <input type="email" id="register-email" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Email">
+                    <div class="relative">
+                        <input type="password" id="register-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="register-confirm-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Confirmar Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container do Jogo (Oculto por padrão) -->
+    <div id="game-container" class="hidden">
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+             <div class="w-full max-w-4xl bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Desafio de Projetos</h1>
+                        <p id="user-email" class="text-sm text-gray-300"></p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button id="completed-button" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Completos</button>
+                        <button id="logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                    </div>
+                </div>
+                
+                <!-- Botão para Iniciar Desafio -->
+                <div id="start-challenge-container" class="text-center py-8">
+                    <button id="start-button" class="bg-indigo-600 text-white font-bold py-4 px-10 text-lg rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105">
+                        <span id="button-text">Iniciar Novo Desafio</span>
+                    </button>
+                    <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                </div>
+
+                <!-- Área do Desafio -->
+                <div id="challenge-container" class="hidden space-y-4">
+                    <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                        <div id="loader" class="loader hidden"></div>
+                        <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain">
+                    </div>
+                    
+                    <div class="bg-black/20 p-3 rounded-lg text-center">
+                        <p class="text-sm text-gray-400">Material Fornecido:</p>
+                        <p id="material-info" class="font-bold text-white text-lg"></p>
+                    </div>
+
+                    <!-- Formulário de Resposta -->
+                    <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                        <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                        <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                    </form>
+                    <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                    <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Desafios Completos -->
+    <div id="completed-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">Desafios Completos</h2>
+                <button id="close-completed-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="completed-list" class="max-h-[70vh] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pr-2">
+                <!-- Galeria de imagens será preenchida dinamicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Detalhes da Resposta -->
+    <div id="details-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content w-full max-w-lg bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+             <div class="flex justify-between items-center mb-4">
+                <h2 id="details-modal-title" class="text-xl font-bold text-white">Sua Resposta</h2>
+                <button id="close-details-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="details-content" class="text-white">
+                <!-- Detalhes da resposta serão preenchidos aqui -->
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // --- SDKs DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
+          authDomain: "projects-debbb.firebaseapp.com",
+          projectId: "projects-debbb",
+          storageBucket: "projects-debbb.appspot.com",
+          messagingSenderId: "1016788358282",
+          appId: "1:1016788358282:web:491d260dfac9bc19f88973",
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let currentUser = null;
+        let currentChallenge = null;
+        let allChallenges = [];
+        let completedChallenges = new Map();
+
+        // --- ELEMENTOS DO DOM ---
+        const authContainer = document.getElementById('auth-container');
+        const gameContainer = document.getElementById('game-container');
+        const messageBox = document.getElementById('message-box');
+        
+        // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                await loadGameData(user);
+                authContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                document.getElementById('user-email').textContent = `Logado como: ${user.email}`;
+            } else {
+                authContainer.classList.remove('hidden');
+                gameContainer.classList.add('hidden');
+                allChallenges = [];
+                completedChallenges.clear();
+            }
+        });
+
+        async function loadGameData(user) {
+            const challengesSnapshot = await getDocs(collection(db, "challenges"));
+            allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const completedRef = collection(db, "users", user.uid, "completedChallenges");
+            const completedSnapshot = await getDocs(completedRef);
+            completedChallenges.clear();
+            completedSnapshot.forEach((doc) => {
+                completedChallenges.set(doc.id, doc.data());
+            });
+        }
+
+        // --- LÓGICA DE AUTENTICAÇÃO (Login, Cadastro, etc.) ---
+        document.getElementById('tab-login').addEventListener('click', (e) => switchTab(e.target));
+        document.getElementById('tab-register').addEventListener('click', (e) => switchTab(e.target));
+        function switchTab(clickedTab) {
+            const isLogin = clickedTab.id === 'tab-login';
+            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-login').classList.toggle('border-indigo-500', isLogin).classList.toggle('border-transparent', !isLogin);
+            document.getElementById('tab-register').classList.toggle('border-indigo-500', !isLogin).classList.toggle('border-transparent', isLogin);
+        }
+        document.querySelectorAll('.password-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const input = button.previousElementSibling;
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        });
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
+        }
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", userCredential.user.uid), { name, email });
+                showMessage('Cadastro realizado! Faça o login.');
+                switchTab(document.getElementById('tab-login'));
+            } catch (error) { showMessage('Erro: ' + error.code, true); }
+        });
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
+            } catch (error) { showMessage('Email ou senha inválidos.', true); }
+        });
+        document.getElementById('forgot-password').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            if (!email) return showMessage('Por favor, digite seu email para redefinir a senha.', true);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage(`Email de redefinição enviado para ${email}. Verifique sua caixa de entrada.`);
+            } catch (error) { showMessage('Nenhum usuário encontrado com este email.', true); }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- LÓGICA DO JOGO ---
+        const startButton = document.getElementById('start-button');
+        const startMessage = document.getElementById('start-message');
+        const challengeContainer = document.getElementById('challenge-container');
+        const placeholderText = document.getElementById('placeholder-text');
+        const challengeImage = document.getElementById('challenge-image');
+        const loader = document.getElementById('loader');
+        const materialInfo = document.getElementById('material-info');
+        const answerForm = document.getElementById('answer-form');
+        const answerFeedback = document.getElementById('answer-feedback');
+        const nextChallengeButton = document.getElementById('next-challenge-button');
+
+        startButton.addEventListener('click', () => {
+            document.getElementById('start-challenge-container').classList.add('hidden');
+            challengeContainer.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            startButton.disabled = true;
+            placeholderText.textContent = 'Buscando um desafio...';
+            placeholderText.classList.remove('hidden');
+
+            const availableChallenges = allChallenges.filter(challenge => !completedChallenges.has(challenge.id));
+
+            if (availableChallenges.length === 0) {
+                loader.classList.add('hidden');
+                startButton.disabled = true;
+                placeholderText.textContent = allChallenges.length > 0 ? 'Parabéns! Você completou todos os desafios.' : 'Nenhum desafio cadastrado pelo administrador no momento.';
+                document.getElementById('start-challenge-container').classList.remove('hidden');
+                challengeContainer.classList.add('hidden');
+                return;
+            }
+            
+            currentChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+            
+            materialInfo.textContent = currentChallenge.material;
+            challengeImage.src = `https://lh3.googleusercontent.com/d/${currentChallenge.id}`;
+            challengeImage.onload = () => {
+                loader.classList.add('hidden');
+                placeholderText.classList.add('hidden');
+                challengeImage.classList.remove('hidden');
+            };
+        });
+
+        answerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !currentChallenge) return;
+
+            const userMass = parseFloat(document.getElementById('mass-input').value);
+            const userVolume = parseFloat(document.getElementById('volume-input').value);
+            
+            const correctData = currentChallenge;
+            const correctMass = parseFloat(correctData.mass);
+            const correctVolume = parseFloat(correctData.volume);
+            const tolerance = parseFloat(correctData.tolerance || 5);
+
+            const toleranceMarginMass = correctMass * (tolerance / 100);
+            const toleranceMarginVolume = correctVolume * (tolerance / 100);
+
+            const isMassCorrect = userMass >= (correctMass - toleranceMarginMass) && userMass <= (correctMass + toleranceMarginMass);
+            const isVolumeCorrect = userVolume >= (correctVolume - toleranceMarginVolume) && userVolume <= (correctVolume + toleranceMarginVolume);
+            const isCorrect = isMassCorrect && isVolumeCorrect;
+
+            answerFeedback.textContent = isCorrect ? "Resposta Correta!" : "Resposta Incorreta. Tente novamente!";
+            answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
+            
+            if(isCorrect) {
+                answerForm.classList.add('hidden');
+                nextChallengeButton.classList.remove('hidden');
+                const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
+                const userFinalAnswer = { mass: userMass, volume: userVolume };
+                await setDoc(completedDocRef, { challengeName: currentChallenge.name, completedAt: serverTimestamp(), userAnswer: userFinalAnswer });
+                completedChallenges.set(currentChallenge.id, { challengeName: currentChallenge.name, userAnswer: userFinalAnswer });
+            }
+
+            const attemptId = `${currentUser.uid}_${currentChallenge.id}_${Date.now()}`;
+            await setDoc(doc(db, "attempts", attemptId), {
+                userId: currentUser.uid, userEmail: currentUser.email,
+                challengeId: currentChallenge.id, challengeName: currentChallenge.name,
+                userAnswer: { mass: userMass, volume: userVolume }, isCorrect, timestamp: serverTimestamp()
+            });
+        });
+        
+        nextChallengeButton.addEventListener('click', () => {
+            challengeContainer.classList.add('hidden');
+            document.getElementById('start-challenge-container').classList.remove('hidden');
+            
+            answerForm.classList.remove('hidden');
+            nextChallengeButton.classList.add('hidden');
+            answerFeedback.className = 'hidden';
+            answerForm.reset();
+            
+            startButton.disabled = false;
+            startMessage.textContent = '';
+            challengeImage.src = '';
+        });
+
+        // --- LÓGICA DO MODAL DE COMPLETOS ---
+        const completedModal = document.getElementById('completed-modal');
+        const completedButton = document.getElementById('completed-button');
+        const closeCompletedModal = document.getElementById('close-completed-modal');
+        const completedList = document.getElementById('completed-list');
+        const detailsModal = document.getElementById('details-modal');
+
+        completedButton.addEventListener('click', () => {
+            completedList.innerHTML = '';
+            if (completedChallenges.size === 0) {
+                completedList.innerHTML = '<p class="text-gray-400 col-span-full">Você ainda não completou nenhum desafio.</p>';
+            } else {
+                completedChallenges.forEach((data, id) => {
+                    const div = document.createElement('div');
+                    div.className = 'aspect-square bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform';
+                    div.innerHTML = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-cover">`;
+                    div.addEventListener('click', () => showDetailsModal(data));
+                    completedList.appendChild(div);
+                });
+            }
+            openModal(completedModal);
+        });
+
+        function showDetailsModal(data) {
+            document.getElementById('details-modal-title').textContent = data.challengeName || "Detalhes do Desafio";
+            const detailsContent = document.getElementById('details-content');
+            if (data && data.userAnswer) {
+                detailsContent.innerHTML = `
+                    <p><span class="font-semibold text-gray-400">Sua Resposta de Massa:</span> ${data.userAnswer.mass} g</p>
+                    <p><span class="font-semibold text-gray-400">Sua Resposta de Volume:</span> ${data.userAnswer.volume} cm³</p>
+                `;
+            } else {
+                detailsContent.innerHTML = '<p class="text-gray-400">Dados da sua resposta não encontrados.</p>';
+            }
+            openModal(detailsModal);
+        }
+
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+
+        function closeModal(modal) {
+            modal.querySelector('.modal-content').classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        closeCompletedModal.addEventListener('click', () => closeModal(completedModal));
+        document.getElementById('close-details-modal').addEventListener('click', () => closeModal(detailsModal));
+
+    </script>
+</body>
+</html>
