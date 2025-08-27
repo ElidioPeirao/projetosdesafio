@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administrador</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Customizados -->
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: #2563eb; /* Tom de azul blueprint */
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+        }
+        ::placeholder { color: #9ca3af; opacity: 1; }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
+    </style>
+</head>
+<body>
+
+    <!-- Container de Login do Admin -->
+    <div id="admin-login-container" class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+            <h1 class="text-2xl font-bold text-white text-center">Acesso Restrito</h1>
+            <p class="text-center text-gray-300 text-sm">Este painel é exclusivo para administradores.</p>
+            <div id="admin-message-box" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+            <form id="admin-login-form" class="space-y-6">
+                <div>
+                    <label for="admin-user" class="text-sm font-medium text-gray-300">Usuário</label>
+                    <input type="text" id="admin-user" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="admin" value="admin">
+                </div>
+                <div>
+                    <label for="admin-password" class="text-sm font-medium text-gray-300">Senha</label>
+                    <input type="password" id="admin-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="********" value="admin">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container do Painel Principal -->
+    <div id="admin-panel-container" class="hidden relative p-4 md:p-8">
+        <div class="w-full max-w-7xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-8 border border-white/20">
+            <!-- Cabeçalho -->
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Painel Administrativo</h1>
+                    <p id="admin-user-email" class="text-sm text-gray-300"></p>
+                </div>
+                <button id="admin-logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+            </div>
+
+            <!-- Menu Principal -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Desafios</button>
+                <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-xl transition">Visualizar Tentativas</button>
+            </div>
+
+            <!-- Conteúdo Dinâmico -->
+            <div id="dynamic-content" class="hidden bg-black/20 p-6 rounded-lg">
+                <!-- O conteúdo de gerenciamento ou visualização será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Desafio -->
+    <div id="challenge-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content w-full max-w-xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="challenge-modal-title" class="text-xl font-bold text-white">Adicionar Novo Desafio</h2>
+                <button id="close-challenge-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form id="add-challenge-form" class="space-y-4">
+                <input type="hidden" id="challenge-id-hidden">
+                <input type="text" id="challenge-url" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Link completo do Arquivo no Google Drive">
+                <input type="text" id="challenge-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Desafio (Ex: Peça 135)">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="challenge-category" list="categories-datalist" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Categoria (Ex: Desenhos Fácil)">
+                    <input type="number" step="any" id="challenge-tolerance" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Tolerância (%)" value="5">
+                </div>
+                <datalist id="categories-datalist"></datalist>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <input type="number" step="any" id="challenge-mass" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Massa (g)">
+                    <input type="number" step="any" id="challenge-volume" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Volume (cm³)">
+                    <input type="text" id="challenge-material" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Material">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Desafio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Tentativas do Usuário -->
+    <div id="attempts-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-xl font-bold text-white">Tentativas</h2>
+                <button id="close-attempts-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="attempts-list" class="max-h-[70vh] overflow-y-auto space-y-4 pr-2">
+                <!-- Lista de tentativas será preenchida aqui -->
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // --- SDKs DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
+          authDomain: "projects-debbb.firebaseapp.com",
+          projectId: "projects-debbb",
+          storageBucket: "projects-debbb.appspot.com",
+          messagingSenderId: "1016788358282",
+          appId: "1:1016788358282:web:491d260dfac9bc19f88973",
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- ELEMENTOS DO DOM ---
+        const loginContainer = document.getElementById('admin-login-container');
+        const panelContainer = document.getElementById('admin-panel-container');
+        const messageBox = document.getElementById('admin-message-box');
+        const dynamicContent = document.getElementById('dynamic-content');
+
+        // --- LOGIN DO ADMIN (Simplificado) ---
+        document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-password').value;
+
+            if (user === 'admin' && pass === 'admin') {
+                loginContainer.classList.add('hidden');
+                panelContainer.classList.remove('hidden');
+                document.getElementById('admin-user-email').textContent = `Admin: ${user}`;
+            } else {
+                showAdminMessage('Usuário ou senha inválidos.', true);
+            }
+        });
+
+        document.getElementById('admin-logout-button').addEventListener('click', () => {
+            panelContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+            dynamicContent.classList.add('hidden');
+            document.getElementById('admin-password').value = "admin";
+        });
+
+        function showAdminMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
+        }
+        
+        // --- NAVEGAÇÃO DO PAINEL ---
+        document.getElementById('manage-challenges-btn').addEventListener('click', showChallengesManagement);
+        document.getElementById('view-users-btn').addEventListener('click', showUsersAttempts);
+
+        // --- GERENCIAMENTO DE DESAFIOS ---
+        const challengeModal = document.getElementById('challenge-modal');
+        const addChallengeForm = document.getElementById('add-challenge-form');
+
+        async function showChallengesManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Desafios Cadastrados</h2>
+                    <button id="add-new-challenge-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Novo</button>
+                </div>
+                <div id="challenges-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
+            `;
+            document.getElementById('add-new-challenge-btn').addEventListener('click', () => openChallengeModal());
+            await loadChallenges();
+        }
+
+        async function loadChallenges() {
+            const challengesList = document.getElementById('challenges-list');
+            challengesList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const querySnapshot = await getDocs(collection(db, "challenges"));
+            challengesList.innerHTML = '';
+            
+            const categories = new Set();
+            if (querySnapshot.empty) {
+                challengesList.innerHTML = '<p class="text-gray-400">Nenhum desafio cadastrado.</p>';
+            } else {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if(data.category) categories.add(data.category);
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <span class="text-white font-semibold">${data.name}</span>
+                            <span class="text-xs bg-indigo-500 text-white px-2 py-1 rounded-full ml-2">${data.category || 'Sem Categoria'}</span>
+                            <small class="block text-gray-400">${doc.id}</small>
+                        </div>
+                        <div>
+                            <button data-id="${doc.id}" class="edit-challenge-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
+                            <button data-id="${doc.id}" class="delete-challenge-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                        </div>`;
+                    challengesList.appendChild(div);
+                });
+            }
+            updateCategoriesDatalist(categories);
+            document.querySelectorAll('.delete-challenge-btn').forEach(btn => btn.addEventListener('click', deleteChallenge));
+            document.querySelectorAll('.edit-challenge-btn').forEach(btn => btn.addEventListener('click', (e) => openChallengeModal(e.target.dataset.id)));
+        }
+
+        function updateCategoriesDatalist(categories) {
+            const datalist = document.getElementById('categories-datalist');
+            datalist.innerHTML = '';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                datalist.appendChild(option);
+            });
+        }
+        
+        async function deleteChallenge(e) {
+            const id = e.target.dataset.id;
+            if (confirm(`Tem certeza que deseja excluir o desafio ${id}?`)) {
+                await deleteDoc(doc(db, "challenges", id));
+                await loadChallenges();
+            }
+        }
+
+        function extractIdFromUrl(url) {
+            const match = url.match(/\/d\/(.*?)(?:\/|$)/);
+            return match ? match[1] : url;
+        }
+
+        addChallengeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('challenge-url').value;
+            let id = document.getElementById('challenge-id-hidden').value;
+            
+            if (!id) { // Se não tem ID, é um novo desafio, então extrai da URL
+                id = extractIdFromUrl(url);
+            }
+
+            if (!id) {
+                alert("URL do Google Drive inválida ou ID não encontrado.");
+                return;
+            }
+
+            const name = document.getElementById('challenge-name').value;
+            const category = document.getElementById('challenge-category').value;
+            const mass = document.getElementById('challenge-mass').value;
+            const volume = document.getElementById('challenge-volume').value;
+            const material = document.getElementById('challenge-material').value;
+            const tolerance = document.getElementById('challenge-tolerance').value;
+
+            try {
+                await setDoc(doc(db, "challenges", id), { name, category, mass, volume, material, tolerance });
+                closeChallengeModal();
+                await loadChallenges();
+            } catch (error) {
+                console.error("Erro ao salvar desafio:", error);
+                alert('Erro ao salvar desafio.');
+            }
+        });
+
+        async function openChallengeModal(challengeId = null) {
+            addChallengeForm.reset();
+            const title = document.getElementById('challenge-modal-title');
+            const urlField = document.getElementById('challenge-url');
+            const idField = document.getElementById('challenge-id-hidden');
+
+            if (challengeId) {
+                title.textContent = "Editar Desafio";
+                const docRef = doc(db, "challenges", challengeId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    idField.value = challengeId;
+                    urlField.value = `https://drive.google.com/file/d/${challengeId}/view`;
+                    document.getElementById('challenge-name').value = data.name;
+                    document.getElementById('challenge-category').value = data.category;
+                    document.getElementById('challenge-tolerance').value = data.tolerance;
+                    document.getElementById('challenge-mass').value = data.mass;
+                    document.getElementById('challenge-volume').value = data.volume;
+                    document.getElementById('challenge-material').value = data.material;
+                }
+            } else {
+                title.textContent = "Adicionar Novo Desafio";
+                idField.value = '';
+            }
+            
+            challengeModal.classList.remove('hidden');
+            setTimeout(() => challengeModal.classList.remove('opacity-0'), 10);
+            setTimeout(() => challengeModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+
+        function closeChallengeModal() {
+            challengeModal.querySelector('.modal-content').classList.add('scale-95');
+            challengeModal.classList.add('opacity-0');
+            setTimeout(() => challengeModal.classList.add('hidden'), 300);
+        }
+        document.getElementById('close-challenge-modal').addEventListener('click', closeChallengeModal);
+
+        // --- VISUALIZAÇÃO DE TENTATIVAS ---
+        const attemptsModal = document.getElementById('attempts-modal');
+        let allChallengesData = new Map();
+
+        async function showUsersAttempts() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Tentativas por Usuário</h2>
+                                        <div id="users-list" class="max-h-[30rem] overflow-y-auto space-y-2 pr-2"></div>`;
+            
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+
+            const challengesSnapshot = await getDocs(collection(db, "challenges"));
+            allChallengesData.clear();
+            challengesSnapshot.forEach(doc => allChallengesData.set(doc.id, doc.data()));
+
+            const attemptsSnapshot = await getDocs(query(collection(db, "attempts"), orderBy("timestamp", "desc")));
+            const users = new Map();
+            attemptsSnapshot.forEach(doc => {
+                const attempt = doc.data();
+                if (!users.has(attempt.userId)) {
+                    users.set(attempt.userId, { email: attempt.userEmail, attempts: [] });
+                }
+                users.get(attempt.userId).attempts.push(attempt);
+            });
+
+            usersList.innerHTML = '';
+            if (users.size === 0) {
+                usersList.innerHTML = '<p class="text-gray-400">Nenhuma tentativa registrada.</p>';
+                return;
+            }
+
+            users.forEach((userData, userId) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center cursor-pointer hover:bg-gray-600';
+                div.innerHTML = `<span class="text-white">${userData.email}</span>
+                                 <span class="text-gray-300 text-sm">${userData.attempts.length} tentativa(s)</span>`;
+                div.addEventListener('click', () => showAttemptsModal(userData.email, userData.attempts));
+                usersList.appendChild(div);
+            });
+        }
+
+        function showAttemptsModal(email, attempts) {
+            const attemptsList = document.getElementById('attempts-list');
+            document.getElementById('modal-title').textContent = `Tentativas de ${email}`;
+            attemptsList.innerHTML = '';
+            
+            const attemptsByChallenge = new Map();
+            attempts.forEach(attempt => {
+                if(!attemptsByChallenge.has(attempt.challengeId)) {
+                    attemptsByChallenge.set(attempt.challengeId, []);
+                }
+                attemptsByChallenge.get(attempt.challengeId).push(attempt);
+            });
+
+            attemptsByChallenge.forEach((challengeAttempts, challengeId) => {
+                const correctData = allChallengesData.get(challengeId);
+                const challengeName = challengeAttempts[0].challengeName;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bg-gray-900/50 p-4 rounded-lg';
+                wrapper.innerHTML = `
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <img src="https://lh3.googleusercontent.com/d/${challengeId}" class="w-full md:w-48 h-auto rounded-md object-cover border-2 border-gray-600">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg text-white">${challengeName}</h3>
+                            <div class="text-sm mt-1">
+                                <p class="text-gray-300 font-semibold">Resposta Correta:</p>
+                                <p class="text-white">Massa: ${correctData?.mass}g, Vol: ${correctData?.volume}cm³, Mat: ${correctData?.material}</p>
+                            </div>
+                            <hr class="border-gray-600 my-2">
+                            <p class="text-gray-300 font-semibold mb-1">Histórico de Tentativas (${challengeAttempts.length}):</p>
+                            <div class="space-y-2">
+                                ${challengeAttempts.map(attempt => {
+                                    const statusClass = attempt.isCorrect ? 'border-green-500' : 'border-red-500';
+                                    return `<div class="bg-gray-700 p-2 rounded border-l-4 ${statusClass} text-xs">
+                                                <p class="text-white"><b>Sua Resposta:</b> Massa: ${attempt.userAnswer.mass}, Vol: ${attempt.userAnswer.volume}</p>
+                                                <p class="text-gray-500 text-right">${new Date(attempt.timestamp?.toDate()).toLocaleString()}</p>
+                                            </div>`
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                attemptsList.appendChild(wrapper);
+            });
+            
+            attemptsModal.classList.remove('hidden');
+            setTimeout(() => attemptsModal.classList.remove('opacity-0'), 10);
+            setTimeout(() => attemptsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+
+        document.getElementById('close-attempts-modal').addEventListener('click', closeAttemptsModal);
+        function closeAttemptsModal() {
+            attemptsModal.querySelector('.modal-content').classList.add('scale-95');
+            attemptsModal.classList.add('opacity-0');
+            setTimeout(() => attemptsModal.classList.add('hidden'), 300);
+        }
+
+    </script>
+</body>
+</html>
