@@ -66,56 +66,19 @@
             </div>
 
             <!-- Menu Principal -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                 <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Desafios</button>
-                <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-xl transition">Visualizar Tentativas</button>
+                <button id="manage-shop-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Loja</button>
+                <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-xl transition">Visualizar Usuários</button>
             </div>
 
             <!-- Conteúdo Dinâmico -->
-            <div id="dynamic-content" class="hidden bg-black/20 p-6 rounded-lg">
-                <!-- O conteúdo de gerenciamento ou visualização será inserido aqui -->
-            </div>
+            <div id="dynamic-content" class="hidden bg-black/20 p-6 rounded-lg"></div>
         </div>
     </div>
 
-    <!-- Modal para Adicionar/Editar Desafio -->
-    <div id="challenge-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content w-full max-w-xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="challenge-modal-title" class="text-xl font-bold text-white">Adicionar Novo Desafio</h2>
-                <button id="close-challenge-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            <form id="add-challenge-form" class="space-y-4">
-                <input type="hidden" id="challenge-id-hidden">
-                <input type="text" id="challenge-url" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Link completo do Arquivo no Google Drive">
-                <input type="text" id="challenge-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Desafio (Ex: Peça 135)">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="text" id="challenge-category" list="categories-datalist" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Categoria (Ex: Desenhos Fácil)">
-                    <input type="number" step="any" id="challenge-tolerance" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Tolerância (%)" value="5">
-                </div>
-                <datalist id="categories-datalist"></datalist>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <input type="number" step="any" id="challenge-mass" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Massa (g)">
-                    <input type="number" step="any" id="challenge-volume" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Volume (cm³)">
-                    <input type="text" id="challenge-material" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Material">
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Desafio</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de Tentativas do Usuário -->
-    <div id="attempts-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="modal-title" class="text-xl font-bold text-white">Tentativas</h2>
-                <button id="close-attempts-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div id="attempts-list" class="max-h-[70vh] overflow-y-auto space-y-4 pr-2">
-                <!-- Lista de tentativas será preenchida aqui -->
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="modal-container"></div>
 
 
     <script type="module">
@@ -123,7 +86,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
-        // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
           apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
           authDomain: "projects-debbb.firebaseapp.com",
@@ -140,29 +102,24 @@
         const panelContainer = document.getElementById('admin-panel-container');
         const messageBox = document.getElementById('admin-message-box');
         const dynamicContent = document.getElementById('dynamic-content');
+        const modalContainer = document.getElementById('modal-container');
 
-        // --- LOGIN DO ADMIN (Simplificado) ---
+        // --- LOGIN DO ADMIN ---
         document.getElementById('admin-login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const user = document.getElementById('admin-user').value.trim();
-            const pass = document.getElementById('admin-password').value;
-
-            if (user === 'admin' && pass === 'admin') {
+            if (document.getElementById('admin-user').value.trim() === 'admin' && document.getElementById('admin-password').value === 'admin') {
                 loginContainer.classList.add('hidden');
                 panelContainer.classList.remove('hidden');
-                document.getElementById('admin-user-email').textContent = `Admin: ${user}`;
+                document.getElementById('admin-user-email').textContent = `Admin: admin`;
             } else {
                 showAdminMessage('Usuário ou senha inválidos.', true);
             }
         });
-
         document.getElementById('admin-logout-button').addEventListener('click', () => {
             panelContainer.classList.add('hidden');
             loginContainer.classList.remove('hidden');
             dynamicContent.classList.add('hidden');
-            document.getElementById('admin-password').value = "admin";
         });
-
         function showAdminMessage(message, isError = false) {
             messageBox.textContent = message;
             messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
@@ -170,12 +127,40 @@
         
         // --- NAVEGAÇÃO DO PAINEL ---
         document.getElementById('manage-challenges-btn').addEventListener('click', showChallengesManagement);
-        document.getElementById('view-users-btn').addEventListener('click', showUsersAttempts);
+        document.getElementById('manage-shop-btn').addEventListener('click', showShopManagement);
+        document.getElementById('view-users-btn').addEventListener('click', showUsersManagement);
+
+        // --- FUNÇÕES DE MODAL GENÉRICAS ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+                setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+        }
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+        function createModal(id, title, content, maxWidth = 'max-w-xl') {
+            modalContainer.innerHTML += `
+                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-white">${title}</h2>
+                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        ${content}
+                    </div>
+                </div>`;
+        }
 
         // --- GERENCIAMENTO DE DESAFIOS ---
-        const challengeModal = document.getElementById('challenge-modal');
-        const addChallengeForm = document.getElementById('add-challenge-form');
-
         async function showChallengesManagement() {
             dynamicContent.classList.remove('hidden');
             dynamicContent.innerHTML = `
@@ -190,14 +175,14 @@
         }
 
         async function loadChallenges() {
-            const challengesList = document.getElementById('challenges-list');
-            challengesList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const listEl = document.getElementById('challenges-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
             const querySnapshot = await getDocs(collection(db, "challenges"));
-            challengesList.innerHTML = '';
+            listEl.innerHTML = '';
             
             const categories = new Set();
             if (querySnapshot.empty) {
-                challengesList.innerHTML = '<p class="text-gray-400">Nenhum desafio cadastrado.</p>';
+                listEl.innerHTML = '<p class="text-gray-400">Nenhum desafio cadastrado.</p>';
             } else {
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
@@ -205,214 +190,304 @@
                     const div = document.createElement('div');
                     div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
                     div.innerHTML = `
-                        <div>
+                        <div class="cursor-pointer" data-id="${doc.id}" data-name="${data.name}">
                             <span class="text-white font-semibold">${data.name}</span>
-                            <span class="text-xs bg-indigo-500 text-white px-2 py-1 rounded-full ml-2">${data.category || 'Sem Categoria'}</span>
-                            <small class="block text-gray-400">${doc.id}</small>
+                            <span class="text-xs bg-indigo-500 text-white px-2 py-1 rounded-full ml-2">${data.category}</span>
+                            <span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full ml-2">${data.score} pts</span>
                         </div>
                         <div>
                             <button data-id="${doc.id}" class="edit-challenge-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
                             <button data-id="${doc.id}" class="delete-challenge-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
                         </div>`;
-                    challengesList.appendChild(div);
+                    listEl.appendChild(div);
                 });
             }
-            updateCategoriesDatalist(categories);
-            document.querySelectorAll('.delete-challenge-btn').forEach(btn => btn.addEventListener('click', deleteChallenge));
-            document.querySelectorAll('.edit-challenge-btn').forEach(btn => btn.addEventListener('click', (e) => openChallengeModal(e.target.dataset.id)));
-        }
-
-        function updateCategoriesDatalist(categories) {
-            const datalist = document.getElementById('categories-datalist');
-            datalist.innerHTML = '';
-            categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                datalist.appendChild(option);
-            });
+            // Event Listeners
+            listEl.querySelectorAll('.delete-challenge-btn').forEach(btn => btn.addEventListener('click', deleteChallenge));
+            listEl.querySelectorAll('.edit-challenge-btn').forEach(btn => btn.addEventListener('click', (e) => openChallengeModal(e.target.dataset.id)));
+            listEl.querySelectorAll('.cursor-pointer').forEach(el => el.addEventListener('click', (e) => showChallengeImage(e.currentTarget.dataset.id, e.currentTarget.dataset.name)));
         }
         
         async function deleteChallenge(e) {
             const id = e.target.dataset.id;
-            if (confirm(`Tem certeza que deseja excluir o desafio ${id}?`)) {
+            if (confirm(`Tem certeza?`)) {
                 await deleteDoc(doc(db, "challenges", id));
                 await loadChallenges();
             }
         }
-
-        function extractIdFromUrl(url) {
-            const match = url.match(/\/d\/(.*?)(?:\/|$)/);
-            return match ? match[1] : url;
+        
+        function showChallengeImage(id, name) {
+            createModal('challenge-image-modal', name, `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`, 'max-w-2xl');
+            openModal('challenge-image-modal');
         }
 
-        addChallengeForm.addEventListener('submit', async (e) => {
+        async function openChallengeModal(challengeId = null) {
+            const categories = [...new Set((await getDocs(collection(db, "challenges"))).docs.map(d => d.data().category).filter(Boolean))];
+            const datalistHtml = categories.map(c => `<option value="${c}"></option>`).join('');
+            
+            createModal('challenge-modal', 'Gerenciar Desafio', `
+                <form id="add-challenge-form" class="space-y-4">
+                    <input type="hidden" id="challenge-id-hidden">
+                    <input type="text" id="challenge-url" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Link completo do Arquivo no Google Drive">
+                    <input type="text" id="challenge-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Desafio (Ex: Peça 135)">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input type="text" id="challenge-category" list="categories-datalist" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Categoria">
+                        <input type="number" step="1" id="challenge-score" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Pontuação" value="10">
+                        <input type="number" step="any" id="challenge-tolerance" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Tolerância (%)" value="5">
+                    </div>
+                    <datalist id="categories-datalist">${datalistHtml}</datalist>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input type="number" step="any" id="challenge-mass" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Massa (g)">
+                        <input type="number" step="any" id="challenge-volume" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Volume (cm³)">
+                        <input type="text" id="challenge-material" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Material">
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Desafio</button>
+                </form>
+            `, 'max-w-xl');
+
+            if (challengeId) {
+                const docSnap = await getDoc(doc(db, "challenges", challengeId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('challenge-id-hidden').value = challengeId;
+                    document.getElementById('challenge-url').value = `https://drive.google.com/file/d/${challengeId}/view`;
+                    Object.keys(data).forEach(key => {
+                        const el = document.getElementById(`challenge-${key}`);
+                        if (el) el.value = data[key];
+                    });
+                }
+            }
+            
+            document.getElementById('add-challenge-form').addEventListener('submit', saveChallenge);
+            openModal('challenge-modal');
+        }
+
+        async function saveChallenge(e) {
             e.preventDefault();
             const url = document.getElementById('challenge-url').value;
             let id = document.getElementById('challenge-id-hidden').value;
-            
-            if (!id) { // Se não tem ID, é um novo desafio, então extrai da URL
-                id = extractIdFromUrl(url);
+            if (!id) id = url.match(/\/d\/(.*?)(?:\/|$)/)?.[1] || url;
+
+            if (!id) return alert("URL do Google Drive inválida.");
+
+            const data = {
+                name: document.getElementById('challenge-name').value,
+                category: document.getElementById('challenge-category').value,
+                mass: document.getElementById('challenge-mass').value,
+                volume: document.getElementById('challenge-volume').value,
+                material: document.getElementById('challenge-material').value,
+                tolerance: document.getElementById('challenge-tolerance').value,
+                score: document.getElementById('challenge-score').value,
+            };
+            await setDoc(doc(db, "challenges", id), data);
+            document.getElementById('challenge-modal').remove();
+            await loadChallenges();
+        }
+
+        // --- GERENCIAMENTO DA LOJA ---
+        async function showShopManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Itens da Loja</h2>
+                    <button id="add-new-item-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Novo Item</button>
+                </div>
+                <div id="shop-items-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
+            `;
+            document.getElementById('add-new-item-btn').addEventListener('click', () => openShopItemModal());
+            await loadShopItems();
+        }
+
+        async function loadShopItems() {
+            const listEl = document.getElementById('shop-items-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const querySnapshot = await getDocs(collection(db, "shopItems"));
+            listEl.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhum item na loja.</p>';
+            } else {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <span class="text-white font-semibold">${data.name}</span>
+                            <span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full ml-2">${data.price} pts</span>
+                            <span class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full ml-2">${data.type === 'unico' ? 'Único' : 'Múltiplo'}</span>
+                        </div>
+                        <div>
+                            <button data-id="${doc.id}" class="edit-item-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
+                            <button data-id="${doc.id}" class="delete-item-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                        </div>`;
+                    listEl.appendChild(div);
+                });
             }
+            document.querySelectorAll('.delete-item-btn').forEach(btn => btn.addEventListener('click', (e) => deleteDoc(doc(db, "shopItems", e.target.dataset.id)).then(loadShopItems)));
+            document.querySelectorAll('.edit-item-btn').forEach(btn => btn.addEventListener('click', (e) => openShopItemModal(e.target.dataset.id)));
+        }
 
-            if (!id) {
-                alert("URL do Google Drive inválida ou ID não encontrado.");
-                return;
-            }
-
-            const name = document.getElementById('challenge-name').value;
-            const category = document.getElementById('challenge-category').value;
-            const mass = document.getElementById('challenge-mass').value;
-            const volume = document.getElementById('challenge-volume').value;
-            const material = document.getElementById('challenge-material').value;
-            const tolerance = document.getElementById('challenge-tolerance').value;
-
-            try {
-                await setDoc(doc(db, "challenges", id), { name, category, mass, volume, material, tolerance });
-                closeChallengeModal();
-                await loadChallenges();
-            } catch (error) {
-                console.error("Erro ao salvar desafio:", error);
-                alert('Erro ao salvar desafio.');
-            }
-        });
-
-        async function openChallengeModal(challengeId = null) {
-            addChallengeForm.reset();
-            const title = document.getElementById('challenge-modal-title');
-            const urlField = document.getElementById('challenge-url');
-            const idField = document.getElementById('challenge-id-hidden');
-
-            if (challengeId) {
-                title.textContent = "Editar Desafio";
-                const docRef = doc(db, "challenges", challengeId);
-                const docSnap = await getDoc(docRef);
+        async function openShopItemModal(itemId = null) {
+            createModal('shop-item-modal', 'Gerenciar Item da Loja', `
+                <form id="add-item-form" class="space-y-4">
+                    <input type="hidden" id="item-id-hidden">
+                    <input type="text" id="item-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Item">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="item-price" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Preço (pontos)">
+                        <select id="item-type" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                            <option value="unico">Compra Única</option>
+                            <option value="multiplo">Compra Múltipla</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Item</button>
+                </form>
+            `);
+            if (itemId) {
+                const docSnap = await getDoc(doc(db, "shopItems", itemId));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    idField.value = challengeId;
-                    urlField.value = `https://drive.google.com/file/d/${challengeId}/view`;
-                    document.getElementById('challenge-name').value = data.name;
-                    document.getElementById('challenge-category').value = data.category;
-                    document.getElementById('challenge-tolerance').value = data.tolerance;
-                    document.getElementById('challenge-mass').value = data.mass;
-                    document.getElementById('challenge-volume').value = data.volume;
-                    document.getElementById('challenge-material').value = data.material;
+                    document.getElementById('item-id-hidden').value = itemId;
+                    document.getElementById('item-name').value = data.name;
+                    document.getElementById('item-price').value = data.price;
+                    document.getElementById('item-type').value = data.type;
                 }
-            } else {
-                title.textContent = "Adicionar Novo Desafio";
-                idField.value = '';
             }
-            
-            challengeModal.classList.remove('hidden');
-            setTimeout(() => challengeModal.classList.remove('opacity-0'), 10);
-            setTimeout(() => challengeModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            document.getElementById('add-item-form').addEventListener('submit', saveShopItem);
+            openModal('shop-item-modal');
         }
 
-        function closeChallengeModal() {
-            challengeModal.querySelector('.modal-content').classList.add('scale-95');
-            challengeModal.classList.add('opacity-0');
-            setTimeout(() => challengeModal.classList.add('hidden'), 300);
+        async function saveShopItem(e) {
+            e.preventDefault();
+            let id = document.getElementById('item-id-hidden').value || Date.now().toString();
+            const data = {
+                name: document.getElementById('item-name').value,
+                price: parseInt(document.getElementById('item-price').value),
+                type: document.getElementById('item-type').value,
+            };
+            await setDoc(doc(db, "shopItems", id), data);
+            document.getElementById('shop-item-modal').remove();
+            await loadShopItems();
         }
-        document.getElementById('close-challenge-modal').addEventListener('click', closeChallengeModal);
 
-        // --- VISUALIZAÇÃO DE TENTATIVAS ---
-        const attemptsModal = document.getElementById('attempts-modal');
-        let allChallengesData = new Map();
-
-        async function showUsersAttempts() {
+        // --- VISUALIZAÇÃO DE USUÁRIOS ---
+        async function showUsersManagement() {
             dynamicContent.classList.remove('hidden');
-            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Tentativas por Usuário</h2>
+            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Usuários Cadastrados</h2>
                                         <div id="users-list" class="max-h-[30rem] overflow-y-auto space-y-2 pr-2"></div>`;
-            
             const usersList = document.getElementById('users-list');
             usersList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
 
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            usersList.innerHTML = '';
+            if (usersSnapshot.empty) {
+                usersList.innerHTML = '<p class="text-gray-400">Nenhum usuário cadastrado.</p>';
+            } else {
+                usersSnapshot.forEach(userDoc => {
+                    const userData = userDoc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center cursor-pointer hover:bg-gray-600';
+                    div.innerHTML = `<span class="text-white">${userData.email}</span>
+                                     <span class="text-yellow-400 font-semibold">${userData.score || 0} pts</span>`;
+                    div.addEventListener('click', () => showUserDetailsModal(userDoc.id, userData.email));
+                    usersList.appendChild(div);
+                });
+            }
+        }
+
+        async function showUserDetailsModal(userId, email) {
+            createModal('user-details-modal', `Detalhes de ${email}`, `
+                <div class="border-b border-gray-600 mb-4">
+                    <nav class="flex -mb-px">
+                        <button data-tab="attempts" class="tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Tentativas</button>
+                        <button data-tab="purchases" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Itens Comprados</button>
+                    </nav>
+                </div>
+                <div id="tab-content-attempts" class="tab-content max-h-[60vh] overflow-y-auto space-y-4 pr-2"></div>
+                <div id="tab-content-purchases" class="tab-content hidden max-h-[60vh] overflow-y-auto space-y-2 pr-2"></div>
+            `, 'max-w-4xl');
+            
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.addEventListener('click', (e) => {
+                tabs.forEach(t => t.classList.remove('border-indigo-500', 'text-white'));
+                e.target.classList.add('border-indigo-500', 'text-white');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(`tab-content-${e.target.dataset.tab}`).classList.remove('hidden');
+            }));
+
+            await loadUserAttempts(userId);
+            await loadUserPurchases(userId);
+            openModal('user-details-modal');
+        }
+
+        async function loadUserAttempts(userId) {
+            const listEl = document.getElementById('tab-content-attempts');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            
             const challengesSnapshot = await getDocs(collection(db, "challenges"));
-            allChallengesData.clear();
+            const allChallengesData = new Map();
             challengesSnapshot.forEach(doc => allChallengesData.set(doc.id, doc.data()));
 
             const attemptsSnapshot = await getDocs(query(collection(db, "attempts"), orderBy("timestamp", "desc")));
-            const users = new Map();
+            const userAttempts = [];
             attemptsSnapshot.forEach(doc => {
-                const attempt = doc.data();
-                if (!users.has(attempt.userId)) {
-                    users.set(attempt.userId, { email: attempt.userEmail, attempts: [] });
-                }
-                users.get(attempt.userId).attempts.push(attempt);
+                if(doc.data().userId === userId) userAttempts.push(doc.data());
             });
 
-            usersList.innerHTML = '';
-            if (users.size === 0) {
-                usersList.innerHTML = '<p class="text-gray-400">Nenhuma tentativa registrada.</p>';
+            listEl.innerHTML = '';
+            if (userAttempts.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhuma tentativa registrada.</p>';
                 return;
             }
 
-            users.forEach((userData, userId) => {
-                const div = document.createElement('div');
-                div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center cursor-pointer hover:bg-gray-600';
-                div.innerHTML = `<span class="text-white">${userData.email}</span>
-                                 <span class="text-gray-300 text-sm">${userData.attempts.length} tentativa(s)</span>`;
-                div.addEventListener('click', () => showAttemptsModal(userData.email, userData.attempts));
-                usersList.appendChild(div);
-            });
-        }
-
-        function showAttemptsModal(email, attempts) {
-            const attemptsList = document.getElementById('attempts-list');
-            document.getElementById('modal-title').textContent = `Tentativas de ${email}`;
-            attemptsList.innerHTML = '';
-            
-            const attemptsByChallenge = new Map();
-            attempts.forEach(attempt => {
-                if(!attemptsByChallenge.has(attempt.challengeId)) {
-                    attemptsByChallenge.set(attempt.challengeId, []);
-                }
-                attemptsByChallenge.get(attempt.challengeId).push(attempt);
-            });
-
-            attemptsByChallenge.forEach((challengeAttempts, challengeId) => {
-                const correctData = allChallengesData.get(challengeId);
-                const challengeName = challengeAttempts[0].challengeName;
-
+            userAttempts.forEach(attempt => {
+                const correctData = allChallengesData.get(attempt.challengeId);
+                const statusClass = attempt.isCorrect ? 'border-green-500' : 'border-red-500';
                 const wrapper = document.createElement('div');
                 wrapper.className = 'bg-gray-900/50 p-4 rounded-lg';
                 wrapper.innerHTML = `
                     <div class="flex flex-col md:flex-row gap-4">
-                        <img src="https://lh3.googleusercontent.com/d/${challengeId}" class="w-full md:w-48 h-auto rounded-md object-cover border-2 border-gray-600">
+                        <img src="https://lh3.googleusercontent.com/d/${attempt.challengeId}" class="w-full md:w-48 h-auto rounded-md object-cover border-2 border-gray-600">
                         <div class="flex-1">
-                            <h3 class="font-bold text-lg text-white">${challengeName}</h3>
+                            <h3 class="font-bold text-lg text-white">${attempt.challengeName}</h3>
                             <div class="text-sm mt-1">
                                 <p class="text-gray-300 font-semibold">Resposta Correta:</p>
                                 <p class="text-white">Massa: ${correctData?.mass}g, Vol: ${correctData?.volume}cm³, Mat: ${correctData?.material}</p>
                             </div>
                             <hr class="border-gray-600 my-2">
-                            <p class="text-gray-300 font-semibold mb-1">Histórico de Tentativas (${challengeAttempts.length}):</p>
-                            <div class="space-y-2">
-                                ${challengeAttempts.map(attempt => {
-                                    const statusClass = attempt.isCorrect ? 'border-green-500' : 'border-red-500';
-                                    return `<div class="bg-gray-700 p-2 rounded border-l-4 ${statusClass} text-xs">
-                                                <p class="text-white"><b>Sua Resposta:</b> Massa: ${attempt.userAnswer.mass}, Vol: ${attempt.userAnswer.volume}</p>
-                                                <p class="text-gray-500 text-right">${new Date(attempt.timestamp?.toDate()).toLocaleString()}</p>
-                                            </div>`
-                                }).join('')}
+                            <div class="bg-gray-700 p-2 rounded border-l-4 ${statusClass} text-xs">
+                                <p class="text-white"><b>Resposta do Usuário:</b> Massa: ${attempt.userAnswer.mass}, Vol: ${attempt.userAnswer.volume}</p>
+                                <p class="text-gray-500 text-right">${new Date(attempt.timestamp?.toDate()).toLocaleString()}</p>
                             </div>
                         </div>
-                    </div>
-                `;
-                attemptsList.appendChild(wrapper);
+                    </div>`;
+                listEl.appendChild(wrapper);
             });
-            
-            attemptsModal.classList.remove('hidden');
-            setTimeout(() => attemptsModal.classList.remove('opacity-0'), 10);
-            setTimeout(() => attemptsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
         }
 
-        document.getElementById('close-attempts-modal').addEventListener('click', closeAttemptsModal);
-        function closeAttemptsModal() {
-            attemptsModal.querySelector('.modal-content').classList.add('scale-95');
-            attemptsModal.classList.add('opacity-0');
-            setTimeout(() => attemptsModal.classList.add('hidden'), 300);
+        async function loadUserPurchases(userId) {
+            const listEl = document.getElementById('tab-content-purchases');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const purchasesSnapshot = await getDocs(query(collection(db, "users", userId, "purchases"), orderBy("purchaseDate", "desc")));
+            listEl.innerHTML = '';
+            if (purchasesSnapshot.empty) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhum item comprado.</p>';
+            } else {
+                purchasesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="text-white font-semibold">${data.itemName}</p>
+                            <p class="text-xs text-gray-400">${new Date(data.purchaseDate?.toDate()).toLocaleString()}</p>
+                        </div>
+                        <span class="text-yellow-400 font-semibold">${data.price} pts</span>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
         }
-
     </script>
 </body>
 </html>
