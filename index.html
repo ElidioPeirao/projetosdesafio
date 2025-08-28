@@ -125,6 +125,7 @@
                             <span class="text-gray-400 text-sm">pontos</span>
                         </div>
                         <button id="shop-button" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700">Loja</button>
+                        <button id="purchases-button" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Minhas Compras</button>
                         <button id="completed-button" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Completos</button>
                         <button id="logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
                     </div>
@@ -177,7 +178,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -496,6 +497,33 @@
                 }
             }
         }
+        
+        // --- HISTÓRICO DE COMPRAS ---
+        document.getElementById('purchases-button').addEventListener('click', async () => {
+            createModal('purchases-modal', 'Histórico de Compras', '<div id="purchases-list" class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">Carregando...</div>', 'max-w-2xl');
+            openModal('purchases-modal');
+
+            const listEl = document.getElementById('purchases-list');
+            const purchasesSnapshot = await getDocs(query(collection(db, "users", currentUser.uid, "purchases"), orderBy("purchaseDate", "desc")));
+            
+            if (purchasesSnapshot.empty) {
+                listEl.innerHTML = '<p class="text-gray-400">Você ainda não comprou nenhum item.</p>';
+            } else {
+                listEl.innerHTML = '';
+                purchasesSnapshot.forEach(doc => {
+                    const item = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="text-white font-semibold">${item.itemName}</p>
+                            <p class="text-xs text-gray-400">${new Date(item.purchaseDate?.toDate()).toLocaleString()}</p>
+                        </div>
+                        <span class="text-yellow-400 font-bold">${item.price} pts</span>`;
+                    listEl.appendChild(div);
+                });
+            }
+        });
         
         // --- FUNÇÕES DE MODAL GENÉRICAS ---
         function createModal(id, title, content, maxWidth = 'max-w-4xl') {
