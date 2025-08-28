@@ -33,6 +33,14 @@
           margin: 0; 
         }
         input[type=number] { -moz-appearance: textfield; }
+        select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+            padding-right: 2.5rem;
+        }
         .loader {
             border: 4px solid #f3f3f340; border-top: 4px solid #3498db;
             border-radius: 50%; width: 40px; height: 40px;
@@ -41,6 +49,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
+        .zoomable { cursor: zoom-in; }
     </style>
 </head>
 <body>
@@ -116,12 +125,17 @@
                     </div>
                 </div>
                 
-                <!-- Botão para Iniciar Desafio -->
-                <div id="start-challenge-container" class="text-center py-8">
-                    <button id="start-button" class="bg-indigo-600 text-white font-bold py-4 px-10 text-lg rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105">
-                        <span id="button-text">Iniciar Novo Desafio</span>
-                    </button>
-                    <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                <!-- Seleção de Categoria -->
+                <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                    <div class="flex flex-col sm:flex-row items-center gap-4 max-w-lg mx-auto">
+                        <select id="category-select" class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                            <option value="" class="bg-gray-800">Selecione uma categoria...</option>
+                        </select>
+                        <button id="start-button" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                            <span id="button-text">Iniciar</span>
+                        </button>
+                    </div>
+                     <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                 </div>
 
                 <!-- Área do Desafio -->
@@ -129,7 +143,7 @@
                     <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
                         <div id="loader" class="loader hidden"></div>
                         <p id="placeholder-text" class="text-gray-400 text-center"></p>
-                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain">
+                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
                     </div>
                     
                     <div class="bg-black/20 p-3 rounded-lg text-center">
@@ -163,15 +177,15 @@
         </div>
     </div>
     
-    <!-- Modal de Detalhes da Resposta -->
+    <!-- Modal de Detalhes da Resposta / Zoom da Imagem -->
     <div id="details-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content w-full max-w-lg bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
              <div class="flex justify-between items-center mb-4">
-                <h2 id="details-modal-title" class="text-xl font-bold text-white">Sua Resposta</h2>
+                <h2 id="details-modal-title" class="text-xl font-bold text-white"></h2>
                 <button id="close-details-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
-            <div id="details-content" class="text-white">
-                <!-- Detalhes da resposta serão preenchidos aqui -->
+            <div id="details-content" class="text-white max-h-[75vh] overflow-auto">
+                <!-- Detalhes da resposta ou imagem com zoom -->
             </div>
         </div>
     </div>
@@ -233,6 +247,33 @@
             completedSnapshot.forEach((doc) => {
                 completedChallenges.set(doc.id, doc.data());
             });
+            
+            populateCategories();
+
+            // Verifica se há um desafio ativo para o usuário
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists() && userDocSnap.data().activeChallenge) {
+                const activeChallengeId = userDocSnap.data().activeChallenge;
+                const challenge = allChallenges.find(c => c.id === activeChallengeId);
+                if (challenge) {
+                    currentChallenge = challenge;
+                    displayChallenge(challenge);
+                }
+            }
+        }
+
+        function populateCategories() {
+            const categorySelect = document.getElementById('category-select');
+            const categories = [...new Set(allChallenges.map(c => c.category))];
+            categorySelect.innerHTML = '<option value="" class="bg-gray-800">Selecione uma categoria...</option>';
+            categories.sort().forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                option.className = 'bg-gray-800';
+                categorySelect.appendChild(option);
+            });
         }
 
         // --- LÓGICA DE AUTENTICAÇÃO (Login, Cadastro, etc.) ---
@@ -263,7 +304,7 @@
             if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, "users", userCredential.user.uid), { name, email });
+                await setDoc(doc(db, "users", userCredential.user.uid), { name, email, activeChallenge: null });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
             } catch (error) { showMessage('Erro: ' + error.code, true); }
@@ -287,6 +328,7 @@
 
         // --- LÓGICA DO JOGO ---
         const startButton = document.getElementById('start-button');
+        const categorySelect = document.getElementById('category-select');
         const startMessage = document.getElementById('start-message');
         const challengeContainer = document.getElementById('challenge-container');
         const placeholderText = document.getElementById('placeholder-text');
@@ -297,34 +339,44 @@
         const answerFeedback = document.getElementById('answer-feedback');
         const nextChallengeButton = document.getElementById('next-challenge-button');
 
-        startButton.addEventListener('click', () => {
+        categorySelect.addEventListener('change', () => {
+            startButton.disabled = !categorySelect.value;
+        });
+
+        function displayChallenge(challenge) {
             document.getElementById('start-challenge-container').classList.add('hidden');
             challengeContainer.classList.remove('hidden');
             loader.classList.remove('hidden');
-            startButton.disabled = true;
-            placeholderText.textContent = 'Buscando um desafio...';
+            placeholderText.textContent = 'Carregando desafio...';
             placeholderText.classList.remove('hidden');
+            challengeImage.classList.add('hidden');
 
-            const availableChallenges = allChallenges.filter(challenge => !completedChallenges.has(challenge.id));
-
-            if (availableChallenges.length === 0) {
-                loader.classList.add('hidden');
-                startButton.disabled = true;
-                placeholderText.textContent = allChallenges.length > 0 ? 'Parabéns! Você completou todos os desafios.' : 'Nenhum desafio cadastrado pelo administrador no momento.';
-                document.getElementById('start-challenge-container').classList.remove('hidden');
-                challengeContainer.classList.add('hidden');
-                return;
-            }
-            
-            currentChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
-            
-            materialInfo.textContent = currentChallenge.material;
-            challengeImage.src = `https://lh3.googleusercontent.com/d/${currentChallenge.id}`;
+            materialInfo.textContent = challenge.material;
+            challengeImage.src = `https://lh3.googleusercontent.com/d/${challenge.id}`;
             challengeImage.onload = () => {
                 loader.classList.add('hidden');
                 placeholderText.classList.add('hidden');
                 challengeImage.classList.remove('hidden');
             };
+        }
+
+        startButton.addEventListener('click', async () => {
+            const selectedCategory = categorySelect.value;
+            const challengesInCategory = allChallenges.filter(c => c.category === selectedCategory);
+            const availableChallenges = challengesInCategory.filter(challenge => !completedChallenges.has(challenge.id));
+
+            if (availableChallenges.length === 0) {
+                startMessage.textContent = challengesInCategory.length > 0 ? 'Parabéns! Você completou todos os desafios desta categoria.' : 'Nenhum desafio encontrado para esta categoria.';
+                return;
+            }
+            
+            currentChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+            
+            // Salva o desafio ativo no perfil do usuário
+            const userDocRef = doc(db, "users", currentUser.uid);
+            await setDoc(userDocRef, { activeChallenge: currentChallenge.id }, { merge: true });
+
+            displayChallenge(currentChallenge);
         });
 
         answerForm.addEventListener('submit', async (e) => {
@@ -352,10 +404,16 @@
             if(isCorrect) {
                 answerForm.classList.add('hidden');
                 nextChallengeButton.classList.remove('hidden');
+                
+                // Salva como completo
                 const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
                 const userFinalAnswer = { mass: userMass, volume: userVolume };
                 await setDoc(completedDocRef, { challengeName: currentChallenge.name, completedAt: serverTimestamp(), userAnswer: userFinalAnswer });
                 completedChallenges.set(currentChallenge.id, { challengeName: currentChallenge.name, userAnswer: userFinalAnswer });
+
+                // Limpa o desafio ativo
+                const userDocRef = doc(db, "users", currentUser.uid);
+                await setDoc(userDocRef, { activeChallenge: null }, { merge: true });
             }
 
             const attemptId = `${currentUser.uid}_${currentChallenge.id}_${Date.now()}`;
@@ -375,12 +433,13 @@
             answerFeedback.className = 'hidden';
             answerForm.reset();
             
-            startButton.disabled = false;
+            startButton.disabled = !categorySelect.value;
             startMessage.textContent = '';
             challengeImage.src = '';
+            currentChallenge = null;
         });
 
-        // --- LÓGICA DO MODAL DE COMPLETOS ---
+        // --- LÓGICA DO MODAL DE COMPLETOS E ZOOM ---
         const completedModal = document.getElementById('completed-modal');
         const completedButton = document.getElementById('completed-button');
         const closeCompletedModal = document.getElementById('close-completed-modal');
@@ -396,24 +455,38 @@
                     const div = document.createElement('div');
                     div.className = 'aspect-square bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform';
                     div.innerHTML = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-cover">`;
-                    div.addEventListener('click', () => showDetailsModal(data));
+                    div.addEventListener('click', () => showDetailsModal(data, id));
                     completedList.appendChild(div);
                 });
             }
             openModal(completedModal);
         });
+        
+        challengeImage.addEventListener('click', () => {
+             if(currentChallenge) {
+                showImageZoomModal(currentChallenge);
+            }
+        });
 
-        function showDetailsModal(data) {
+        function showDetailsModal(data, id) {
             document.getElementById('details-modal-title').textContent = data.challengeName || "Detalhes do Desafio";
             const detailsContent = document.getElementById('details-content');
             if (data && data.userAnswer) {
                 detailsContent.innerHTML = `
+                    <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md mb-4">
                     <p><span class="font-semibold text-gray-400">Sua Resposta de Massa:</span> ${data.userAnswer.mass} g</p>
                     <p><span class="font-semibold text-gray-400">Sua Resposta de Volume:</span> ${data.userAnswer.volume} cm³</p>
                 `;
             } else {
                 detailsContent.innerHTML = '<p class="text-gray-400">Dados da sua resposta não encontrados.</p>';
             }
+            openModal(detailsModal);
+        }
+
+        function showImageZoomModal(challenge) {
+            document.getElementById('details-modal-title').textContent = challenge.name;
+            const detailsContent = document.getElementById('details-content');
+            detailsContent.innerHTML = `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`;
             openModal(detailsModal);
         }
 
