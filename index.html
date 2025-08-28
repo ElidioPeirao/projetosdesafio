@@ -120,6 +120,11 @@
                         <p id="user-email" class="text-sm text-gray-300"></p>
                     </div>
                     <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
+                            <span class="text-gray-400 text-sm">pontos</span>
+                        </div>
+                        <button id="shop-button" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700">Loja</button>
                         <button id="completed-button" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Completos</button>
                         <button id="logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
                     </div>
@@ -164,38 +169,15 @@
         </div>
     </div>
 
-    <!-- Modal de Desafios Completos -->
-    <div id="completed-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white">Desafios Completos</h2>
-                <button id="close-completed-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div id="completed-list" class="max-h-[70vh] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pr-2">
-                <!-- Galeria de imagens será preenchida dinamicamente -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de Detalhes da Resposta / Zoom da Imagem -->
-    <div id="details-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content w-full max-w-4xl bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
-             <div class="flex justify-between items-center mb-4">
-                <h2 id="details-modal-title" class="text-xl font-bold text-white"></h2>
-                <button id="close-details-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div id="details-content" class="text-white max-h-[75vh] overflow-auto">
-                <!-- Detalhes da resposta ou imagem com zoom -->
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="modal-container"></div>
 
 
     <script type="module">
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -215,11 +197,14 @@
         let currentChallenge = null;
         let allChallenges = [];
         let completedChallenges = new Map();
+        let userScore = 0;
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
         const gameContainer = document.getElementById('game-container');
         const messageBox = document.getElementById('message-box');
+        const userScoreEl = document.getElementById('user-score');
+        const modalContainer = document.getElementById('modal-container');
         
         // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
         onAuthStateChanged(auth, async (user) => {
@@ -234,10 +219,18 @@
                 gameContainer.classList.add('hidden');
                 allChallenges = [];
                 completedChallenges.clear();
+                userScore = 0;
             }
         });
 
         async function loadGameData(user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                userScore = userDocSnap.data().score || 0;
+                userScoreEl.textContent = userScore;
+            }
+
             const challengesSnapshot = await getDocs(collection(db, "challenges"));
             allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -250,9 +243,6 @@
             
             populateCategories();
 
-            // Verifica se há um desafio ativo para o usuário
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists() && userDocSnap.data().activeChallenge) {
                 const activeChallengeId = userDocSnap.data().activeChallenge;
                 const challenge = allChallenges.find(c => c.id === activeChallengeId);
@@ -276,15 +266,13 @@
             });
         }
 
-        // --- LÓGICA DE AUTENTICAÇÃO (Login, Cadastro, etc.) ---
+        // --- LÓGICA DE AUTENTICAÇÃO ---
         document.getElementById('tab-login').addEventListener('click', (e) => switchTab(e.target));
         document.getElementById('tab-register').addEventListener('click', (e) => switchTab(e.target));
         function switchTab(clickedTab) {
             const isLogin = clickedTab.id === 'tab-login';
             document.getElementById('form-login').classList.toggle('hidden', !isLogin);
             document.getElementById('form-register').classList.toggle('hidden', isLogin);
-            document.getElementById('tab-login').classList.toggle('border-indigo-500', isLogin).classList.toggle('border-transparent', !isLogin);
-            document.getElementById('tab-register').classList.toggle('border-indigo-500', !isLogin).classList.toggle('border-transparent', isLogin);
         }
         document.querySelectorAll('.password-toggle').forEach(button => {
             button.addEventListener('click', () => {
@@ -304,7 +292,7 @@
             if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, "users", userCredential.user.uid), { name, email, activeChallenge: null });
+                await setDoc(doc(db, "users", userCredential.user.uid), { name, email, activeChallenge: null, score: 0 });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
             } catch (error) { showMessage('Erro: ' + error.code, true); }
@@ -315,25 +303,13 @@
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
             } catch (error) { showMessage('Email ou senha inválidos.', true); }
         });
-        document.getElementById('forgot-password').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            if (!email) return showMessage('Por favor, digite seu email para redefinir a senha.', true);
-            try {
-                await sendPasswordResetEmail(auth, email);
-                showMessage(`Email de redefinição enviado para ${email}. Verifique sua caixa de entrada.`);
-            } catch (error) { showMessage('Nenhum usuário encontrado com este email.', true); }
-        });
         document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
 
         // --- LÓGICA DO JOGO ---
         const startButton = document.getElementById('start-button');
         const categorySelect = document.getElementById('category-select');
-        const startMessage = document.getElementById('start-message');
         const challengeContainer = document.getElementById('challenge-container');
-        const placeholderText = document.getElementById('placeholder-text');
         const challengeImage = document.getElementById('challenge-image');
-        const loader = document.getElementById('loader');
         const materialInfo = document.getElementById('material-info');
         const answerForm = document.getElementById('answer-form');
         const answerFeedback = document.getElementById('answer-feedback');
@@ -344,20 +320,28 @@
         });
 
         function displayChallenge(challenge) {
-            document.getElementById('start-challenge-container').classList.add('hidden');
+            const startContainer = document.getElementById('start-challenge-container');
+            const loader = document.getElementById('loader');
+            const placeholderText = document.getElementById('placeholder-text');
+
+            startContainer.classList.add('hidden');
             challengeContainer.classList.remove('hidden');
+            
             loader.classList.remove('hidden');
-            placeholderText.textContent = 'Carregando desafio...';
-            placeholderText.classList.remove('hidden');
+            placeholderText.classList.add('hidden');
             challengeImage.classList.add('hidden');
 
             materialInfo.textContent = challenge.material;
             challengeImage.src = `https://lh3.googleusercontent.com/d/${challenge.id}`;
             challengeImage.onload = () => {
                 loader.classList.add('hidden');
-                placeholderText.classList.add('hidden');
                 challengeImage.classList.remove('hidden');
             };
+            challengeImage.onerror = () => {
+                loader.classList.add('hidden');
+                placeholderText.textContent = 'Erro ao carregar a imagem do desafio.';
+                placeholderText.classList.remove('hidden');
+            }
         }
 
         startButton.addEventListener('click', async () => {
@@ -366,13 +350,12 @@
             const availableChallenges = challengesInCategory.filter(challenge => !completedChallenges.has(challenge.id));
 
             if (availableChallenges.length === 0) {
-                startMessage.textContent = challengesInCategory.length > 0 ? 'Parabéns! Você completou todos os desafios desta categoria.' : 'Nenhum desafio encontrado para esta categoria.';
+                document.getElementById('start-message').textContent = 'Parabéns! Você completou todos os desafios desta categoria.';
                 return;
             }
             
             currentChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
             
-            // Salva o desafio ativo no perfil do usuário
             const userDocRef = doc(db, "users", currentUser.uid);
             await setDoc(userDocRef, { activeChallenge: currentChallenge.id }, { merge: true });
 
@@ -391,33 +374,36 @@
             const correctVolume = parseFloat(correctData.volume);
             const tolerance = parseFloat(correctData.tolerance || 5);
 
-            const toleranceMarginMass = correctMass * (tolerance / 100);
-            const toleranceMarginVolume = correctVolume * (tolerance / 100);
-
-            const isMassCorrect = userMass >= (correctMass - toleranceMarginMass) && userMass <= (correctMass + toleranceMarginMass);
-            const isVolumeCorrect = userVolume >= (correctVolume - toleranceMarginVolume) && userVolume <= (correctVolume + toleranceMarginVolume);
+            const isMassCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100);
+            const isVolumeCorrect = Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
             const isCorrect = isMassCorrect && isVolumeCorrect;
 
-            answerFeedback.textContent = isCorrect ? "Resposta Correta!" : "Resposta Incorreta. Tente novamente!";
+            answerFeedback.textContent = isCorrect ? `Resposta Correta! +${correctData.score} pontos` : "Resposta Incorreta.";
             answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
             
             if(isCorrect) {
                 answerForm.classList.add('hidden');
                 nextChallengeButton.classList.remove('hidden');
                 
-                // Salva como completo
-                const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
-                const userFinalAnswer = { mass: userMass, volume: userVolume };
-                await setDoc(completedDocRef, { challengeName: currentChallenge.name, completedAt: serverTimestamp(), userAnswer: userFinalAnswer });
-                completedChallenges.set(currentChallenge.id, { challengeName: currentChallenge.name, userAnswer: userFinalAnswer });
-
-                // Limpa o desafio ativo
                 const userDocRef = doc(db, "users", currentUser.uid);
-                await setDoc(userDocRef, { activeChallenge: null }, { merge: true });
+                const challengeScore = parseInt(currentChallenge.score || 0);
+                
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const newScore = (userDoc.data().score || 0) + challengeScore;
+                    transaction.update(userDocRef, { score: newScore, activeChallenge: null });
+                    
+                    const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
+                    const userFinalAnswer = { mass: userMass, volume: userVolume };
+                    transaction.set(completedDocRef, { challengeName: currentChallenge.name, completedAt: serverTimestamp(), userAnswer: userFinalAnswer });
+                });
+
+                userScore += challengeScore;
+                userScoreEl.textContent = userScore;
+                completedChallenges.set(currentChallenge.id, { challengeName: currentChallenge.name, userAnswer: { mass: userMass, volume: userVolume } });
             }
 
-            const attemptId = `${currentUser.uid}_${currentChallenge.id}_${Date.now()}`;
-            await setDoc(doc(db, "attempts", attemptId), {
+            await setDoc(doc(collection(db, "attempts")), {
                 userId: currentUser.uid, userEmail: currentUser.email,
                 challengeId: currentChallenge.id, challengeName: currentChallenge.name,
                 userAnswer: { mass: userMass, volume: userVolume }, isCorrect, timestamp: serverTimestamp()
@@ -427,83 +413,166 @@
         nextChallengeButton.addEventListener('click', () => {
             challengeContainer.classList.add('hidden');
             document.getElementById('start-challenge-container').classList.remove('hidden');
-            
             answerForm.classList.remove('hidden');
             nextChallengeButton.classList.add('hidden');
             answerFeedback.className = 'hidden';
             answerForm.reset();
-            
-            startButton.disabled = !categorySelect.value;
-            startMessage.textContent = '';
-            challengeImage.src = '';
             currentChallenge = null;
         });
 
-        // --- LÓGICA DO MODAL DE COMPLETOS E ZOOM ---
-        const completedModal = document.getElementById('completed-modal');
-        const completedButton = document.getElementById('completed-button');
-        const closeCompletedModal = document.getElementById('close-completed-modal');
-        const completedList = document.getElementById('completed-list');
-        const detailsModal = document.getElementById('details-modal');
+        // --- LÓGICA DA LOJA ---
+        document.getElementById('shop-button').addEventListener('click', async () => {
+            createModal('shop-modal', `Sua Pontuação: ${userScore}`, `
+                <div id="shop-items-list" class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">Carregando itens...</div>
+            `, 'max-w-2xl');
+            openModal('shop-modal');
 
-        completedButton.addEventListener('click', () => {
-            completedList.innerHTML = '';
-            if (completedChallenges.size === 0) {
-                completedList.innerHTML = '<p class="text-gray-400 col-span-full">Você ainda não completou nenhum desafio.</p>';
-            } else {
-                completedChallenges.forEach((data, id) => {
-                    const div = document.createElement('div');
-                    div.className = 'aspect-square bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform';
-                    div.innerHTML = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-cover">`;
-                    div.addEventListener('click', () => showDetailsModal(data, id));
-                    completedList.appendChild(div);
-                });
-            }
-            openModal(completedModal);
+            const itemsSnapshot = await getDocs(collection(db, "shopItems"));
+            const purchasesSnapshot = await getDocs(collection(db, "users", currentUser.uid, "purchases"));
+            const purchasedItems = new Set(purchasesSnapshot.docs.map(d => d.id));
+
+            const listEl = document.getElementById('shop-items-list');
+            listEl.innerHTML = '';
+            itemsSnapshot.forEach(doc => {
+                const item = { id: doc.id, ...doc.data() };
+                const hasBought = item.type === 'unico' && purchasedItems.has(item.id);
+                const canAfford = userScore >= item.price;
+                const buttonDisabled = hasBought || !canAfford;
+
+                let buttonHtml = `<button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${buttonDisabled ? 'disabled' : ''}>Comprar</button>`;
+                if (hasBought) {
+                    buttonHtml = `<span class="text-green-400 font-semibold">Adquirido</span>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                div.innerHTML = `
+                    <div>
+                        <p class="text-white font-semibold">${item.name}</p>
+                        <p class="text-xs text-gray-400">${item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes'}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-yellow-400 font-bold">${item.price} pts</p>
+                        ${buttonHtml}
+                    </div>`;
+                listEl.appendChild(div);
+            });
+            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
         });
+
+        async function buyItem(e) {
+            const { id, price, type, name } = e.target.dataset;
+            const itemPrice = parseInt(price);
+
+            if (confirm(`Comprar "${name}" por ${itemPrice} pontos?`)) {
+                const userDocRef = doc(db, "users", currentUser.uid);
+                
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const userDoc = await transaction.get(userDocRef);
+                        const currentScore = userDoc.data().score || 0;
+
+                        if (currentScore < itemPrice) throw "Pontos insuficientes!";
+
+                        if (type === 'unico') {
+                            const purchaseRef = doc(db, "users", currentUser.uid, "purchases", id);
+                            const purchaseDoc = await transaction.get(purchaseRef);
+                            if (purchaseDoc.exists()) throw "Você já possui este item!";
+                            transaction.set(purchaseRef, { itemName: name, price: itemPrice, purchaseDate: serverTimestamp() });
+                        } else {
+                            const purchaseRef = doc(collection(db, "users", currentUser.uid, "purchases"));
+                            transaction.set(purchaseRef, { itemId: id, itemName: name, price: itemPrice, purchaseDate: serverTimestamp() });
+                        }
+                        
+                        transaction.update(userDocRef, { score: currentScore - itemPrice });
+                    });
+
+                    userScore -= itemPrice;
+                    userScoreEl.textContent = userScore;
+                    alert("Compra realizada com sucesso!");
+                    closeModal('shop-modal');
+                } catch (error) {
+                    alert("Erro na compra: " + error);
+                }
+            }
+        }
         
-        challengeImage.addEventListener('click', () => {
-             if(currentChallenge) {
-                showImageZoomModal(currentChallenge);
-            }
-        });
-
-        function showDetailsModal(data, id) {
-            document.getElementById('details-modal-title').textContent = data.challengeName || "Detalhes do Desafio";
-            const detailsContent = document.getElementById('details-content');
-            if (data && data.userAnswer) {
-                detailsContent.innerHTML = `
-                    <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md mb-4">
-                    <p><span class="font-semibold text-gray-400">Sua Resposta de Massa:</span> ${data.userAnswer.mass} g</p>
-                    <p><span class="font-semibold text-gray-400">Sua Resposta de Volume:</span> ${data.userAnswer.volume} cm³</p>
-                `;
-            } else {
-                detailsContent.innerHTML = '<p class="text-gray-400">Dados da sua resposta não encontrados.</p>';
-            }
-            openModal(detailsModal);
+        // --- FUNÇÕES DE MODAL GENÉRICAS ---
+        function createModal(id, title, content, maxWidth = 'max-w-4xl') {
+            const modalHtml = `
+                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
+                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-white">${title}</h2>
+                            <button id="close-${id}" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        <div id="${id}-content" class="max-h-[75vh] overflow-auto">${content}</div>
+                    </div>
+                </div>`;
+            modalContainer.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById(`close-${id}`).addEventListener('click', () => closeModal(id));
         }
 
-        function showImageZoomModal(challenge) {
-            document.getElementById('details-modal-title').textContent = challenge.name;
-            const detailsContent = document.getElementById('details-content');
-            detailsContent.innerHTML = `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`;
-            openModal(detailsModal);
-        }
-
-        function openModal(modal) {
+        function openModal(id) {
+            const modal = document.getElementById(id);
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
             setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
         }
 
-        function closeModal(modal) {
-            modal.querySelector('.modal-content').classList.add('scale-95');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                modal.classList.add('opacity-0');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
         }
 
-        closeCompletedModal.addEventListener('click', () => closeModal(completedModal));
-        document.getElementById('close-details-modal').addEventListener('click', () => closeModal(detailsModal));
+        // --- MODAIS DE COMPLETOS E ZOOM ---
+        document.getElementById('completed-button').addEventListener('click', () => {
+            let content = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pr-2">';
+            if (completedChallenges.size === 0) {
+                content += '<p class="text-gray-400 col-span-full">Você ainda não completou nenhum desafio.</p>';
+            } else {
+                completedChallenges.forEach((data, id) => {
+                    content += `
+                        <div class="aspect-square bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform" onclick="window.showDetailsModal('${id}')">
+                            <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-cover">
+                        </div>`;
+                });
+            }
+            content += '</div>';
+            createModal('completed-modal', 'Desafios Completos', content);
+            openModal('completed-modal');
+        });
+        
+        challengeImage.addEventListener('click', () => {
+             if(currentChallenge) showImageZoomModal(currentChallenge);
+        });
+
+        window.showDetailsModal = (id) => {
+            const data = completedChallenges.get(id);
+            let content = '';
+            if (data && data.userAnswer) {
+                content = `
+                    <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md mb-4">
+                    <p><span class="font-semibold text-gray-400">Sua Resposta de Massa:</span> ${data.userAnswer.mass} g</p>
+                    <p><span class="font-semibold text-gray-400">Sua Resposta de Volume:</span> ${data.userAnswer.volume} cm³</p>
+                `;
+            } else {
+                content = '<p class="text-gray-400">Dados da sua resposta não encontrados.</p>';
+            }
+            createModal('details-modal', data.challengeName || "Detalhes", content, 'max-w-lg');
+            openModal('details-modal');
+        }
+
+        function showImageZoomModal(challenge) {
+            createModal('zoom-modal', challenge.name, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
+            openModal('zoom-modal');
+        }
 
     </script>
 </body>
