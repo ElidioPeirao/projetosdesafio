@@ -50,6 +50,29 @@
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
         .zoomable { cursor: zoom-in; }
+
+        /* Custom Scrollbar */
+        /* For Webkit browsers (Chrome, Safari) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -58,7 +81,7 @@
     <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
             <div class="flex justify-center">
-                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-32 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
             </div>
             <div class="flex border-b border-gray-500">
                 <button id="tab-login" class="flex-1 py-2 text-center font-semibold text-white border-b-2 border-indigo-500 transition-colors duration-300">Login</button>
@@ -113,21 +136,44 @@
     <!-- Container do Jogo (Oculto por padrão) -->
     <div id="game-container" class="hidden">
         <div class="relative min-h-screen flex items-center justify-center p-4">
-             <div class="w-full max-w-4xl bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
-                <div class="flex justify-between items-start">
+             <div class="w-full max-w-4xl bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-white">Desafio de Projetos</h1>
                         <p id="user-email" class="text-sm text-gray-300"></p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="bg-black/20 px-4 py-2 rounded-lg text-right">
                             <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
                             <span class="text-gray-400 text-sm">pontos</span>
                         </div>
-                        <button id="shop-button" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700">Loja</button>
-                        <button id="purchases-button" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Minhas Compras</button>
-                        <button id="completed-button" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Completos</button>
-                        <button id="logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                        
+                        <!-- Menu Dropdown -->
+                        <div class="relative">
+                            <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="ml-2 hidden sm:inline">Menu</span>
+                            </button>
+                            <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20">
+                                <a href="#" id="ranking-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
+                                    Ranking
+                                </a>
+                                <a href="#" id="shop-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
+                                    Loja
+                                </a>
+                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                    Completos
+                                </a>
+                            </div>
+                        </div>
+
+                        <button id="logout-button" class="flex items-center justify-center bg-red-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-red-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                            <span class="ml-2 hidden sm:inline">Sair</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -137,24 +183,51 @@
                         <select id="category-select" class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
                             <option value="" class="bg-gray-800">Selecione uma categoria...</option>
                         </select>
-                        <button id="start-button" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                            <span id="button-text">Iniciar</span>
-                        </button>
                     </div>
+                     <div class="flex flex-col items-center justify-center gap-4 mt-4">
+                        <button id="start-button" class="w-full max-w-xs bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                           Sortear Desafio
+                        </button>
+                        <div id="choice-button-container" class="w-full max-w-xs hidden">
+                            <div class="relative py-2">
+                                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                            </div>
+                            <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                               Escolher Desafio (<span id="choice-token-count">0</span>)
+                            </button>
+                        </div>
+                     </div>
                      <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                 </div>
 
                 <!-- Área do Desafio -->
                 <div id="challenge-container" class="hidden space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                             <p id="timer-display" class="font-bold text-2xl text-white"></p>
+                             <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                        </div>
+                        <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                            Trocar (<span id="reroll-token-count">0</span>)
+                        </button>
+                    </div>
                     <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
                         <div id="loader" class="loader hidden"></div>
                         <p id="placeholder-text" class="text-gray-400 text-center"></p>
                         <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
                     </div>
                     
-                    <div class="bg-black/20 p-3 rounded-lg text-center">
-                        <p class="text-sm text-gray-400">Material Fornecido:</p>
-                        <p id="material-info" class="font-bold text-white text-lg"></p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-black/20 p-3 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">Material Fornecido:</p>
+                            <p id="material-info" class="font-bold text-white text-lg"></p>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">Pontuação:</p>
+                            <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                        </div>
                     </div>
 
                     <!-- Formulário de Resposta -->
@@ -166,6 +239,20 @@
                     <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
                     <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
                 </div>
+                
+                 <!-- Barra de XP -->
+                <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-1">
+                            <span id="level-name" class="text-sm font-bold text-white"></span>
+                            <span id="xp-text" class="text-xs text-gray-300"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-4">
+                            <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -178,7 +265,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -197,8 +284,14 @@
         let currentUser = null;
         let currentChallenge = null;
         let allChallenges = [];
+        let allLevels = [];
         let completedChallenges = new Map();
         let userScore = 0;
+        let userXp = 0;
+        let userConsumables = { reroll: 0, choice: 0 };
+        let activeChallengeData = {};
+        let challengeTimerInterval = null;
+
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -218,19 +311,31 @@
             } else {
                 authContainer.classList.remove('hidden');
                 gameContainer.classList.add('hidden');
-                allChallenges = [];
-                completedChallenges.clear();
-                userScore = 0;
             }
         });
 
         async function loadGameData(user) {
+            // Carregar Níveis primeiro
+            const levelsQuery = query(collection(db, "levels"), orderBy("xpRequired", "asc"));
+            const levelsSnapshot = await getDocs(levelsQuery);
+            allLevels = levelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Carregar dados do usuário
             const userDocRef = doc(db, "users", user.uid);
             const userDocSnap = await getDoc(userDocRef);
+            
             if (userDocSnap.exists()) {
-                userScore = userDocSnap.data().score || 0;
-                userScoreEl.textContent = userScore;
+                const data = userDocSnap.data();
+                userScore = data.score || 0;
+                userXp = data.xp || 0;
+                userConsumables = data.consumables || { reroll: 0, choice: 0 };
+                activeChallengeData = {
+                    id: data.activeChallenge,
+                    startTime: data.activeChallengeStartTime?.toDate()
+                };
             }
+            updateXpBar();
+            updateConsumablesUI();
 
             const challengesSnapshot = await getDocs(collection(db, "challenges"));
             allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -238,19 +343,71 @@
             const completedRef = collection(db, "users", user.uid, "completedChallenges");
             const completedSnapshot = await getDocs(completedRef);
             completedChallenges.clear();
-            completedSnapshot.forEach((doc) => {
-                completedChallenges.set(doc.id, doc.data());
-            });
+            completedSnapshot.forEach((doc) => completedChallenges.set(doc.id, doc.data()));
             
             populateCategories();
 
-            if (userDocSnap.exists() && userDocSnap.data().activeChallenge) {
-                const activeChallengeId = userDocSnap.data().activeChallenge;
-                const challenge = allChallenges.find(c => c.id === activeChallengeId);
+            if (activeChallengeData.id) {
+                const challenge = allChallenges.find(c => c.id === activeChallengeData.id);
                 if (challenge) {
                     currentChallenge = challenge;
-                    displayChallenge(challenge);
+                    displayChallenge(challenge, activeChallengeData.startTime);
                 }
+            }
+        }
+
+        function updateConsumablesUI() {
+            userScoreEl.textContent = userScore;
+            const choiceContainer = document.getElementById('choice-button-container');
+            const choiceCount = document.getElementById('choice-token-count');
+            const rerollBtn = document.getElementById('reroll-button');
+            const rerollCount = document.getElementById('reroll-token-count');
+
+            if (userConsumables.choice > 0) {
+                choiceContainer.classList.remove('hidden');
+                choiceCount.textContent = userConsumables.choice;
+            } else {
+                choiceContainer.classList.add('hidden');
+            }
+            if (userConsumables.reroll > 0 && currentChallenge) {
+                rerollBtn.classList.remove('hidden');
+                rerollCount.textContent = userConsumables.reroll;
+            } else {
+                rerollBtn.classList.add('hidden');
+            }
+        }
+        
+        function updateXpBar() {
+            if (allLevels.length === 0) return;
+            
+            let currentLevel = allLevels[0];
+            let nextLevel = null;
+
+            for (let i = 0; i < allLevels.length; i++) {
+                if (userXp >= allLevels[i].xpRequired) {
+                    currentLevel = allLevels[i];
+                } else {
+                    nextLevel = allLevels[i];
+                    break;
+                }
+            }
+            
+            document.getElementById('level-name').textContent = `Nível: ${currentLevel.name}`;
+            
+            // Garantir que todos os valores são numéricos para o cálculo
+            const xpForCurrentLevel = Number(currentLevel.xpRequired);
+            const xpForNextLevel = nextLevel ? Number(nextLevel.xpRequired) : xpForCurrentLevel;
+            
+            if(nextLevel){
+                const xpInRange = Number(userXp) - xpForCurrentLevel;
+                const range = xpForNextLevel - xpForCurrentLevel;
+                const percentage = range > 0 ? (xpInRange / range) * 100 : 100;
+                
+                document.getElementById('xp-progress').style.width = `${Math.min(100, percentage)}%`;
+                document.getElementById('xp-text').textContent = `${userXp} / ${xpForNextLevel} XP`;
+            } else {
+                document.getElementById('xp-progress').style.width = '100%';
+                document.getElementById('xp-text').textContent = `${userXp} XP (Nível Máximo)`;
             }
         }
 
@@ -274,6 +431,12 @@
             const isLogin = clickedTab.id === 'tab-login';
             document.getElementById('form-login').classList.toggle('hidden', !isLogin);
             document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-login').classList.toggle('border-indigo-500', isLogin);
+            document.getElementById('tab-login').classList.toggle('text-white', isLogin);
+            document.getElementById('tab-login').classList.toggle('text-gray-400', !isLogin);
+            document.getElementById('tab-register').classList.toggle('border-indigo-500', !isLogin);
+            document.getElementById('tab-register').classList.toggle('text-white', !isLogin);
+            document.getElementById('tab-register').classList.toggle('text-gray-400', isLogin);
         }
         document.querySelectorAll('.password-toggle').forEach(button => {
             button.addEventListener('click', () => {
@@ -284,6 +447,7 @@
         function showMessage(message, isError = false) {
             messageBox.textContent = message;
             messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
+            messageBox.classList.remove('hidden');
         }
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -293,7 +457,7 @@
             if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, "users", userCredential.user.uid), { name, email, activeChallenge: null, score: 0 });
+                await setDoc(doc(db, "users", userCredential.user.uid), { name, email, activeChallenge: null, score: 0, xp: 0, consumables: { reroll: 0, choice: 0 } });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
             } catch (error) { showMessage('Erro: ' + error.code, true); }
@@ -305,6 +469,17 @@
             } catch (error) { showMessage('Email ou senha inválidos.', true); }
         });
         document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+        document.getElementById('forgot-password').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            if(!email) return showMessage('Por favor, digite seu e-mail no campo de login.', true);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage('Link para redefinição de senha enviado para seu e-mail!');
+            } catch (error) {
+                showMessage('Erro ao enviar e-mail. Verifique se o e-mail está correto.', true);
+            }
+        });
 
         // --- LÓGICA DO JOGO ---
         const startButton = document.getElementById('start-button');
@@ -312,15 +487,19 @@
         const challengeContainer = document.getElementById('challenge-container');
         const challengeImage = document.getElementById('challenge-image');
         const materialInfo = document.getElementById('material-info');
+        const scoreInfo = document.getElementById('score-info');
         const answerForm = document.getElementById('answer-form');
         const answerFeedback = document.getElementById('answer-feedback');
         const nextChallengeButton = document.getElementById('next-challenge-button');
+        const choiceButton = document.getElementById('choice-button');
+        const rerollButton = document.getElementById('reroll-button');
 
         categorySelect.addEventListener('change', () => {
             startButton.disabled = !categorySelect.value;
+            choiceButton.disabled = !categorySelect.value;
         });
 
-        function displayChallenge(challenge) {
+        function displayChallenge(challenge, startTime) {
             const startContainer = document.getElementById('start-challenge-container');
             const loader = document.getElementById('loader');
             const placeholderText = document.getElementById('placeholder-text');
@@ -333,6 +512,7 @@
             challengeImage.classList.add('hidden');
 
             materialInfo.textContent = challenge.material;
+            scoreInfo.textContent = `${challenge.score} pts`;
             challengeImage.src = `https://lh3.googleusercontent.com/d/${challenge.id}`;
             challengeImage.onload = () => {
                 loader.classList.add('hidden');
@@ -343,24 +523,69 @@
                 placeholderText.textContent = 'Erro ao carregar a imagem do desafio.';
                 placeholderText.classList.remove('hidden');
             }
+
+            // Timer Logic
+            clearInterval(challengeTimerInterval);
+            const timerContainer = document.getElementById('timer-container');
+            const timerDisplay = document.getElementById('timer-display');
+            const timerBonus = document.getElementById('timer-bonus');
+            const timeLimit = parseInt(challenge.timeLimit);
+
+            if (timeLimit > 0) {
+                 timerBonus.textContent = `(x${challenge.bonusMultiplier || 1.5} Bônus)`;
+            } else {
+                 timerBonus.textContent = '';
+            }
+
+            if (timeLimit > 0 && startTime) {
+                timerContainer.classList.remove('hidden');
+                challengeTimerInterval = setInterval(() => {
+                    const now = new Date();
+                    const elapsed = Math.floor((now - startTime) / 1000);
+                    const remaining = timeLimit - elapsed;
+                    
+                    if (remaining <= 0) {
+                        clearInterval(challengeTimerInterval);
+                        timerDisplay.textContent = "Tempo Esgotado!";
+                        timerDisplay.classList.add('text-red-500');
+                    } else {
+                        const minutes = Math.floor(remaining / 60);
+                        const seconds = remaining % 60;
+                        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        timerDisplay.classList.remove('text-red-500');
+                    }
+                }, 1000);
+            } else {
+                timerContainer.classList.add('hidden');
+            }
+            
+            updateConsumablesUI();
+        }
+        
+        async function startNewChallenge(challenge) {
+            currentChallenge = challenge;
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const startTime = new Date();
+            await setDoc(userDocRef, { 
+                activeChallenge: currentChallenge.id,
+                activeChallengeStartTime: startTime
+            }, { merge: true });
+            
+            activeChallengeData = { id: currentChallenge.id, startTime: startTime };
+            displayChallenge(currentChallenge, startTime);
         }
 
         startButton.addEventListener('click', async () => {
             const selectedCategory = categorySelect.value;
-            const challengesInCategory = allChallenges.filter(c => c.category === selectedCategory);
-            const availableChallenges = challengesInCategory.filter(challenge => !completedChallenges.has(challenge.id));
+            const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
 
             if (availableChallenges.length === 0) {
                 document.getElementById('start-message').textContent = 'Parabéns! Você completou todos os desafios desta categoria.';
                 return;
             }
             
-            currentChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
-            
-            const userDocRef = doc(db, "users", currentUser.uid);
-            await setDoc(userDocRef, { activeChallenge: currentChallenge.id }, { merge: true });
-
-            displayChallenge(currentChallenge);
+            const newChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+            await startNewChallenge(newChallenge);
         });
 
         answerForm.addEventListener('submit', async (e) => {
@@ -378,30 +603,57 @@
             const isMassCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100);
             const isVolumeCorrect = Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
             const isCorrect = isMassCorrect && isVolumeCorrect;
+            
+            let finalScore = parseInt(currentChallenge.score || 0);
 
-            answerFeedback.textContent = isCorrect ? `Resposta Correta! +${correctData.score} pontos` : "Resposta Incorreta.";
+            if (isCorrect) {
+                const timeLimit = parseInt(currentChallenge.timeLimit);
+                if (timeLimit > 0 && activeChallengeData.startTime) {
+                    const now = new Date();
+                    const elapsed = (now - activeChallengeData.startTime) / 1000;
+                    if (elapsed <= timeLimit) {
+                        const multiplier = parseFloat(currentChallenge.bonusMultiplier || 1);
+                        const bonusScore = Math.round(finalScore * multiplier);
+                        answerFeedback.textContent = `Correto! +${bonusScore} pontos (Bônus de tempo!)`;
+                        finalScore = bonusScore;
+                    } else {
+                        answerFeedback.textContent = `Correto (tempo esgotado)! +${finalScore} pontos`;
+                    }
+                } else {
+                    answerFeedback.textContent = `Resposta Correta! +${finalScore} pontos`;
+                }
+            } else {
+                answerFeedback.textContent = "Resposta Incorreta.";
+            }
+            
             answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
+            answerFeedback.classList.remove('hidden');
             
             if(isCorrect) {
+                clearInterval(challengeTimerInterval);
                 answerForm.classList.add('hidden');
                 nextChallengeButton.classList.remove('hidden');
+                rerollButton.classList.add('hidden');
                 
                 const userDocRef = doc(db, "users", currentUser.uid);
-                const challengeScore = parseInt(currentChallenge.score || 0);
                 
                 await runTransaction(db, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
-                    const newScore = (userDoc.data().score || 0) + challengeScore;
-                    transaction.update(userDocRef, { score: newScore, activeChallenge: null });
+                    const userData = userDoc.data();
+                    const newScore = (userData.score || 0) + finalScore;
+                    const newXp = (userData.xp || 0) + finalScore;
+                    transaction.update(userDocRef, { score: newScore, xp: newXp, activeChallenge: null, activeChallengeStartTime: null });
                     
                     const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
                     const userFinalAnswer = { mass: userMass, volume: userVolume };
                     transaction.set(completedDocRef, { challengeName: currentChallenge.name, completedAt: serverTimestamp(), userAnswer: userFinalAnswer });
                 });
 
-                userScore += challengeScore;
-                userScoreEl.textContent = userScore;
+                userScore += finalScore;
+                userXp += finalScore;
                 completedChallenges.set(currentChallenge.id, { challengeName: currentChallenge.name, userAnswer: { mass: userMass, volume: userVolume } });
+                updateConsumablesUI();
+                updateXpBar();
             }
 
             await setDoc(doc(collection(db, "attempts")), {
@@ -416,17 +668,106 @@
             document.getElementById('start-challenge-container').classList.remove('hidden');
             answerForm.classList.remove('hidden');
             nextChallengeButton.classList.add('hidden');
-            answerFeedback.className = 'hidden';
+            answerFeedback.classList.add('hidden');
             answerForm.reset();
             currentChallenge = null;
+            activeChallengeData = {};
         });
 
-        // --- LÓGICA DA LOJA ---
-        document.getElementById('shop-button').addEventListener('click', async () => {
+        // --- LÓGICA DOS CONSUMÍVEIS ---
+        rerollButton.addEventListener('click', async () => {
+            if (userConsumables.reroll <= 0) {
+                return createAlertModal("Sem Tokens", "Você não tem tokens de troca.");
+            }
+            createConfirmationModal("Confirmar Troca", "Usar 1 token para trocar de desafio? (O tempo do novo desafio iniciará imediatamente)", async () => {
+                const selectedCategory = currentChallenge.category;
+                const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id) && c.id !== currentChallenge.id);
+
+                if (availableChallenges.length === 0) {
+                   return createAlertModal("Sem Desafios", "Não há outros desafios disponíveis nesta categoria para trocar.");
+                }
+
+                const userDocRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const currentConsumables = userDoc.data().consumables || { reroll: 0, choice: 0 };
+                    if (currentConsumables.reroll <= 0) throw "Sem tokens de troca.";
+                    currentConsumables.reroll--;
+                    transaction.update(userDocRef, { consumables: currentConsumables });
+                });
+                userConsumables.reroll--;
+                
+                const newChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+                await startNewChallenge(newChallenge);
+            });
+        });
+        
+        choiceButton.addEventListener('click', () => {
+            if (userConsumables.choice <= 0) {
+                return createAlertModal("Sem Tokens", "Você não tem tokens de escolha.");
+            }
+            
+            const selectedCategory = categorySelect.value;
+            const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
+            
+            if (availableChallenges.length === 0) {
+                return createAlertModal("Sem Desafios", "Não há desafios disponíveis para escolher nesta categoria.");
+            }
+
+            let content = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">';
+            availableChallenges.forEach(c => {
+                content += `
+                    <div data-id="${c.id}" class="choice-item-btn bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform">
+                        <img src="https://lh3.googleusercontent.com/d/${c.id}" class="w-full h-32 object-cover">
+                        <p class="text-white text-sm p-2 text-center truncate">${c.name}</p>
+                    </div>
+                `;
+            });
+            content += '</div>';
+            
+            createModal('choice-modal', `Escolha um Desafio em ${selectedCategory}`, content, 'max-w-2xl');
+            
+            document.querySelectorAll('.choice-item-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const challengeId = e.currentTarget.dataset.id;
+                    const chosenChallenge = allChallenges.find(c => c.id === challengeId);
+                    
+                    createConfirmationModal("Confirmar Escolha", `Usar 1 token para iniciar o desafio "${chosenChallenge.name}"?`, async () => {
+                        const userDocRef = doc(db, "users", currentUser.uid);
+                        await runTransaction(db, async (transaction) => {
+                             const userDoc = await transaction.get(userDocRef);
+                             const currentConsumables = userDoc.data().consumables || { reroll: 0, choice: 0 };
+                             if (currentConsumables.choice <= 0) throw "Sem tokens de escolha.";
+                             currentConsumables.choice--;
+                             transaction.update(userDocRef, { consumables: currentConsumables });
+                        });
+                        userConsumables.choice--;
+                        await startNewChallenge(chosenChallenge);
+                        document.getElementById('choice-modal')?.remove();
+                    });
+                });
+            });
+        });
+
+        // --- LÓGICA DO MENU E MODAIS PRINCIPAIS ---
+        const menuToggleButton = document.getElementById('menu-toggle-button');
+        const menuDropdown = document.getElementById('menu-dropdown');
+
+        menuToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuToggleButton.contains(e.target)) {
+                menuDropdown.classList.add('hidden');
+            }
+        });
+
+        async function openShopModal() {
             createModal('shop-modal', `Sua Pontuação: ${userScore}`, `
                 <div id="shop-items-list" class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">Carregando itens...</div>
             `, 'max-w-2xl');
-            openModal('shop-modal');
 
             const itemsSnapshot = await getDocs(collection(db, "shopItems"));
             const purchasesSnapshot = await getDocs(collection(db, "users", currentUser.uid, "purchases"));
@@ -441,16 +782,14 @@
                 const buttonDisabled = hasBought || !canAfford;
 
                 let buttonHtml = `<button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${buttonDisabled ? 'disabled' : ''}>Comprar</button>`;
-                if (hasBought) {
-                    buttonHtml = `<span class="text-green-400 font-semibold">Adquirido</span>`;
-                }
+                if (hasBought) buttonHtml = `<span class="text-green-400 font-semibold">Adquirido</span>`;
 
                 const div = document.createElement('div');
                 div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
                 div.innerHTML = `
                     <div>
                         <p class="text-white font-semibold">${item.name}</p>
-                        <p class="text-xs text-gray-400">${item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes'}</p>
+                        <p class="text-xs text-gray-400">${item.type.startsWith('consumable') ? 'Item Consumível' : (item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes')}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-yellow-400 font-bold">${item.price} pts</p>
@@ -459,108 +798,9 @@
                 listEl.appendChild(div);
             });
             listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
-        });
-
-        async function buyItem(e) {
-            const { id, price, type, name } = e.target.dataset;
-            const itemPrice = parseInt(price);
-
-            if (confirm(`Comprar "${name}" por ${itemPrice} pontos?`)) {
-                const userDocRef = doc(db, "users", currentUser.uid);
-                
-                try {
-                    await runTransaction(db, async (transaction) => {
-                        const userDoc = await transaction.get(userDocRef);
-                        const currentScore = userDoc.data().score || 0;
-
-                        if (currentScore < itemPrice) throw "Pontos insuficientes!";
-
-                        if (type === 'unico') {
-                            const purchaseRef = doc(db, "users", currentUser.uid, "purchases", id);
-                            const purchaseDoc = await transaction.get(purchaseRef);
-                            if (purchaseDoc.exists()) throw "Você já possui este item!";
-                            transaction.set(purchaseRef, { itemName: name, price: itemPrice, purchaseDate: serverTimestamp() });
-                        } else {
-                            const purchaseRef = doc(collection(db, "users", currentUser.uid, "purchases"));
-                            transaction.set(purchaseRef, { itemId: id, itemName: name, price: itemPrice, purchaseDate: serverTimestamp() });
-                        }
-                        
-                        transaction.update(userDocRef, { score: currentScore - itemPrice });
-                    });
-
-                    userScore -= itemPrice;
-                    userScoreEl.textContent = userScore;
-                    alert("Compra realizada com sucesso!");
-                    closeModal('shop-modal');
-                } catch (error) {
-                    alert("Erro na compra: " + error);
-                }
-            }
-        }
-        
-        // --- HISTÓRICO DE COMPRAS ---
-        document.getElementById('purchases-button').addEventListener('click', async () => {
-            createModal('purchases-modal', 'Histórico de Compras', '<div id="purchases-list" class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">Carregando...</div>', 'max-w-2xl');
-            openModal('purchases-modal');
-
-            const listEl = document.getElementById('purchases-list');
-            const purchasesSnapshot = await getDocs(query(collection(db, "users", currentUser.uid, "purchases"), orderBy("purchaseDate", "desc")));
-            
-            if (purchasesSnapshot.empty) {
-                listEl.innerHTML = '<p class="text-gray-400">Você ainda não comprou nenhum item.</p>';
-            } else {
-                listEl.innerHTML = '';
-                purchasesSnapshot.forEach(doc => {
-                    const item = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
-                    div.innerHTML = `
-                        <div>
-                            <p class="text-white font-semibold">${item.itemName}</p>
-                            <p class="text-xs text-gray-400">${new Date(item.purchaseDate?.toDate()).toLocaleString()}</p>
-                        </div>
-                        <span class="text-yellow-400 font-bold">${item.price} pts</span>`;
-                    listEl.appendChild(div);
-                });
-            }
-        });
-        
-        // --- FUNÇÕES DE MODAL GENÉRICAS ---
-        function createModal(id, title, content, maxWidth = 'max-w-4xl') {
-            const modalHtml = `
-                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold text-white">${title}</h2>
-                            <button id="close-${id}" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-                        </div>
-                        <div id="${id}-content" class="max-h-[75vh] overflow-auto">${content}</div>
-                    </div>
-                </div>`;
-            modalContainer.insertAdjacentHTML('beforeend', modalHtml);
-            document.getElementById(`close-${id}`).addEventListener('click', () => closeModal(id));
         }
 
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.querySelector('.modal-content').classList.add('scale-95');
-                modal.classList.add('opacity-0');
-                setTimeout(() => {
-                    modal.remove();
-                }, 300);
-            }
-        }
-
-        // --- MODAIS DE COMPLETOS E ZOOM ---
-        document.getElementById('completed-button').addEventListener('click', () => {
+        function openCompletedModal() {
             let content = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pr-2">';
             if (completedChallenges.size === 0) {
                 content += '<p class="text-gray-400 col-span-full">Você ainda não completou nenhum desafio.</p>';
@@ -574,34 +814,177 @@
             }
             content += '</div>';
             createModal('completed-modal', 'Desafios Completos', content);
-            openModal('completed-modal');
-        });
+        }
+
+        async function openRankingModal() {
+            createModal('ranking-modal', 'Ranking de Jogadores', '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
+            const listEl = document.getElementById('ranking-list');
+            
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, orderBy("xp", "desc"), limit(20));
+                const querySnapshot = await getDocs(q);
+                
+                listEl.innerHTML = '';
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhum jogador no ranking ainda.</p>';
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach(doc => {
+                    const user = doc.data();
+                    const isCurrentUser = doc.id === currentUser.uid;
+                    const bgColor = isCurrentUser ? 'bg-indigo-600/50' : 'bg-gray-700';
+                    const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
+
+                    const div = document.createElement('div');
+                    div.className = `${bgColor} p-3 rounded flex justify-between items-center mb-2`;
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="font-bold text-lg w-8 text-center ${rankColor}">#${rank}</span>
+                            <span class="text-white ml-4">${user.name || user.email}</span>
+                        </div>
+                        <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
+                    `;
+                    listEl.appendChild(div);
+                    rank++;
+                });
+
+            } catch (error) {
+                console.error("Error fetching ranking:", error);
+                listEl.innerHTML = '<p class="text-red-400">Erro ao carregar o ranking.</p>';
+            }
+        }
         
+        document.getElementById('shop-button-menu').addEventListener('click', (e) => { e.preventDefault(); openShopModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); openCompletedModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); openRankingModal(); menuDropdown.classList.add('hidden'); });
+
+        async function buyItem(e) {
+            const { id, price, type, name } = e.target.dataset;
+            const itemPrice = parseInt(price);
+            
+            createConfirmationModal('Confirmar Compra', `Comprar "${name}" por ${itemPrice} pontos?`, async () => {
+                const userDocRef = doc(db, "users", currentUser.uid);
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const userDoc = await transaction.get(userDocRef);
+                        if (!userDoc.exists()) throw "Usuário não encontrado.";
+                        
+                        const userData = userDoc.data();
+                        const currentScore = userData.score || 0;
+                        if (currentScore < itemPrice) throw "Pontos insuficientes!";
+                        
+                        const newScore = currentScore - itemPrice;
+                        let newConsumables = userData.consumables || { reroll: 0, choice: 0 };
+
+                        if (type === 'consumable_reroll') {
+                            newConsumables.reroll = (newConsumables.reroll || 0) + 1;
+                        } else if (type === 'consumable_choice') {
+                            newConsumables.choice = (newConsumables.choice || 0) + 1;
+                        }
+                        
+                        const notificationRef = doc(collection(db, "purchaseNotifications"));
+                        transaction.set(notificationRef, {
+                            userEmail: currentUser.email,
+                            userId: currentUser.uid,
+                            itemName: name,
+                            price: itemPrice,
+                            timestamp: serverTimestamp(),
+                            read: false
+                        });
+                        
+                        transaction.update(userDocRef, { score: newScore, consumables: newConsumables });
+                    });
+
+                    userScore -= itemPrice;
+                    if (type === 'consumable_reroll') userConsumables.reroll++;
+                    if (type === 'consumable_choice') userConsumables.choice++;
+                    
+                    updateConsumablesUI();
+                    document.getElementById('shop-modal')?.remove();
+                    createAlertModal("Sucesso", "Compra realizada com sucesso!");
+
+                } catch (error) {
+                    createAlertModal("Erro na Compra", String(error));
+                }
+            });
+        }
+        
+        // --- FUNÇÕES DE MODAL GENÉRICAS ---
+        function createModal(id, title, content, maxWidth = 'max-w-4xl') {
+            const existingModal = document.getElementById(id);
+            if(existingModal) existingModal.remove();
+            
+            const modalHtml = `
+                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
+                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-white">${title}</h2>
+                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        <div class="max-h-[75vh] overflow-auto">${content}</div>
+                    </div>
+                </div>`;
+            modalContainer.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modal = document.getElementById(id);
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function createAlertModal(title, message, onOk) {
+             const modalId = 'alert-modal';
+             const content = `
+                <p class="text-gray-300 mb-6">${message}</p>
+                <div class="flex justify-end gap-4">
+                    <button id="alert-ok-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">OK</button>
+                </div>
+             `;
+             createModal(modalId, title, content, 'max-w-md');
+             
+             document.getElementById('alert-ok-btn').addEventListener('click', () => {
+                 document.getElementById(modalId)?.remove();
+                 if(onOk) onOk();
+             });
+        }
+        
+        function createConfirmationModal(title, message, onConfirm) {
+            const modalId = 'confirmation-modal';
+            const content = `
+                <p class="text-gray-300 mb-6">${message}</p>
+                <div class="flex justify-end gap-4">
+                    <button onclick="document.getElementById('${modalId}').remove()" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
+                    <button id="confirm-ok-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">Confirmar</button>
+                </div>
+            `;
+            createModal(modalId, title, content, 'max-w-md');
+
+            document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+                document.getElementById(modalId)?.remove();
+                onConfirm();
+            });
+        }
+
+        // --- MODAIS DE COMPLETOS E ZOOM ---
         challengeImage.addEventListener('click', () => {
              if(currentChallenge) showImageZoomModal(currentChallenge);
         });
 
         window.showDetailsModal = (id) => {
             const data = completedChallenges.get(id);
-            let content = '';
-            if (data && data.userAnswer) {
-                content = `
-                    <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md mb-4">
-                    <p><span class="font-semibold text-gray-400">Sua Resposta de Massa:</span> ${data.userAnswer.mass} g</p>
-                    <p><span class="font-semibold text-gray-400">Sua Resposta de Volume:</span> ${data.userAnswer.volume} cm³</p>
-                `;
-            } else {
-                content = '<p class="text-gray-400">Dados da sua resposta não encontrados.</p>';
-            }
+            const content = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`;
             createModal('details-modal', data.challengeName || "Detalhes", content, 'max-w-lg');
-            openModal('details-modal');
         }
 
         function showImageZoomModal(challenge) {
             createModal('zoom-modal', challenge.name, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
-            openModal('zoom-modal');
         }
 
     </script>
 </body>
 </html>
+
