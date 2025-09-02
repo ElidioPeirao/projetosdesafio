@@ -264,7 +264,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -867,7 +867,7 @@
             
             try {
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, orderBy("xp", "desc"), limit(20));
+                const q = query(usersRef, orderBy("xp", "desc"), limit(10));
                 const querySnapshot = await getDocs(q);
                 
                 listEl.innerHTML = '';
@@ -877,10 +877,11 @@
                 }
 
                 let rank = 1;
+                let isUserInTop10 = false;
                 querySnapshot.forEach(doc => {
+                    if (doc.id === currentUser.uid) isUserInTop10 = true;
                     const user = doc.data();
-                    const isCurrentUser = doc.id === currentUser.uid;
-                    const bgColor = isCurrentUser ? 'bg-indigo-600/50' : 'bg-gray-700';
+                    const bgColor = doc.id === currentUser.uid ? 'bg-indigo-600/50' : 'bg-gray-700';
                     const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
 
                     const div = document.createElement('div');
@@ -897,6 +898,27 @@
                     listEl.appendChild(div);
                     rank++;
                 });
+
+                if (!isUserInTop10 && (currentUserData.xp || 0) > 0) {
+                    const allUsersSnapshot = await getDocs(query(collection(db, "users"), orderBy("xp", "desc")));
+                    const userRank = allUsersSnapshot.docs.findIndex(doc => doc.id === currentUser.uid) + 1;
+
+                    listEl.innerHTML += '<div class="my-4 text-center text-gray-500 text-xl">...</div>';
+
+                    const user = currentUserData;
+                    const div = document.createElement('div');
+                    div.className = `bg-indigo-600/50 p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
+                    div.dataset.userId = currentUser.uid;
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="font-bold text-lg w-8 text-center text-gray-400">#${userRank}</span>
+                            <span class="text-white ml-4">${user.name || currentUser.email} <span class="text-xs text-gray-400">${user.profile?.title || ''}</span></span>
+                        </div>
+                        <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
+                    `;
+                    div.addEventListener('click', () => openPublicProfileModal(currentUser.uid));
+                    listEl.appendChild(div);
+                }
 
             } catch (error) {
                 console.error("Error fetching ranking:", error);
@@ -1102,7 +1124,7 @@
              };
              
              for (const achievement of allAchievements) {
-                 if (unlockedAchievements.has(achievement.id)) continue;
+                 if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
 
                  let isUnlocked = false;
                  const { type, value, category } = achievement.condition;
