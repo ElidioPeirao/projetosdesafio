@@ -79,11 +79,12 @@
             </div>
 
             <!-- Menu Principal -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-                <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Desafios</button>
-                <button id="manage-shop-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Loja</button>
-                <button id="manage-levels-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Níveis</button>
-                <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-xl transition">Visualizar Usuários</button>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-6 text-center">
+                <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-lg transition">Desafios</button>
+                <button id="manage-shop-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-lg transition">Loja</button>
+                <button id="manage-levels-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-6 rounded-lg text-lg transition">Níveis</button>
+                <button id="manage-achievements-btn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-6 rounded-lg text-lg transition">Conquistas</button>
+                <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-lg transition">Usuários</button>
             </div>
 
             <!-- Conteúdo Dinâmico -->
@@ -113,6 +114,7 @@
 
         // --- VARIÁVEIS GLOBAIS ---
         let allChallengesData = [];
+        let allAchievementsData = [];
         let unreadNotifications = [];
 
         // --- ELEMENTOS DO DOM ---
@@ -195,6 +197,7 @@
         document.getElementById('manage-challenges-btn').addEventListener('click', showChallengesManagement);
         document.getElementById('manage-shop-btn').addEventListener('click', showShopManagement);
         document.getElementById('manage-levels-btn').addEventListener('click', showLevelsManagement);
+        document.getElementById('manage-achievements-btn').addEventListener('click', showAchievementsManagement);
         document.getElementById('view-users-btn').addEventListener('click', showUsersManagement);
 
         // --- FUNÇÕES DE MODAL GENÉRICAS ---
@@ -439,6 +442,7 @@
                     multiplo: 'Múltiplo',
                     consumable_reroll: 'Consumível (Troca)',
                     consumable_choice: 'Consumível (Escolha)',
+                    consumable_abandon: 'Consumível (Abandonar)',
                 };
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
@@ -473,6 +477,7 @@
                             <option value="multiplo">Compra Múltipla</option>
                             <option value="consumable_reroll">Consumível (Trocar Desafio)</option>
                             <option value="consumable_choice">Consumível (Escolher Desafio)</option>
+                            <option value="consumable_abandon">Consumível (Abandonar Desafio)</option>
                         </select>
                     </div>
                     <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Item</button>
@@ -498,6 +503,7 @@
 
             if (type === 'consumable_reroll') id = 'reroll_token';
             else if (type === 'consumable_choice') id = 'choice_token';
+            else if (type === 'consumable_abandon') id = 'abandon_token';
             else if (!id) id = Date.now().toString();
             
             const data = {
@@ -573,6 +579,154 @@
             document.getElementById('level-modal').remove();
             await loadLevels();
         }
+
+        // --- GERENCIAMENTO DE CONQUISTAS ---
+        async function showAchievementsManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Conquistas</h2>
+                    <button id="add-new-achievement-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Conquista</button>
+                </div>
+                <div id="achievements-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
+            `;
+            await fetchAllChallenges(); // Garantir que as categorias estão carregadas
+            document.getElementById('add-new-achievement-btn').addEventListener('click', openAchievementModal);
+            await loadAchievements();
+        }
+
+        async function loadAchievements() {
+            const listEl = document.getElementById('achievements-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const q = query(collection(db, "achievements"), orderBy("name", "asc"));
+            const querySnapshot = await getDocs(q);
+            allAchievementsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            listEl.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhuma conquista cadastrada.</p>';
+            } else {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="${data.iconUrl}" class="w-10 h-10 rounded">
+                            <div>
+                                <p class="text-white font-semibold">${data.name}</p>
+                                <p class="text-xs text-gray-400">${data.description}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                           <button data-id="${doc.id}" class="edit-achievement-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
+                           <button data-id="${doc.id}" class="delete-achievement-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                        </div>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+             document.querySelectorAll('.delete-achievement-btn').forEach(btn => btn.addEventListener('click', (e) => deleteDoc(doc(db, "achievements", e.target.dataset.id)).then(loadAchievements)));
+             document.querySelectorAll('.edit-achievement-btn').forEach(btn => btn.addEventListener('click', (e) => openAchievementModal(e.target.dataset.id)));
+        }
+
+        async function openAchievementModal(achievementId = null) {
+            const categories = [...new Set(allChallengesData.map(d => d.category).filter(Boolean))];
+            const categoryOptions = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            createModal('achievement-modal', 'Gerenciar Conquista', `
+                <form id="add-achievement-form" class="space-y-4">
+                    <input type="hidden" id="achievement-id-hidden">
+                    <input type="text" id="achievement-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome da Conquista">
+                    <input type="text" id="achievement-desc" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Descrição">
+                    <input type="url" id="achievement-icon" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="URL do Ícone (Imgur)">
+                    
+                    <div class="border-t border-gray-600 pt-4">
+                        <label class="text-sm font-medium text-gray-300">Condição para Desbloqueio</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                            <select id="achievement-condition-type" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                                <option value="xp">XP Total Alcançado</option>
+                                <option value="challenges_completed">Total de Desafios Completos</option>
+                                <option value="category_completed">Desafios Completos em Categoria</option>
+                                <option value="points_spent">Pontos Gastos na Loja</option>
+                            </select>
+                            <input type="number" id="achievement-condition-value" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Valor (ex: 1000)">
+                        </div>
+                        <select id="achievement-condition-category" class="hidden w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg mt-4">
+                            <option value="">Selecione a categoria</option>
+                            ${categoryOptions}
+                        </select>
+                    </div>
+
+                    <div class="border-t border-gray-600 pt-4">
+                        <label class="text-sm font-medium text-gray-300">Recompensas (Opcional)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                            <input type="text" id="achievement-reward-title" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Título Desbloqueado (ex: Cadista)">
+                            <input type="url" id="achievement-reward-badge" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="URL da Insígnia (Imgur)">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Conquista</button>
+                </form>
+            `);
+
+            const conditionTypeSelect = document.getElementById('achievement-condition-type');
+            const conditionCategorySelect = document.getElementById('achievement-condition-category');
+            conditionTypeSelect.addEventListener('change', () => {
+                conditionCategorySelect.classList.toggle('hidden', conditionTypeSelect.value !== 'category_completed');
+            });
+
+            if (achievementId) {
+                const data = allAchievementsData.find(a => a.id === achievementId);
+                if (data) {
+                    document.getElementById('achievement-id-hidden').value = achievementId;
+                    document.getElementById('achievement-name').value = data.name;
+                    document.getElementById('achievement-desc').value = data.description;
+                    document.getElementById('achievement-icon').value = data.iconUrl;
+                    conditionTypeSelect.value = data.condition.type;
+                    document.getElementById('achievement-condition-value').value = data.condition.value;
+                    if (data.condition.type === 'category_completed') {
+                        conditionCategorySelect.value = data.condition.category;
+                        conditionCategorySelect.classList.remove('hidden');
+                    }
+                    document.getElementById('achievement-reward-title').value = data.reward?.title || '';
+                    document.getElementById('achievement-reward-badge').value = data.reward?.badgeUrl || '';
+                }
+            }
+
+            document.getElementById('add-achievement-form').addEventListener('submit', saveAchievement);
+        }
+
+        async function saveAchievement(e) {
+            e.preventDefault();
+            const id = document.getElementById('achievement-id-hidden').value || doc(collection(db, "achievements")).id;
+            
+            const conditionType = document.getElementById('achievement-condition-type').value;
+            const condition = {
+                type: conditionType,
+                value: parseInt(document.getElementById('achievement-condition-value').value)
+            };
+            if (conditionType === 'category_completed') {
+                condition.category = document.getElementById('achievement-condition-category').value;
+                if (!condition.category) return alert('Por favor, selecione uma categoria para esta condição.');
+            }
+
+            const data = {
+                name: document.getElementById('achievement-name').value,
+                description: document.getElementById('achievement-desc').value,
+                iconUrl: document.getElementById('achievement-icon').value,
+                condition: condition,
+                reward: {
+                    title: document.getElementById('achievement-reward-title').value || null,
+                    badgeUrl: document.getElementById('achievement-reward-badge').value || null
+                }
+            };
+
+            await setDoc(doc(db, "achievements", id), data);
+            document.getElementById('achievement-modal').remove();
+            await loadAchievements();
+        }
+
 
         // --- VISUALIZAÇÃO DE USUÁRIOS ---
         async function showUsersManagement() {
