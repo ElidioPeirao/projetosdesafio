@@ -42,11 +42,11 @@
             <form id="admin-login-form" class="space-y-6">
                 <div>
                     <label for="admin-user" class="text-sm font-medium text-gray-300">Usuário</label>
-                    <input type="text" id="admin-user" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="admin">
+                    <input type="text" id="admin-user" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Digite o usuário">
                 </div>
                 <div>
                     <label for="admin-password" class="text-sm font-medium text-gray-300">Senha</label>
-                    <input type="password" id="admin-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="********">
+                    <input type="password" id="admin-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Digite a senha">
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700">Entrar</button>
             </form>
@@ -62,13 +62,27 @@
                     <h1 class="text-3xl font-bold text-white">Painel Administrativo</h1>
                     <p id="admin-user-email" class="text-sm text-gray-300"></p>
                 </div>
-                <button id="admin-logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <button id="notifications-btn" class="text-white hover:text-gray-300 relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="notifications-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden">0</span>
+                        </button>
+                        <div id="notifications-list" class="absolute right-0 mt-8 w-80 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-10 hidden max-h-96 overflow-y-auto">
+                            <!-- As notificações serão preenchidas aqui -->
+                        </div>
+                    </div>
+                    <button id="admin-logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                </div>
             </div>
 
             <!-- Menu Principal -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
                 <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Desafios</button>
                 <button id="manage-shop-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Loja</button>
+                <button id="manage-levels-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-6 rounded-lg text-xl transition">Gerenciar Níveis</button>
                 <button id="view-users-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg text-xl transition">Visualizar Usuários</button>
             </div>
 
@@ -84,7 +98,7 @@
     <script type="module">
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, onSnapshot, where, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         const firebaseConfig = {
           apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
@@ -97,12 +111,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- VARIÁVEIS GLOBAIS ---
+        let allChallengesData = [];
+        let unreadNotifications = [];
+
         // --- ELEMENTOS DO DOM ---
         const loginContainer = document.getElementById('admin-login-container');
         const panelContainer = document.getElementById('admin-panel-container');
         const messageBox = document.getElementById('admin-message-box');
         const dynamicContent = document.getElementById('dynamic-content');
         const modalContainer = document.getElementById('modal-container');
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationsCount = document.getElementById('notifications-count');
+        const notificationsList = document.getElementById('notifications-list');
 
         // --- LOGIN DO ADMIN ---
         document.getElementById('admin-login-form').addEventListener('submit', (e) => {
@@ -111,6 +132,7 @@
                 loginContainer.classList.add('hidden');
                 panelContainer.classList.remove('hidden');
                 document.getElementById('admin-user-email').textContent = `Admin: admin`;
+                listenForNotifications();
             } else {
                 showAdminMessage('Usuário ou senha inválidos.', true);
             }
@@ -125,32 +147,64 @@
             messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
         }
         
+        // --- SISTEMA DE NOTIFICAÇÕES ---
+        function listenForNotifications() {
+            const q = query(collection(db, "purchaseNotifications"), where("read", "==", false));
+            onSnapshot(q, (snapshot) => {
+                unreadNotifications = snapshot.docs;
+                const count = unreadNotifications.length;
+                notificationsCount.textContent = count;
+                if (count > 0) {
+                    notificationsCount.classList.remove('hidden');
+                } else {
+                    notificationsCount.classList.add('hidden');
+                }
+            });
+        }
+        
+        notificationsBtn.addEventListener('click', async () => {
+            notificationsList.classList.toggle('hidden');
+            if (!notificationsList.classList.contains('hidden')) {
+                const q = query(collection(db, "purchaseNotifications"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+                notificationsList.innerHTML = '';
+                if (snapshot.empty) {
+                     notificationsList.innerHTML = '<p class="text-gray-400 p-4 text-center text-sm">Nenhuma notificação.</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const notif = doc.data();
+                        const isUnread = !notif.read;
+                        const div = document.createElement('div');
+                        div.className = `p-3 border-b border-gray-700 ${isUnread ? 'bg-indigo-900/50' : ''}`;
+                        div.innerHTML = `
+                            <p class="text-sm text-white"><span class="font-bold">${notif.userEmail}</span> comprou <span class="font-bold">${notif.itemName}</span>.</p>
+                            <p class="text-xs text-gray-400 mt-1">${new Date(notif.timestamp?.toDate()).toLocaleString()}</p>
+                        `;
+                        notificationsList.appendChild(div);
+                    });
+                }
+                
+                // Marcar como lidas
+                unreadNotifications.forEach(doc => {
+                    updateDoc(doc.ref, { read: true });
+                });
+            }
+        });
+
         // --- NAVEGAÇÃO DO PAINEL ---
         document.getElementById('manage-challenges-btn').addEventListener('click', showChallengesManagement);
         document.getElementById('manage-shop-btn').addEventListener('click', showShopManagement);
+        document.getElementById('manage-levels-btn').addEventListener('click', showLevelsManagement);
         document.getElementById('view-users-btn').addEventListener('click', showUsersManagement);
 
         // --- FUNÇÕES DE MODAL GENÉRICAS ---
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0'), 10);
-                setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
-            }
-        }
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.querySelector('.modal-content').classList.add('scale-95');
-                modal.classList.add('opacity-0');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-        }
         function createModal(id, title, content, maxWidth = 'max-w-xl') {
-            modalContainer.innerHTML += `
-                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0">
-                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95">
+            const existingModal = document.getElementById(id);
+            if(existingModal) existingModal.remove();
+
+            const modalHtml = `
+                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
+                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold text-white">${title}</h2>
                             <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
@@ -158,51 +212,111 @@
                         ${content}
                     </div>
                 </div>`;
+            modalContainer.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modal = document.getElementById(id);
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
         }
 
         // --- GERENCIAMENTO DE DESAFIOS ---
         async function showChallengesManagement() {
             dynamicContent.classList.remove('hidden');
             dynamicContent.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                     <h2 class="text-2xl font-semibold text-white">Desafios Cadastrados</h2>
-                    <button id="add-new-challenge-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Novo</button>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <input type="text" id="filter-name" placeholder="Filtrar por nome..." class="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 text-sm">
+                        <select id="filter-category" class="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 text-sm">
+                            <option value="">Todas as Categorias</option>
+                        </select>
+                        <button id="add-new-challenge-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 whitespace-nowrap text-sm">Adicionar Novo</button>
+                    </div>
                 </div>
                 <div id="challenges-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
             `;
             document.getElementById('add-new-challenge-btn').addEventListener('click', () => openChallengeModal());
-            await loadChallenges();
+            document.getElementById('filter-name').addEventListener('input', renderChallengesList);
+            document.getElementById('filter-category').addEventListener('change', renderChallengesList);
+
+            await fetchAllChallenges();
+            renderChallengesList();
         }
 
-        async function loadChallenges() {
+        async function fetchAllChallenges() {
             const listEl = document.getElementById('challenges-list');
-            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            if (listEl) listEl.innerHTML = '<p class="text-gray-400">Carregando desafios...</p>';
             const querySnapshot = await getDocs(collection(db, "challenges"));
-            listEl.innerHTML = '';
+            allChallengesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+
+        function renderChallengesList() {
+            const listEl = document.getElementById('challenges-list');
+            if (!listEl) return;
             
-            const categories = new Set();
-            if (querySnapshot.empty) {
-                listEl.innerHTML = '<p class="text-gray-400">Nenhum desafio cadastrado.</p>';
+            const categoryFilter = document.getElementById('filter-category');
+            const categories = [...new Set(allChallengesData.map(c => c.category))];
+            const currentCategorySelection = categoryFilter.value;
+            categoryFilter.innerHTML = '<option value="">Todas as Categorias</option>'; 
+            categories.sort().forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categoryFilter.appendChild(option);
+            });
+            categoryFilter.value = currentCategorySelection;
+
+            const nameFilter = document.getElementById('filter-name').value.toLowerCase();
+            const categoryFilterValue = categoryFilter.value;
+
+            const filteredChallenges = allChallengesData.filter(challenge => {
+                const nameMatch = challenge.name.toLowerCase().includes(nameFilter);
+                const categoryMatch = !categoryFilterValue || challenge.category === categoryFilterValue;
+                return nameMatch && categoryMatch;
+            });
+
+            listEl.innerHTML = '';
+            if (filteredChallenges.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhum desafio encontrado com os filtros aplicados.</p>';
             } else {
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if(data.category) categories.add(data.category);
+                filteredChallenges.forEach(data => {
                     const div = document.createElement('div');
                     div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    
+                    let timeInfo = '';
+                    const timeLimitInSeconds = parseInt(data.timeLimit) || 0;
+                    if (timeLimitInSeconds > 0) {
+                        const minutes = Math.floor(timeLimitInSeconds / 60);
+                        const seconds = timeLimitInSeconds % 60;
+                        let timeString = `${minutes}min`;
+                        if (seconds > 0) {
+                            timeString += ` ${seconds}s`;
+                        }
+
+                        timeInfo = `<span class="text-xs bg-cyan-500 text-white px-2 py-1 rounded-full ml-2 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+                                        ${timeString} (x${data.bonusMultiplier})
+                                    </span>`;
+                    }
+
                     div.innerHTML = `
-                        <div class="cursor-pointer" data-id="${doc.id}" data-name="${data.name}">
-                            <span class="text-white font-semibold">${data.name}</span>
-                            <span class="text-xs bg-indigo-500 text-white px-2 py-1 rounded-full ml-2">${data.category}</span>
-                            <span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full ml-2">${data.score} pts</span>
+                        <div class="flex items-center gap-2">
+                            <div class="cursor-pointer" data-id="${data.id}" data-name="${data.name}">
+                                <span class="text-white font-semibold">${data.name}</span>
+                            </div>
+                            <span class="text-xs bg-indigo-500 text-white px-2 py-1 rounded-full">${data.category}</span>
+                            <span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full">${data.score} pts</span>
+                            ${timeInfo}
                         </div>
                         <div>
-                            <button data-id="${doc.id}" class="edit-challenge-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
-                            <button data-id="${doc.id}" class="delete-challenge-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                            <button data-id="${data.id}" class="edit-challenge-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
+                            <button data-id="${data.id}" class="delete-challenge-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
                         </div>`;
                     listEl.appendChild(div);
                 });
             }
-            // Event Listeners
             listEl.querySelectorAll('.delete-challenge-btn').forEach(btn => btn.addEventListener('click', deleteChallenge));
             listEl.querySelectorAll('.edit-challenge-btn').forEach(btn => btn.addEventListener('click', (e) => openChallengeModal(e.target.dataset.id)));
             listEl.querySelectorAll('.cursor-pointer').forEach(el => el.addEventListener('click', (e) => showChallengeImage(e.currentTarget.dataset.id, e.currentTarget.dataset.name)));
@@ -210,19 +324,19 @@
         
         async function deleteChallenge(e) {
             const id = e.target.dataset.id;
-            if (confirm(`Tem certeza?`)) {
+            if (confirm(`Tem certeza que deseja excluir este desafio?`)) {
                 await deleteDoc(doc(db, "challenges", id));
-                await loadChallenges();
+                await fetchAllChallenges();
+                renderChallengesList();
             }
         }
         
         function showChallengeImage(id, name) {
             createModal('challenge-image-modal', name, `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`, 'max-w-2xl');
-            openModal('challenge-image-modal');
         }
 
         async function openChallengeModal(challengeId = null) {
-            const categories = [...new Set((await getDocs(collection(db, "challenges"))).docs.map(d => d.data().category).filter(Boolean))];
+            const categories = [...new Set(allChallengesData.map(d => d.category).filter(Boolean))];
             const datalistHtml = categories.map(c => `<option value="${c}"></option>`).join('');
             
             createModal('challenge-modal', 'Gerenciar Desafio', `
@@ -241,6 +355,10 @@
                         <input type="number" step="any" id="challenge-volume" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Volume (cm³)">
                         <input type="text" id="challenge-material" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Material">
                     </div>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="number" step="any" id="challenge-timeLimit" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Tempo (minutos, opcional)">
+                        <input type="number" step="0.1" id="challenge-bonusMultiplier" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Multiplicador de Bônus (ex: 1.5)">
+                    </div>
                     <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Desafio</button>
                 </form>
             `, 'max-w-xl');
@@ -251,15 +369,19 @@
                     const data = docSnap.data();
                     document.getElementById('challenge-id-hidden').value = challengeId;
                     document.getElementById('challenge-url').value = `https://drive.google.com/file/d/${challengeId}/view`;
-                    Object.keys(data).forEach(key => {
+                    
+                    if(data.timeLimit) {
+                         document.getElementById('challenge-timeLimit').value = data.timeLimit / 60;
+                    }
+
+                    ['name', 'category', 'score', 'tolerance', 'mass', 'volume', 'material', 'bonusMultiplier'].forEach(key => {
                         const el = document.getElementById(`challenge-${key}`);
-                        if (el) el.value = data[key];
+                        if (el && data[key] !== undefined) el.value = data[key];
                     });
                 }
             }
             
             document.getElementById('add-challenge-form').addEventListener('submit', saveChallenge);
-            openModal('challenge-modal');
         }
 
         async function saveChallenge(e) {
@@ -269,6 +391,8 @@
             if (!id) id = url.match(/\/d\/(.*?)(?:\/|$)/)?.[1] || url;
 
             if (!id) return alert("URL do Google Drive inválida.");
+            
+            const timeInMinutes = parseFloat(document.getElementById('challenge-timeLimit').value) || 0;
 
             const data = {
                 name: document.getElementById('challenge-name').value,
@@ -278,10 +402,13 @@
                 material: document.getElementById('challenge-material').value,
                 tolerance: document.getElementById('challenge-tolerance').value,
                 score: document.getElementById('challenge-score').value,
+                timeLimit: timeInMinutes * 60,
+                bonusMultiplier: document.getElementById('challenge-bonusMultiplier').value || 1.5,
             };
             await setDoc(doc(db, "challenges", id), data);
             document.getElementById('challenge-modal').remove();
-            await loadChallenges();
+            await fetchAllChallenges();
+            renderChallengesList();
         }
 
         // --- GERENCIAMENTO DA LOJA ---
@@ -307,6 +434,12 @@
             if (querySnapshot.empty) {
                 listEl.innerHTML = '<p class="text-gray-400">Nenhum item na loja.</p>';
             } else {
+                const itemTypes = {
+                    unico: 'Único',
+                    multiplo: 'Múltiplo',
+                    consumable_reroll: 'Consumível (Troca)',
+                    consumable_choice: 'Consumível (Escolha)',
+                };
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     const div = document.createElement('div');
@@ -315,7 +448,7 @@
                         <div>
                             <span class="text-white font-semibold">${data.name}</span>
                             <span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full ml-2">${data.price} pts</span>
-                            <span class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full ml-2">${data.type === 'unico' ? 'Único' : 'Múltiplo'}</span>
+                            <span class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full ml-2">${itemTypes[data.type] || 'Desconhecido'}</span>
                         </div>
                         <div>
                             <button data-id="${doc.id}" class="edit-item-btn bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
@@ -338,6 +471,8 @@
                         <select id="item-type" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
                             <option value="unico">Compra Única</option>
                             <option value="multiplo">Compra Múltipla</option>
+                            <option value="consumable_reroll">Consumível (Trocar Desafio)</option>
+                            <option value="consumable_choice">Consumível (Escolher Desafio)</option>
                         </select>
                     </div>
                     <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Item</button>
@@ -354,20 +489,89 @@
                 }
             }
             document.getElementById('add-item-form').addEventListener('submit', saveShopItem);
-            openModal('shop-item-modal');
         }
 
         async function saveShopItem(e) {
             e.preventDefault();
-            let id = document.getElementById('item-id-hidden').value || Date.now().toString();
+            let id = document.getElementById('item-id-hidden').value;
+            const type = document.getElementById('item-type').value;
+
+            if (type === 'consumable_reroll') id = 'reroll_token';
+            else if (type === 'consumable_choice') id = 'choice_token';
+            else if (!id) id = Date.now().toString();
+            
             const data = {
                 name: document.getElementById('item-name').value,
                 price: parseInt(document.getElementById('item-price').value),
-                type: document.getElementById('item-type').value,
+                type: type,
             };
             await setDoc(doc(db, "shopItems", id), data);
             document.getElementById('shop-item-modal').remove();
             await loadShopItems();
+        }
+        
+        // --- GERENCIAMENTO DE NÍVEIS ---
+        async function showLevelsManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Níveis de Experiência</h2>
+                    <button id="add-new-level-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Nível</button>
+                </div>
+                <div id="levels-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
+            `;
+            document.getElementById('add-new-level-btn').addEventListener('click', openLevelModal);
+            await loadLevels();
+        }
+
+        async function loadLevels() {
+            const listEl = document.getElementById('levels-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const q = query(collection(db, "levels"), orderBy("xpRequired", "asc"));
+            const querySnapshot = await getDocs(q);
+            listEl.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                listEl.innerHTML = '<p class="text-gray-400">Nenhum nível cadastrado. Crie o primeiro nível com 0 XP.</p>';
+            } else {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <span class="text-white font-semibold">${data.name}</span>
+                            <span class="text-xs bg-cyan-500 text-white px-2 py-1 rounded-full ml-2">XP Mínimo: ${data.xpRequired}</span>
+                        </div>
+                        <button data-id="${doc.id}" class="delete-level-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+            document.querySelectorAll('.delete-level-btn').forEach(btn => btn.addEventListener('click', (e) => deleteDoc(doc(db, "levels", e.target.dataset.id)).then(loadLevels)));
+        }
+
+        function openLevelModal() {
+            createModal('level-modal', 'Adicionar Novo Nível', `
+                <form id="add-level-form" class="space-y-4">
+                    <input type="text" id="level-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Nível (ex: Aprendiz)">
+                    <input type="number" id="level-xp" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="XP necessário para alcançar">
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Nível</button>
+                </form>
+            `);
+            document.getElementById('add-level-form').addEventListener('submit', saveLevel);
+        }
+
+        async function saveLevel(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('level-name').value,
+                xpRequired: parseInt(document.getElementById('level-xp').value),
+            };
+            const newDocRef = doc(collection(db, "levels"));
+            await setDoc(newDocRef, data);
+            document.getElementById('level-modal').remove();
+            await loadLevels();
         }
 
         // --- VISUALIZAÇÃO DE USUÁRIOS ---
@@ -378,7 +582,7 @@
             const usersList = document.getElementById('users-list');
             usersList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
 
-            const usersSnapshot = await getDocs(collection(db, "users"));
+            const usersSnapshot = await getDocs(query(collection(db, "users"), orderBy("xp", "desc")));
             usersList.innerHTML = '';
             if (usersSnapshot.empty) {
                 usersList.innerHTML = '<p class="text-gray-400">Nenhum usuário cadastrado.</p>';
@@ -387,8 +591,12 @@
                     const userData = userDoc.data();
                     const div = document.createElement('div');
                     div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center cursor-pointer hover:bg-gray-600';
-                    div.innerHTML = `<span class="text-white">${userData.email}</span>
-                                     <span class="text-yellow-400 font-semibold">${userData.score || 0} pts</span>`;
+                    div.innerHTML = `
+                        <div>
+                            <span class="text-white">${userData.email}</span>
+                            <span class="text-sm text-cyan-400 ml-4">${userData.xp || 0} XP</span>
+                        </div>
+                        <span class="text-yellow-400 font-semibold">${userData.score || 0} pts</span>`;
                     div.addEventListener('click', () => showUserDetailsModal(userDoc.id, userData.email));
                     usersList.appendChild(div);
                 });
@@ -417,7 +625,6 @@
 
             await loadUserAttempts(userId);
             await loadUserPurchases(userId);
-            openModal('user-details-modal');
         }
 
         async function loadUserAttempts(userId) {
@@ -425,23 +632,20 @@
             listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
             
             const challengesSnapshot = await getDocs(collection(db, "challenges"));
-            const allChallengesData = new Map();
-            challengesSnapshot.forEach(doc => allChallengesData.set(doc.id, doc.data()));
+            const allChallengesInfo = new Map();
+            challengesSnapshot.forEach(doc => allChallengesInfo.set(doc.id, doc.data()));
 
-            const attemptsSnapshot = await getDocs(query(collection(db, "attempts"), orderBy("timestamp", "desc")));
-            const userAttempts = [];
-            attemptsSnapshot.forEach(doc => {
-                if(doc.data().userId === userId) userAttempts.push(doc.data());
-            });
-
+            const attemptsSnapshot = await getDocs(query(collection(db, "attempts"), where("userId", "==", userId), orderBy("timestamp", "desc")));
+            
             listEl.innerHTML = '';
-            if (userAttempts.length === 0) {
+            if (attemptsSnapshot.empty) {
                 listEl.innerHTML = '<p class="text-gray-400">Nenhuma tentativa registrada.</p>';
                 return;
             }
 
-            userAttempts.forEach(attempt => {
-                const correctData = allChallengesData.get(attempt.challengeId);
+            attemptsSnapshot.forEach(doc => {
+                const attempt = doc.data();
+                const correctData = allChallengesInfo.get(attempt.challengeId);
                 const statusClass = attempt.isCorrect ? 'border-green-500' : 'border-red-500';
                 const wrapper = document.createElement('div');
                 wrapper.className = 'bg-gray-900/50 p-4 rounded-lg';
@@ -491,3 +695,4 @@
     </script>
 </body>
 </html>
+
