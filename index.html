@@ -177,7 +177,7 @@
                     </div>
                      <div class="flex flex-col items-center justify-center gap-4 mt-6">
                         <button id="start-button" class="w-full max-w-xs bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                           Sortear Desafio
+                            Sortear Desafio
                         </button>
                         <div id="choice-button-container" class="w-full max-w-xs hidden">
                             <div class="relative py-2">
@@ -185,11 +185,11 @@
                                 <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
                             </div>
                             <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                               Escolher Desafio (<span id="choice-token-count">0</span>)
+                                Escolher Desafio (<span id="choice-token-count">0</span>)
                             </button>
                         </div>
                      </div>
-                     <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                   <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                 </div>
 
                 <!-- Área do Desafio -->
@@ -256,7 +256,7 @@
 
     <!-- Modals -->
     <div id="modal-container"></div>
-     <!-- Toast Notification -->
+    <!-- Toast Notification -->
     <div id="toast-container" class="fixed bottom-24 right-4 z-50"></div>
 
 
@@ -327,7 +327,7 @@
             allLevels = levelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allAchievements = achievementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+            
             if (userDocSnap.exists()) {
                 currentUserData = userDocSnap.data();
                 activeChallengeData = {
@@ -380,24 +380,18 @@
             const userXp = currentUserData.xp || 0;
             if (allLevels.length === 0) return;
             
-            let currentLevel = allLevels[0];
-            let nextLevel = null;
+            const currentLevel = getLevelForXp(userXp);
+            if (!currentLevel) return;
 
-            for (let i = 0; i < allLevels.length; i++) {
-                if (userXp >= allLevels[i].xpRequired) {
-                    currentLevel = allLevels[i];
-                } else {
-                    nextLevel = allLevels[i];
-                    break;
-                }
-            }
+            const currentLevelIndex = allLevels.findIndex(l => l.id === currentLevel.id);
+            const nextLevel = allLevels[currentLevelIndex + 1];
             
             document.getElementById('level-name').textContent = `Nível: ${currentLevel.name}`;
             
             const xpForCurrentLevel = Number(currentLevel.xpRequired);
-            const xpForNextLevel = nextLevel ? Number(nextLevel.xpRequired) : xpForCurrentLevel;
             
             if(nextLevel){
+                const xpForNextLevel = Number(nextLevel.xpRequired);
                 const xpInRange = Number(userXp) - xpForCurrentLevel;
                 const range = xpForNextLevel - xpForCurrentLevel;
                 const percentage = range > 0 ? (xpInRange / range) * 100 : 100;
@@ -883,6 +877,9 @@
                     const user = doc.data();
                     const bgColor = doc.id === currentUser.uid ? 'bg-indigo-600/50' : 'bg-gray-700';
                     const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
+                    
+                    const level = getLevelForXp(user.xp || 0);
+                    const nameColor = level ? level.color : '#FFFFFF';
 
                     const div = document.createElement('div');
                     div.className = `${bgColor} p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
@@ -890,7 +887,10 @@
                     div.innerHTML = `
                         <div class="flex items-center">
                             <span class="font-bold text-lg w-8 text-center ${rankColor}">#${rank}</span>
-                            <span class="text-white ml-4">${user.name || user.email} <span class="text-xs text-gray-400">${user.profile?.title || ''}</span></span>
+                            <div class="ml-4">
+                                <span class="font-bold" style="color: ${nameColor};">${user.name || user.email}</span>
+                                <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
+                            </div>
                         </div>
                         <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
                     `;
@@ -900,19 +900,21 @@
                 });
 
                 if (!isUserInTop10 && (currentUserData.xp || 0) > 0) {
-                    const allUsersSnapshot = await getDocs(query(collection(db, "users"), orderBy("xp", "desc")));
-                    const userRank = allUsersSnapshot.docs.findIndex(doc => doc.id === currentUser.uid) + 1;
-
+                    const userRank = (await getDocs(query(collection(db, "users"), orderBy("xp", "desc")))).docs.findIndex(doc => doc.id === currentUser.uid) + 1;
                     listEl.innerHTML += '<div class="my-4 text-center text-gray-500 text-xl">...</div>';
-
                     const user = currentUserData;
+                    const level = getLevelForXp(user.xp || 0);
+                    const nameColor = level ? level.color : '#FFFFFF';
                     const div = document.createElement('div');
                     div.className = `bg-indigo-600/50 p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
                     div.dataset.userId = currentUser.uid;
                     div.innerHTML = `
                         <div class="flex items-center">
                             <span class="font-bold text-lg w-8 text-center text-gray-400">#${userRank}</span>
-                            <span class="text-white ml-4">${user.name || currentUser.email} <span class="text-xs text-gray-400">${user.profile?.title || ''}</span></span>
+                             <div class="ml-4">
+                                <span class="font-bold" style="color: ${nameColor};">${user.name || currentUser.email}</span>
+                                <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
+                            </div>
                         </div>
                         <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
                     `;
@@ -1080,6 +1082,9 @@
             const unlockedSnapshot = await getDocs(collection(db, "users", userId, "unlockedAchievements"));
             const unlockedIds = new Set(unlockedSnapshot.docs.map(d => d.id));
             
+            const level = getLevelForXp(userData.xp || 0);
+            const nameColor = level ? level.color : '#FFFFFF';
+
             const achievementsHtml = allAchievements
                 .filter(a => unlockedIds.has(a.id))
                 .map(achieve => `
@@ -1096,7 +1101,7 @@
                 <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-900/50 rounded-lg">
                     <img src="${userData.profile?.badgeUrl || 'https://placehold.co/96x96/718096/FFFFFF?text=?'}" class="w-24 h-24 rounded-full object-cover border-4 border-indigo-500">
                     <div>
-                        <h3 class="text-2xl font-bold text-white">${userData.name}</h3>
+                        <h3 class="text-2xl font-bold" style="color: ${nameColor};">${userData.name}</h3>
                         <p class="text-indigo-400 font-semibold">${userData.profile?.title || 'Novo Jogador'}</p>
                         <p class="text-sm text-cyan-400 mt-1">${userData.xp || 0} XP</p>
                     </div>
@@ -1122,25 +1127,25 @@
                     return counts;
                 })()
              };
-             
-             for (const achievement of allAchievements) {
-                 if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
+              
+              for (const achievement of allAchievements) {
+                   if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
 
-                 let isUnlocked = false;
-                 const { type, value, category } = achievement.condition;
+                   let isUnlocked = false;
+                   const { type, value, category } = achievement.condition;
 
-                 if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
-                 if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
-                 if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
-                 if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
-                 
-                 if (isUnlocked) {
-                     const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
-                     await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
-                     unlockedAchievements.set(achievement.id, {});
-                     showToast(`Conquista Desbloqueada: ${achievement.name}`);
-                 }
-             }
+                   if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
+                   if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
+                   if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
+                   if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
+                   
+                   if (isUnlocked) {
+                       const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
+                       await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
+                       unlockedAchievements.set(achievement.id, {});
+                       showToast(`Conquista Desbloqueada: ${achievement.name}`);
+                   }
+              }
         }
 
         function showToast(message) {
@@ -1226,6 +1231,19 @@
 
         function showImageZoomModal(challenge) {
             createModal('zoom-modal', challenge.name, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
+        }
+        
+        function getLevelForXp(xp) {
+            let currentLevel = null;
+            // a lista `allLevels` já vem ordenada por `xpRequired`
+            for (const level of allLevels) {
+                if (xp >= level.xpRequired) {
+                    currentLevel = level;
+                } else {
+                    break;
+                }
+            }
+            return currentLevel;
         }
 
     </script>
