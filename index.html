@@ -75,6 +75,24 @@
         .animate-slide-in-out {
             animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
         }
+        /* Toggle Switch CSS */
+        #create-lobby-private:checked ~ .dot {
+            transform: translateX(1.5rem); /* w-6 */
+        }
+        #create-lobby-private:checked ~ .block {
+            background-color: var(--primary-color);
+        }
+        
+        /* Animações de View */
+        .view-container {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .view-hidden {
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+            position: absolute; /* Evita que o elemento ocupe espaço quando escondido */
+        }
     </style>
 </head>
 <body>
@@ -152,6 +170,10 @@
                             <span class="text-gray-400 text-sm">pontos</span>
                         </div>
                         
+                        <button id="abandon-competition-btn" class="hidden items-center justify-center bg-yellow-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-yellow-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                            <span class="ml-2 hidden sm:inline">Abandonar</span>
+                        </button>
                         <!-- Menu Dropdown -->
                         <div class="relative">
                             <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
@@ -175,9 +197,16 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                     Completos
                                 </a>
-                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
                                     Ativar Código
+                                </a>
+                                <a href="#" id="friends-button-menu" class="flex items-center justify-between px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <span class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3.004 3.004 0 013.75-2.906z" /></svg>
+                                        Amigos
+                                    </span>
+                                    <span id="friend-request-badge" class="hidden bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"></span>
                                 </a>
                             </div>
                         </div>
@@ -189,75 +218,115 @@
                     </div>
                 </div>
                 
-                <!-- Seleção de Categoria -->
-                <div id="start-challenge-container" class="space-y-4 text-center py-8">
-                    <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
-                    <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                        <!-- Categorias serão inseridas aqui -->
-                    </div>
-                     <div class="flex flex-col items-center justify-center gap-4 mt-6">
-                        <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                            Sortear Desafio
-                        </button>
-                        <div id="choice-button-container" class="w-full max-w-xs hidden">
-                            <div class="relative py-2">
-                                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
-                                <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                <div class="relative w-full">
+                    <!-- Tela Principal (Solo e Competitivo) -->
+                    <div id="main-view-container" class="view-container">
+                        <!-- Seleção de Categoria (Modo Solo) -->
+                        <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                            <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
+                            <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                                <!-- Categorias serão inseridas aqui -->
                             </div>
-                            <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                Escolher Desafio (<span id="choice-token-count">0</span>)
-                            </button>
+                            <div class="flex flex-col items-center justify-center gap-4 mt-6">
+                                <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                                    Sortear Desafio
+                                </button>
+                                <div id="choice-button-container" class="w-full max-w-xs hidden">
+                                    <div class="relative py-2">
+                                        <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                        <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                    </div>
+                                    <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                        Escolher Desafio (<span id="choice-token-count">0</span>)
+                                    </button>
+                                </div>
+                                <!-- Botão para Modo Competitivo -->
+                                <div class="relative py-2 w-full max-w-xs">
+                                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                    <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                </div>
+                                <button id="show-competitive-mode-btn" class="w-full max-w-xs bg-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-purple-700">
+                                    Modo Competitivo
+                                </button>
+                            </div>
+                        <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                         </div>
-                   </div>
-                  <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
-                </div>
 
-                <!-- Área do Desafio -->
-                <div id="challenge-container" class="hidden space-y-4">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
-                             <p id="timer-display" class="font-bold text-2xl"></p>
-                             <p id="timer-bonus" class="text-sm text-cyan-400"></p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
-                                (<span id="abandon-token-count">0</span>)
-                            </button>
-                            <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                                (<span id="reroll-token-count">0</span>)
-                            </button>
-                        </div>
-                    </div>
-                    <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
-                        <div id="loader" class="loader hidden"></div>
-                        <p id="placeholder-text" class="text-gray-400 text-center"></p>
-                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-black/20 p-3 rounded-lg text-center">
-                            <p class="text-sm text-gray-400">Material Fornecido:</p>
-                            <p id="material-info" class="font-bold text-lg"></p>
-                        </div>
-                        <div class="bg-black/20 p-3 rounded-lg text-center">
-                            <p class="text-sm text-gray-400">Pontuação:</p>
-                            <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                        <!-- Área do Desafio (Modo Solo) -->
+                        <div id="challenge-container" class="hidden space-y-4">
+                            <div class="flex justify-between items-center flex-wrap gap-2">
+                                <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                                    <p id="timer-display" class="font-bold text-2xl"></p>
+                                    <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
+                                        (<span id="abandon-token-count">0</span>)
+                                    </button>
+                                    <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                                        (<span id="reroll-token-count">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                                <div id="loader" class="loader hidden"></div>
+                                <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                                <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-black/20 p-3 rounded-lg text-center">
+                                    <p class="text-sm text-gray-400">Material Fornecido:</p>
+                                    <p id="material-info" class="font-bold text-lg"></p>
+                                </div>
+                                <div class="bg-black/20 p-3 rounded-lg text-center">
+                                    <p class="text-sm text-gray-400">Pontuação:</p>
+                                    <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                                </div>
+                            </div>
+
+                            <!-- Formulário de Resposta -->
+                            <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                                <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                                <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                            </form>
+                            <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                            <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
                         </div>
                     </div>
 
-                    <!-- Formulário de Resposta -->
-                    <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
-                        <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
-                        <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
-                    </form>
-                    <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
-                    <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                    <!-- Container do Modo Competitivo -->
+                    <div id="competitive-container" class="view-container view-hidden">
+                        <!-- Navegador de Lobbies -->
+                        <div id="lobby-browser">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold">Salas Competitivas</h2>
+                                <button id="back-to-solo-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Voltar</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button id="create-lobby-btn" class="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700">Criar Nova Sala</button>
+                                <div class="bg-black/20 p-4 rounded-lg">
+                                    <input type="text" id="join-lobby-id" class="w-full bg-white/20 text-white p-2 rounded-lg" placeholder="ID da Sala">
+                                    <button id="join-lobby-btn" class="w-full mt-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Entrar na Sala</button>
+                                </div>
+                            </div>
+                            <h3 class="font-semibold mt-6 mb-2">Salas Abertas</h3>
+                            <div id="lobbies-list" class="space-y-2 max-h-64 overflow-y-auto">
+                                <!-- Lista de salas abertas -->
+                            </div>
+                        </div>
+
+                        <!-- Visualização do Lobby -->
+                        <div id="lobby-view" class="hidden">
+                            <!-- Conteúdo dinâmico do lobby (espera, jogo, resultados) -->
+                        </div>
+                    </div>
                 </div>
                 
-                 <!-- Barra de XP -->
+                <!-- Barra de XP -->
                 <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
                     <div class="max-w-4xl mx-auto">
                         <div class="flex justify-between items-center mb-1">
@@ -268,6 +337,13 @@
                             <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Mini Ranking Competitivo -->
+                <div id="mini-ranking-container" class="hidden fixed top-24 right-4 bg-black/50 backdrop-blur-md p-4 rounded-lg w-64 border border-white/20 z-10">
+                    <h3 class="font-bold text-center mb-2">Placar da Partida</h3>
+                    <div id="mini-ranking-list" class="space-y-2"></div>
+                    <div id="match-timer" class="mt-4 text-center font-bold text-xl"></div>
                 </div>
 
             </div>
@@ -284,7 +360,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp, onSnapshot, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -314,6 +390,16 @@
         let challengeTimerInterval = null;
         let selectedCategory = null;
 
+        // --- VARIÁVEIS DO MODO COMPETITIVO ---
+        let currentLobbyId = null;
+        let lobbyListener = null;
+        let lobbiesListener = null; // Para a lista de salas
+        let matchTimerInterval = null;
+
+        // --- VARIÁVEIS DE UI/UX ---
+        let friendsListener = null;
+        let friendRequestsListener = null;
+
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -334,6 +420,10 @@
                 document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
                 authContainer.classList.remove('hidden');
                 gameContainer.classList.add('hidden');
+                if (lobbyListener) lobbyListener(); // Desconecta do lobby se deslogar
+                if (lobbiesListener) lobbiesListener();
+                if (friendsListener) friendsListener();
+                if (friendRequestsListener) friendRequestsListener();
             }
         });
 
@@ -385,6 +475,8 @@
             completedSnapshot.forEach((doc) => completedChallenges.set(doc.id, doc.data()));
             
             populateCategories();
+            listenToFriendData(user.uid);
+
 
             if (activeChallengeData.id) {
                 const challenge = allChallenges.find(c => c.id === activeChallengeData.id);
@@ -392,6 +484,8 @@
                     currentChallenge = challenge;
                     displayChallenge(challenge, activeChallengeData.startTime);
                 }
+            } else if (!currentUserData.hasCompletedTutorial) {
+                startTutorial();
             }
         }
 
@@ -502,7 +596,9 @@
                     activeChallenge: null, score: 0, xp: 0, pointsSpent: 0,
                     consumables: { reroll: 0, choice: 0, abandon: 0 },
                     profile: { title: null, badgeUrl: null, activeTheme: null },
-                    activeBonus: null
+                    activeBonus: null,
+                    stats: { totalAttempts: 0, correctAttempts: 0 },
+                    hasCompletedTutorial: false
                 });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
@@ -514,7 +610,14 @@
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
             } catch (error) { showMessage('Email ou senha inválidos.', true); }
         });
-        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+        document.getElementById('logout-button').addEventListener('click', async () => {
+             if (currentLobbyId) {
+                await leaveLobby();
+             }
+             if (friendsListener) friendsListener();
+             if (friendRequestsListener) friendRequestsListener();
+             signOut(auth);
+        });
         document.getElementById('forgot-password').addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -545,12 +648,14 @@
             const loader = document.getElementById('loader');
             const placeholderText = document.getElementById('placeholder-text');
 
-            startContainer.classList.add('hidden');
-            challengeContainer.classList.remove('hidden');
+            // Animação de troca de view
+            switchView(startContainer, challengeContainer);
             
             loader.classList.remove('hidden');
             placeholderText.classList.add('hidden');
             challengeImage.classList.add('hidden');
+            answerForm.reset();
+            answerFeedback.classList.add('hidden');
 
             materialInfo.textContent = challenge.material;
             scoreInfo.textContent = `${challenge.score} pts`;
@@ -565,7 +670,7 @@
                 placeholderText.classList.remove('hidden');
             }
 
-            // Timer Logic
+            // Timer Logic (Solo)
             clearInterval(challengeTimerInterval);
             const timerContainer = document.getElementById('timer-container');
             const timerDisplay = document.getElementById('timer-display');
@@ -630,6 +735,14 @@
 
         answerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (currentLobbyId) {
+                await submitCompetitiveAnswer();
+            } else {
+                await submitSoloAnswer();
+            }
+        });
+
+        async function submitSoloAnswer() {
             if (!currentUser || !currentChallenge) return;
 
             const userMass = parseFloat(document.getElementById('mass-input').value);
@@ -677,14 +790,14 @@
             answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
             answerFeedback.classList.remove('hidden');
             
+            const userDocRef = doc(db, "users", currentUser.uid);
+
             if(isCorrect) {
                 clearInterval(challengeTimerInterval);
                 answerForm.classList.add('hidden');
                 nextChallengeButton.classList.remove('hidden');
                 rerollButton.classList.add('hidden');
                 abandonButton.classList.add('hidden');
-                
-                const userDocRef = doc(db, "users", currentUser.uid);
                 
                 const oldLevel = getLevelForXp(currentUserData.xp);
 
@@ -693,7 +806,17 @@
                     const userData = userDoc.data();
                     const newScore = (userData.score || 0) + finalScore;
                     const newXp = (userData.xp || 0) + finalScore;
-                    transaction.update(userDocRef, { score: newScore, xp: newXp, activeChallenge: null, activeChallengeStartTime: null });
+                    const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                    newStats.totalAttempts++;
+                    newStats.correctAttempts++;
+
+                    transaction.update(userDocRef, { 
+                        score: newScore, 
+                        xp: newXp, 
+                        activeChallenge: null, 
+                        activeChallengeStartTime: null,
+                        stats: newStats
+                    });
                     
                     const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
                     const userFinalAnswer = { mass: userMass, volume: userVolume };
@@ -707,6 +830,9 @@
                 
                 currentUserData.score += finalScore;
                 currentUserData.xp += finalScore;
+                currentUserData.stats.totalAttempts++;
+                currentUserData.stats.correctAttempts++;
+
 
                 const newLevel = getLevelForXp(currentUserData.xp);
 
@@ -723,6 +849,16 @@
                 await checkAchievements();
                 updateConsumablesUI();
                 updateXpBar();
+            } else {
+                // Se errou, apenas atualiza as estatísticas de tentativa
+                await runTransaction(db, async (transaction) => {
+                     const userDoc = await transaction.get(userDocRef);
+                     const userData = userDoc.data();
+                     const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                     newStats.totalAttempts++;
+                     transaction.update(userDocRef, { stats: newStats });
+                });
+                currentUserData.stats.totalAttempts++;
             }
 
             await addDoc(collection(db, "attempts"), {
@@ -730,11 +866,18 @@
                 challengeId: currentChallenge.id, challengeName: currentChallenge.name,
                 userAnswer: { mass: userMass, volume: userVolume }, isCorrect, timestamp: serverTimestamp()
             });
-        });
+        }
         
         function resetToStartScreen() {
-            challengeContainer.classList.add('hidden');
-            document.getElementById('start-challenge-container').classList.remove('hidden');
+            const startContainer = document.getElementById('start-challenge-container');
+            if(challengeContainer.classList.contains('hidden') && startContainer.classList.contains('hidden')) {
+                 // Estava no modo competitivo, então mostra a tela de solo
+                 switchView(competitiveContainer, mainViewContainer.querySelector('#start-challenge-container'));
+            } else if (!challengeContainer.classList.contains('hidden')) {
+                 // Estava em um desafio solo, volta para a seleção de categoria
+                 switchView(challengeContainer, startContainer);
+            }
+
             answerForm.classList.remove('hidden');
             nextChallengeButton.classList.add('hidden');
             answerFeedback.classList.add('hidden');
@@ -748,7 +891,9 @@
             clearInterval(challengeTimerInterval);
         }
         
-        nextChallengeButton.addEventListener('click', resetToStartScreen);
+        nextChallengeButton.addEventListener('click', () => {
+             resetToStartScreen();
+        });
 
         // --- LÓGICA DOS CONSUMÍVEIS E CÓDIGOS ---
         rerollButton.addEventListener('click', async () => {
@@ -858,7 +1003,7 @@
         });
 
         document.addEventListener('click', (e) => {
-            if (!menuToggleButton.contains(e.target)) {
+            if (!menuToggleButton.contains(e.target) && !menuDropdown.classList.contains('hidden')) {
                 menuDropdown.classList.add('hidden');
             }
         });
@@ -929,7 +1074,7 @@
             }
         
             // --- Anexar todos os listeners no final ---
-            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
+            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', (e) => { buyItem(e); }));
         }
 
         function openCompletedModal() {
@@ -956,7 +1101,7 @@
                 </div>`;
 
             createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
-            document.getElementById('show-all-users-btn').addEventListener('click', showFullRanking);
+            document.getElementById('show-all-users-btn').addEventListener('click', () => { showFullRanking(); });
 
             const listEl = document.getElementById('ranking-list');
             
@@ -1015,7 +1160,7 @@
                 </div>
                 <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
             `;
-            div.addEventListener('click', () => openPublicProfileModal(userDoc.id));
+            div.addEventListener('click', () => { openPublicProfileModal(userDoc.id); });
             return div;
         }
 
@@ -1055,6 +1200,7 @@
         document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); openCompletedModal(); menuDropdown.classList.add('hidden'); });
         document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); openRankingModal(); menuDropdown.classList.add('hidden'); });
         document.getElementById('redeem-code-button').addEventListener('click', (e) => { e.preventDefault(); openRedeemCodeModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('friends-button-menu').addEventListener('click', (e) => { e.preventDefault(); openFriendsModal(); menuDropdown.classList.add('hidden'); });
 
         async function buyItem(e) {
             const { id, price, type, name } = e.target.dataset;
@@ -1156,11 +1302,24 @@
                     </div>
                 </label>
             `).join('');
+
+            const stats = currentUserData.stats || { totalAttempts: 0, correctAttempts: 0 };
+            const accuracy = stats.totalAttempts > 0 ? ((stats.correctAttempts / stats.totalAttempts) * 100).toFixed(1) : "N/A";
+            
+            let favoriteCategory = "Nenhuma";
+            if(completedChallenges.size > 0) {
+                const categoryCounts = {};
+                completedChallenges.forEach(c => {
+                    categoryCounts[c.category] = (categoryCounts[c.category] || 0) + 1;
+                });
+                favoriteCategory = Object.keys(categoryCounts).reduce((a, b) => categoryCounts[a] > categoryCounts[b] ? a : b);
+            }
             
             const content = `
                 <div class="border-b border-gray-600 mb-4">
-                    <nav class="flex -mb-px">
+                    <nav class="flex -mb-px flex-wrap">
                         <button data-tab="equip" class="tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Equipar</button>
+                        <button data-tab="stats" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Estatísticas</button>
                         <button data-tab="themes" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Temas</button>
                         <button data-tab="achievements" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Conquistas</button>
                     </nav>
@@ -1181,6 +1340,14 @@
                         </div>
                     </div>
                      <button id="save-profile-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Perfil</button>
+                </div>
+                <div id="tab-content-stats" class="tab-content hidden space-y-4">
+                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${completedChallenges.size}</p><p class="text-sm text-gray-400">Desafios Concluídos</p></div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${accuracy}%</p><p class="text-sm text-gray-400">Taxa de Acerto</p></div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${favoriteCategory}</p><p class="text-sm text-gray-400">Categoria Favorita</p></div>
+                     </div>
+                     <p class="text-center text-gray-500 text-xs pt-4">Mais estatísticas em breve!</p>
                 </div>
                  <div id="tab-content-themes" class="tab-content hidden space-y-4">
                     ${unlockedThemesHtml || '<p class="text-gray-400">Nenhum tema desbloqueado.</p>'}
@@ -1203,7 +1370,10 @@
 
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => tab.addEventListener('click', (e) => {
-                tabs.forEach(t => {t.classList.remove('border-indigo-500', 'text-white'); t.classList.add('border-transparent', 'text-gray-400')});
+                tabs.forEach(t => {
+                    t.classList.remove('border-indigo-500', 'text-white');
+                    t.classList.add('border-transparent', 'text-gray-400');
+                });
                 e.target.classList.add('border-indigo-500', 'text-white');
                 e.target.classList.remove('border-transparent', 'text-gray-400');
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
@@ -1238,6 +1408,33 @@
             const level = getLevelForXp(userData.xp || 0);
             const nameColor = level ? level.color : '#FFFFFF';
 
+            let friendButtonHtml = '';
+            if (userId !== currentUser.uid) {
+                // 1. Check if they are friends or if I sent a request
+                const myFriendRef = doc(db, "users", currentUser.uid, "friends", userId);
+                const myFriendDoc = await getDoc(myFriendRef);
+
+                if (myFriendDoc.exists()) {
+                    const status = myFriendDoc.data().status;
+                    if (status === 'accepted') {
+                        friendButtonHtml = `<button class="w-full mt-4 bg-gray-600 text-white font-bold py-2 rounded-lg cursor-not-allowed" disabled>Amigos</button>`;
+                    } else if (status === 'sent') {
+                        friendButtonHtml = `<button class="w-full mt-4 bg-gray-600 text-white font-bold py-2 rounded-lg cursor-not-allowed" disabled>Pedido Enviado</button>`;
+                    }
+                } else {
+                    // 2. Check if they sent me a request
+                    const requestsQuery = query(collection(db, "users", currentUser.uid, "friendRequests"), where("requesterId", "==", userId), where("status", "==", "pending"));
+                    const requestSnapshot = await getDocs(requestsQuery);
+
+                    if (!requestSnapshot.empty) {
+                        friendButtonHtml = `<button class="w-full mt-4 bg-yellow-600 text-white font-bold py-2 rounded-lg" onclick="document.getElementById('public-profile-${userId}').remove(); document.getElementById('friends-button-menu').click();">Responder Pedido</button>`;
+                    } else {
+                         // 3. No connection, show Add Friend button
+                        friendButtonHtml = `<button id="add-friend-from-profile-btn" data-id="${userId}" data-name="${userData.name}" class="w-full mt-4 bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Adicionar Amigo</button>`;
+                    }
+                }
+            }
+
             const achievementsHtml = allAchievements
                 .filter(a => unlockedIds.has(a.id))
                 .map(achieve => `
@@ -1253,10 +1450,11 @@
             const content = `
                 <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-900/50 rounded-lg">
                     <img src="${userData.profile?.badgeUrl || 'https://placehold.co/96x96/718096/FFFFFF?text=?'}" class="w-24 h-24 rounded-full object-cover border-4 border-indigo-500">
-                    <div>
+                    <div class="flex-1 text-center sm:text-left">
                         <h3 class="text-2xl font-bold" style="color: ${nameColor};">${userData.name}</h3>
                         <p class="text-indigo-400 font-semibold">${userData.profile?.title || 'Novo Jogador'}</p>
                         <p class="text-sm text-cyan-400 mt-1">${userData.xp || 0} XP</p>
+                        ${friendButtonHtml}
                     </div>
                 </div>
                 <h4 class="font-bold text-white mt-6 mb-2">Conquistas Desbloqueadas</h4>
@@ -1265,40 +1463,53 @@
                 </div>
             `;
             createModal(`public-profile-${userId}`, `Perfil de ${userData.name}`, content, 'max-w-2xl');
+
+            const addFriendBtn = document.getElementById('add-friend-from-profile-btn');
+            if (addFriendBtn) {
+                addFriendBtn.addEventListener('click', async (e) => {
+                    const targetId = e.target.dataset.id;
+                    const targetName = e.target.dataset.name;
+                    await sendFriendRequest(targetId, targetName);
+                    e.target.textContent = 'Pedido Enviado';
+                    e.target.disabled = true;
+                    e.target.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    e.target.classList.add('bg-gray-600', 'cursor-not-allowed');
+                });
+            }
         }
 
         async function checkAchievements() {
              const userStats = {
-                xp: currentUserData.xp || 0,
-                pointsSpent: currentUserData.pointsSpent || 0,
-                completedTotal: completedChallenges.size,
-                completedByCategory: (() => {
-                    const counts = {};
-                    completedChallenges.forEach(c => {
-                        counts[c.category] = (counts[c.category] || 0) + 1;
-                    });
-                    return counts;
-                })()
-             };
-             
-              for (const achievement of allAchievements) {
-                   if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
+                 xp: currentUserData.xp || 0,
+                 pointsSpent: currentUserData.pointsSpent || 0,
+                 completedTotal: completedChallenges.size,
+                 completedByCategory: (() => {
+                     const counts = {};
+                     completedChallenges.forEach(c => {
+                         counts[c.category] = (counts[c.category] || 0) + 1;
+                     });
+                     return counts;
+                 })()
+              };
+              
+               for (const achievement of allAchievements) {
+                    if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
 
-                   let isUnlocked = false;
-                   const { type, value, category } = achievement.condition;
+                    let isUnlocked = false;
+                    const { type, value, category } = achievement.condition;
 
-                   if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
-                   if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
-                   if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
-                   if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
-                   
-                   if (isUnlocked) {
-                       const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
-                       await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
-                       unlockedAchievements.set(achievement.id, {});
-                       showToast(`Conquista Desbloqueada: ${achievement.name}`);
-                   }
-              }
+                    if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
+                    if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
+                    if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
+                    if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
+                    
+                    if (isUnlocked) {
+                        const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
+                        await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
+                        unlockedAchievements.set(achievement.id, {});
+                        showToast(`Conquista Desbloqueada: ${achievement.name}`);
+                    }
+               }
         }
         
         async function checkForLevelUpRewards(newLevel) {
@@ -1364,8 +1575,8 @@
                 <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
                     <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
                         <div class="flex justify-between items-center mb-4">
-                            ${titleHtml}
-                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
+                            ${typeof titleHtml === 'string' ? `<h2 class="text-xl font-bold text-white">${titleHtml}</h2>` : titleHtml}
+                            <button onclick="document.getElementById('${id}').remove();" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
                         </div>
                         <div class="max-h-[75vh] overflow-auto">${content}</div>
                     </div>
@@ -1548,6 +1759,727 @@
                     currentUserData.activeBonus = null;
                 }
             }
+        }
+
+        // --- MODO COMPETITIVO ---
+        const mainViewContainer = document.getElementById('main-view-container');
+        const competitiveContainer = document.getElementById('competitive-container');
+        const abandonCompetitionBtn = document.getElementById('abandon-competition-btn');
+
+        document.getElementById('show-competitive-mode-btn').addEventListener('click', () => {
+            switchView(mainViewContainer, competitiveContainer);
+            listenToLobbies();
+        });
+
+        document.getElementById('back-to-solo-btn').addEventListener('click', () => {
+            switchView(competitiveContainer, mainViewContainer);
+            if (lobbiesListener) lobbiesListener(); // Para de ouvir a lista de salas
+        });
+
+        function listenToLobbies() {
+            const lobbiesRef = collection(db, "lobbies");
+            const q = query(lobbiesRef, where("status", "==", "waiting"));
+
+            if (lobbiesListener) lobbiesListener(); // Garante que não haja listeners duplicados
+
+            lobbiesListener = onSnapshot(q, (snapshot) => {
+                const listEl = document.getElementById('lobbies-list');
+                listEl.innerHTML = '';
+                if (snapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhuma sala aberta. Crie uma!</p>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const lobby = doc.data();
+                    const lobbyEl = document.createElement('div');
+                    lobbyEl.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                    const lockIcon = lobby.settings.isPrivate ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a3 3 0 00-3 3v1H6a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V8a2 2 0 00-2-2h-1V5a3 3 0 00-3-3zm-1 4V5a1 1 0 112 0v1H9z" clip-rule="evenodd" /></svg>` : '';
+                    lobbyEl.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${lobby.hostName}'s Room ${lockIcon}</p>
+                            <p class="text-xs text-gray-400">${lobby.players.length} jogador(es)</p>
+                        </div>
+                        <button data-id="${doc.id}" class="join-lobby-list-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Entrar</button>
+                    `;
+                    listEl.appendChild(lobbyEl);
+                });
+                document.querySelectorAll('.join-lobby-list-btn').forEach(btn => btn.addEventListener('click', (e) => { joinLobby(e.target.dataset.id); }))
+            });
+        }
+
+        function openCreateLobbyModal() {
+            const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
+                .map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm">Categoria</label>
+                        <select id="create-lobby-category" class="w-full bg-gray-700 p-2 rounded mt-1">
+                            ${categoriesOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm">Tempo (minutos)</label>
+                        <input type="number" id="create-lobby-time" value="5" min="1" max="60" class="w-full bg-gray-700 p-2 rounded mt-1">
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg">
+                        <label for="create-lobby-private" class="flex items-center cursor-pointer">
+                            <span class="mr-3 text-sm font-semibold">Sala Privada</span>
+                            <div class="relative">
+                                <input type="checkbox" id="create-lobby-private" class="sr-only peer">
+                                <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="create-lobby-password-container" class="hidden">
+                        <label class="text-sm">Senha da Sala</label>
+                        <input type="password" id="create-lobby-password" class="w-full bg-gray-700 p-2 rounded mt-1" placeholder="Mínimo 4 caracteres">
+                    </div>
+                    <button id="confirm-create-lobby-btn" class="w-full mt-4 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Criar Sala</button>
+                </div>
+            `;
+            createModal('create-lobby-modal', 'Criar Sala Competitiva', content, 'max-w-md');
+
+            const privateToggle = document.getElementById('create-lobby-private');
+            const passwordContainer = document.getElementById('create-lobby-password-container');
+            privateToggle.addEventListener('change', () => {
+                passwordContainer.classList.toggle('hidden', !privateToggle.checked);
+            });
+
+            document.getElementById('confirm-create-lobby-btn').addEventListener('click', () => { createLobby(); });
+        }
+
+        async function createLobby() {
+            const settings = {
+                category: document.getElementById('create-lobby-category').value,
+                timeLimitMinutes: parseInt(document.getElementById('create-lobby-time').value) || 5,
+                isPrivate: document.getElementById('create-lobby-private').checked,
+                password: null
+            };
+
+            if (settings.isPrivate) {
+                const password = document.getElementById('create-lobby-password').value;
+                if (password.length < 4) {
+                    return createAlertModal("Erro", "A senha deve ter pelo menos 4 caracteres.");
+                }
+                settings.password = password;
+            }
+
+            const lobbyRef = doc(collection(db, "lobbies"));
+            const lobbyData = {
+                hostId: currentUser.uid,
+                hostName: currentUserData.name,
+                players: [{ uid: currentUser.uid, name: currentUserData.name, score: 0 }],
+                status: 'waiting', // waiting, in_progress, finished
+                settings: settings,
+                currentChallengeId: null,
+                challengeHistory: [],
+                createdAt: serverTimestamp(),
+            };
+            await setDoc(lobbyRef, lobbyData);
+            document.getElementById('create-lobby-modal')?.remove();
+            await joinLobby(lobbyRef.id, true); // O 'true' pula a verificação de senha
+        }
+        document.getElementById('create-lobby-btn').addEventListener('click', () => { openCreateLobbyModal(); });
+        document.getElementById('join-lobby-btn').addEventListener('click', () => {
+            const id = document.getElementById('join-lobby-id').value.trim();
+            if(id) joinLobby(id);
+        });
+
+        async function joinLobby(lobbyId, skipPasswordCheck = false) {
+             const lobbyRef = doc(db, "lobbies", lobbyId);
+             const lobbyDoc = await getDoc(lobbyRef);
+
+             if (!lobbyDoc.exists()) {
+                return createAlertModal("Erro", "Sala não encontrada.");
+             }
+             const lobbyData = lobbyDoc.data();
+             if (lobbyData.status !== 'waiting') {
+                return createAlertModal("Erro", "Esta partida já começou.");
+             }
+
+             if (lobbyData.settings.isPrivate && !skipPasswordCheck) {
+                return promptForLobbyPassword(lobbyId, lobbyData);
+             }
+            
+             await runTransaction(db, async (transaction) => {
+                const freshLobbyDoc = await transaction.get(lobbyRef);
+                const currentLobbyData = freshLobbyDoc.data();
+                const isAlreadyIn = currentLobbyData.players.some(p => p.uid === currentUser.uid);
+
+                if (!isAlreadyIn) {
+                    const newPlayer = { uid: currentUser.uid, name: currentUserData.name, score: 0 };
+                    transaction.update(lobbyRef, { players: arrayUnion(newPlayer) });
+                }
+             });
+
+            currentLobbyId = lobbyId;
+            switchView(competitiveContainer.querySelector('#lobby-browser'), competitiveContainer.querySelector('#lobby-view'));
+            abandonCompetitionBtn.classList.remove('hidden');
+
+
+            if (lobbiesListener) lobbiesListener();
+            
+            lobbyListener = onSnapshot(lobbyRef, (doc) => {
+                if (doc.exists()) {
+                    renderLobby(doc.data());
+                } else {
+                    // Sala foi deletada pelo host
+                    createAlertModal("Sala Fechada", "O líder fechou a sala.", () => leaveLobby(true));
+                }
+            });
+        }
+        
+        function promptForLobbyPassword(lobbyId, lobbyData) {
+            const content = `
+                 <p class="text-gray-400 text-sm mb-4">A sala de ${lobbyData.hostName} é privada. Por favor, insira a senha.</p>
+                 <form id="lobby-password-form">
+                    <input type="password" id="lobby-password-input" class="w-full bg-gray-700 p-2 rounded mt-1" required>
+                    <button type="submit" class="w-full mt-4 button-primary text-white font-bold py-2 rounded-lg hover:opacity-90">Entrar</button>
+                 </form>
+            `;
+            createModal('password-prompt-modal', 'Senha da Sala', content, 'max-w-sm');
+            document.getElementById('lobby-password-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const inputPassword = document.getElementById('lobby-password-input').value;
+                if (inputPassword === lobbyData.settings.password) {
+                    document.getElementById('password-prompt-modal')?.remove();
+                    joinLobby(lobbyId, true);
+                } else {
+                    createAlertModal("Erro", "Senha incorreta.");
+                }
+            })
+        }
+
+        async function leaveLobby(wasKicked = false) {
+            if (!currentLobbyId) return;
+            
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            
+            // Apenas executa a lógica de remoção se não foi expulso (porque a sala já não existe)
+            if (!wasKicked) {
+                 const lobbyDoc = await getDoc(lobbyRef);
+                 if (lobbyDoc.exists()) {
+                    const lobbyData = lobbyDoc.data();
+                    if (lobbyData.hostId === currentUser.uid) {
+                        await deleteDoc(lobbyRef);
+                    } else {
+                        await runTransaction(db, async (transaction) => {
+                            const freshLobbyDoc = await transaction.get(lobbyRef);
+                            if (!freshLobbyDoc.exists()) return;
+                            const currentPlayers = freshLobbyDoc.data().players;
+                            const newPlayers = currentPlayers.filter(p => p.uid !== currentUser.uid);
+                            transaction.update(lobbyRef, { players: newPlayers });
+                        });
+                    }
+                }
+            }
+
+
+            if (lobbyListener) lobbyListener();
+            lobbyListener = null;
+            currentLobbyId = null;
+            
+            abandonCompetitionBtn.classList.add('hidden');
+            document.getElementById('mini-ranking-container').classList.add('hidden');
+            clearInterval(matchTimerInterval);
+            resetToStartScreen();
+            
+            switchView(competitiveContainer, mainViewContainer);
+        }
+        abandonCompetitionBtn.addEventListener('click', () => {
+            createConfirmationModal("Abandonar Partida", "Tem certeza que deseja sair da competição?", () => leaveLobby());
+        });
+        
+        function renderLobby(lobbyData) {
+            const lobbyView = document.getElementById('lobby-view');
+            const isHost = lobbyData.hostId === currentUser.uid;
+
+            if (lobbyData.status === 'waiting') {
+                const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
+                    .map(cat => `<option value="${cat}" ${lobbyData.settings.category === cat ? 'selected' : ''}>${cat}</option>`).join('');
+
+                lobbyView.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Sala de ${lobbyData.hostName}</h2>
+                        <button id="leave-lobby-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                    </div>
+                    <div class="bg-black/20 p-2 rounded-lg text-center mb-4">
+                        ID da Sala: <span class="font-bold tracking-widest">${currentLobbyId}</span>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Configurações (só para o host) -->
+                        <div class="bg-black/30 p-4 rounded-lg">
+                             <h3 class="font-semibold mb-2">Configurações</h3>
+                             <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm">Categoria</label>
+                                    <select id="lobby-category-select" class="w-full bg-gray-700 p-2 rounded mt-1" ${!isHost ? 'disabled' : ''}>
+                                        ${categoriesOptions}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm">Tempo (minutos)</label>
+                                    <input type="number" id="lobby-time-input" value="${lobbyData.settings.timeLimitMinutes}" min="1" max="60" class="w-full bg-gray-700 p-2 rounded mt-1" ${!isHost ? 'disabled' : ''}>
+                                </div>
+                             </div>
+                             ${isHost ? `<button id="start-lobby-btn" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Iniciar Jogo</button>` : '<p class="text-center text-gray-400 mt-6">Aguardando o líder iniciar...</p>'}
+                        </div>
+                        <!-- Jogadores na sala -->
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <h3 class="font-semibold mb-2">Jogadores (${lobbyData.players.length})</h3>
+                            <div id="lobby-players-list" class="space-y-2">
+                                ${lobbyData.players.map(p => `<div class="bg-gray-700 p-2 rounded">${p.name} ${p.uid === lobbyData.hostId ? ' (Líder)' : ''}</div>`).join('')}
+                            </div>
+                        </div>
+                     </div>
+                `;
+                document.getElementById('leave-lobby-btn').addEventListener('click', () => { leaveLobby(); });
+                if (isHost) {
+                    document.getElementById('start-lobby-btn').addEventListener('click', () => { startLobby(); });
+                    document.getElementById('lobby-category-select').addEventListener('change', (e) => updateLobbySettings({ category: e.target.value }));
+                    document.getElementById('lobby-time-input').addEventListener('change', (e) => updateLobbySettings({ timeLimitMinutes: parseInt(e.target.value) }));
+                }
+
+            } else if (lobbyData.status === 'in_progress') {
+                lobbyView.classList.add('hidden'); // Esconde a view do lobby
+                competitiveContainer.classList.add('hidden'); // Esconde o container competitivo
+                mainViewContainer.classList.remove('hidden'); // Mostra a view principal do jogo
+                switchView(mainViewContainer.querySelector('#start-challenge-container'), mainViewContainer.querySelector('#challenge-container'));
+
+                const challenge = allChallenges.find(c => c.id === lobbyData.currentChallengeId);
+                if(challenge) {
+                    currentChallenge = challenge;
+                    displayChallenge(challenge, null); // startTime é null aqui para desativar o timer individual
+                    document.getElementById('abandon-button').classList.add('hidden');
+                    document.getElementById('reroll-button').classList.add('hidden');
+
+                    const myAnswer = lobbyData.playerAnswers?.[currentUser.uid];
+                    if (myAnswer) {
+                        answerForm.classList.add('hidden');
+                        answerFeedback.textContent = 'Correto! Aguardando o próximo desafio...';
+                        answerFeedback.className = 'p-3 rounded-lg text-center text-sm font-medium bg-green-500/50 text-green-100';
+                        answerFeedback.classList.remove('hidden');
+
+                        if(isHost) {
+                            nextChallengeButton.classList.remove('hidden');
+                            nextChallengeButton.textContent = 'Próximo Desafio';
+                            nextChallengeButton.onclick = () => { selectNextCompetitiveChallenge(lobbyData); };
+                        }
+                    } else {
+                        answerForm.classList.remove('hidden');
+                        nextChallengeButton.classList.add('hidden');
+                    }
+                }
+                
+                // Renderiza o mini-ranking
+                const rankingContainer = document.getElementById('mini-ranking-container');
+                const rankingList = document.getElementById('mini-ranking-list');
+                rankingContainer.classList.remove('hidden');
+                rankingList.innerHTML = lobbyData.players
+                    .sort((a,b) => b.score - a.score)
+                    .map(p => `
+                        <div class="flex justify-between items-center text-sm ${p.uid === currentUser.uid ? 'font-bold text-cyan-300' : ''}">
+                            <span>${p.name}</span>
+                            <span>${p.score} pts</span>
+                        </div>
+                    `).join('');
+
+                // Lógica do timer da partida
+                clearInterval(matchTimerInterval);
+                const matchTimerEl = document.getElementById('match-timer');
+                matchTimerInterval = setInterval(() => {
+                    const now = new Date();
+                    const elapsed = Math.floor((now - lobbyData.startTime.toDate()) / 1000);
+                    const remaining = (lobbyData.settings.timeLimitMinutes * 60) - elapsed;
+                    if(remaining <= 0) {
+                        clearInterval(matchTimerInterval);
+                        matchTimerEl.textContent = "Fim de Jogo!";
+                        if(isHost) finishLobby();
+                    } else {
+                         const minutes = Math.floor(remaining / 60);
+                         const seconds = remaining % 60;
+                         matchTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+            } else if (lobbyData.status === 'finished') {
+                const finalRanking = lobbyData.players.sort((a,b) => b.score - a.score);
+                const winner = finalRanking[0];
+                 const content = `
+                    <p class="text-center text-lg mb-4">O vencedor é <span class="font-bold text-yellow-400">${winner.name}</span>!</p>
+                    <div class="space-y-2">
+                     ${finalRanking.map((p, index) => `
+                        <div class="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                            <span class="font-bold">${index + 1}. ${p.name}</span>
+                            <span class="text-cyan-400 font-semibold">${p.score} pts</span>
+                        </div>
+                     `).join('')}
+                    </div>
+                    <button id="close-results-btn" class="w-full mt-6 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700">Voltar</button>
+                 `;
+                createModal('lobby-results', 'Resultados Finais', content, 'max-w-md');
+                document.getElementById('close-results-btn').addEventListener('click', () => {
+                     document.getElementById('lobby-results').remove();
+                     if(isHost) deleteDoc(doc(db, "lobbies", currentLobbyId));
+                     leaveLobby();
+                });
+            }
+        }
+        
+        async function updateLobbySettings(settings) {
+            await updateDoc(doc(db, "lobbies", currentLobbyId), {
+                [`settings.${Object.keys(settings)[0]}`] : Object.values(settings)[0]
+            });
+        }
+        
+        async function startLobby() {
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            const lobbyDoc = await getDoc(lobbyRef);
+            const lobbyData = lobbyDoc.data();
+            
+            const availableChallenges = allChallenges.filter(c => c.category === lobbyData.settings.category);
+            if (availableChallenges.length === 0) {
+                return createAlertModal("Erro", "Não há desafios disponíveis para esta categoria.");
+            }
+            const firstChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+
+            await updateDoc(lobbyRef, {
+                status: 'in_progress',
+                startTime: serverTimestamp(),
+                currentChallengeId: firstChallenge.id,
+                challengeHistory: [firstChallenge.id],
+                playerAnswers: {}
+            });
+        }
+
+        async function submitCompetitiveAnswer() {
+            const userMass = parseFloat(document.getElementById('mass-input').value);
+            const userVolume = parseFloat(document.getElementById('volume-input').value);
+            
+            const correctData = currentChallenge;
+            const correctMass = parseFloat(correctData.mass);
+            const correctVolume = parseFloat(correctData.volume);
+            const tolerance = parseFloat(correctData.tolerance || 5);
+
+            const isCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100) && Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
+
+            if (isCorrect) {
+                const lobbyRef = doc(db, "lobbies", currentLobbyId);
+                const finalScore = parseInt(currentChallenge.score || 0);
+
+                await runTransaction(db, async (transaction) => {
+                    const lobbyDoc = await transaction.get(lobbyRef);
+                    const lobbyData = lobbyDoc.data();
+                    const players = lobbyData.players;
+                    const playerIndex = players.findIndex(p => p.uid === currentUser.uid);
+
+                    if (playerIndex !== -1 && !lobbyData.playerAnswers[currentUser.uid]) {
+                        players[playerIndex].score += finalScore;
+                        transaction.update(lobbyRef, { 
+                            players: players,
+                            [`playerAnswers.${currentUser.uid}`]: serverTimestamp()
+                        });
+
+                        // Também atualiza o XP e Score global do usuário
+                        const userRef = doc(db, "users", currentUser.uid);
+                        const userDoc = await transaction.get(userRef);
+                        const userData = userDoc.data();
+                        transaction.update(userRef, {
+                            score: (userData.score || 0) + finalScore,
+                            xp: (userData.xp || 0) + finalScore
+                        });
+                    }
+                });
+
+                 currentUserData.score += finalScore;
+                 currentUserData.xp += finalScore;
+                 updateXpBar();
+                 updateConsumablesUI();
+            } else {
+                answerFeedback.textContent = "Resposta Incorreta.";
+                answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium bg-red-500/50 text-red-100`;
+                answerFeedback.classList.remove('hidden');
+            }
+        }
+        
+        async function selectNextCompetitiveChallenge(lobbyData) {
+            const available = allChallenges.filter(c => c.category === lobbyData.settings.category && !lobbyData.challengeHistory.includes(c.id));
+            if (available.length === 0) {
+                return finishLobby();
+            }
+            const nextChallenge = available[Math.floor(Math.random() * available.length)];
+            await updateDoc(doc(db, "lobbies", currentLobbyId), {
+                currentChallengeId: nextChallenge.id,
+                challengeHistory: arrayUnion(nextChallenge.id),
+                playerAnswers: {}
+            });
+        }
+        
+        async function finishLobby() {
+            await updateDoc(doc(db, "lobbies", currentLobbyId), { status: 'finished' });
+        }
+
+        // --- FUNÇÕES DE UI/UX ---
+
+        function switchView(from, to) {
+            if (!from || !to) return;
+            from.classList.add('view-hidden');
+            
+            setTimeout(() => {
+                from.classList.add('hidden');
+                to.classList.remove('hidden');
+                setTimeout(() => {
+                    to.classList.remove('view-hidden');
+                }, 10);
+            }, 300); // Deve corresponder à duração da transição do CSS
+        }
+
+        // --- SISTEMA DE AMIGOS ---
+        function listenToFriendData(userId) {
+            if (friendRequestsListener) friendRequestsListener();
+            const requestsRef = collection(db, "users", userId, "friendRequests");
+            friendRequestsListener = onSnapshot(requestsRef, (snapshot) => {
+                const badge = document.getElementById('friend-request-badge');
+                if (snapshot.size > 0) {
+                    badge.textContent = snapshot.size;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+        
+        async function openFriendsModal() {
+            const content = `
+                <div class="border-b border-gray-600 mb-4">
+                    <nav id="friends-modal-tabs" class="flex -mb-px flex-wrap">
+                        <button data-tab="list" class="friends-tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Meus Amigos</button>
+                        <button data-tab="requests" class="friends-tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4 relative">
+                            Pedidos
+                            <span id="friend-request-count" class="hidden absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center"></span>
+                        </button>
+                        <button data-tab="add" class="friends-tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Adicionar</button>
+                    </nav>
+                </div>
+                <div id="tab-content-list" class="friends-tab-content"></div>
+                <div id="tab-content-requests" class="friends-tab-content hidden"></div>
+                <div id="tab-content-add" class="friends-tab-content hidden">
+                    <div class="flex gap-2">
+                        <input type="email" id="add-friend-email" placeholder="Digite o email do jogador" class="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                        <button id="search-friend-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Buscar</button>
+                    </div>
+                    <div id="friend-search-results" class="mt-4"></div>
+                </div>
+            `;
+            createModal('friends-modal', 'Amigos', content, 'max-w-lg');
+            
+            // Lógica das abas
+            const tabs = document.querySelectorAll('.friends-tab-btn');
+            tabs.forEach(tab => tab.addEventListener('click', (e) => {
+                tabs.forEach(t => {t.classList.remove('border-indigo-500', 'text-white'); t.classList.add('border-transparent', 'text-gray-400')});
+                e.target.classList.add('border-indigo-500', 'text-white');
+                document.querySelectorAll('.friends-tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(`tab-content-${e.target.dataset.tab}`).classList.remove('hidden');
+            }));
+
+            loadFriendsList();
+            loadFriendRequests();
+
+            document.getElementById('search-friend-btn').addEventListener('click', searchUsers);
+        }
+
+        function loadFriendsList() {
+            const container = document.getElementById('tab-content-list');
+            const friendsRef = query(collection(db, "users", currentUser.uid, "friends"), where("status", "==", "accepted"));
+
+            if (friendsListener) friendsListener();
+            friendsListener = onSnapshot(friendsRef, (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-400">Você ainda não tem amigos. Adicione um!</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const friend = { id: doc.id, ...doc.data() };
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                    div.innerHTML = `<span>${friend.friendName}</span> <button data-id="${friend.id}" class="remove-friend-btn bg-red-600 text-white px-3 py-1 text-sm rounded hover:bg-red-700">Remover</button>`;
+                    container.appendChild(div);
+                });
+                document.querySelectorAll('.remove-friend-btn').forEach(btn => btn.addEventListener('click', (e) => removeFriend(e.target.dataset.id)));
+            });
+        }
+        
+        function loadFriendRequests() {
+            const container = document.getElementById('tab-content-requests');
+            const countEl = document.getElementById('friend-request-count');
+            const requestsRef = query(collection(db, "users", currentUser.uid, "friendRequests"), where("status", "==", "pending"));
+            
+            if (friendRequestsListener) friendRequestsListener(); // Reutiliza o listener global para a UI interna do modal
+            friendRequestsListener = onSnapshot(requestsRef, (snapshot) => {
+                countEl.textContent = snapshot.size;
+                countEl.classList.toggle('hidden', snapshot.empty);
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-400">Nenhum pedido de amizade.</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const req = { id: doc.id, ...doc.data() };
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                    div.innerHTML = `
+                        <span>${req.requesterName}</span>
+                        <div class="flex gap-2">
+                            <button data-id="${req.requesterId}" data-name="${req.requesterName}" data-doc-id="${req.id}" class="accept-request-btn bg-green-600 text-white px-3 py-1 text-sm rounded hover:bg-green-700">Aceitar</button>
+                            <button data-id="${req.id}" class="decline-request-btn bg-red-600 text-white px-3 py-1 text-sm rounded hover:bg-red-700">Recusar</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                document.querySelectorAll('.accept-request-btn').forEach(btn => btn.addEventListener('click', (e) => acceptFriendRequest(e.target.dataset.id, e.target.dataset.name, e.target.dataset.docId)));
+                document.querySelectorAll('.decline-request-btn').forEach(btn => btn.addEventListener('click', (e) => declineFriendRequest(e.target.dataset.id)));
+            });
+        }
+        
+        async function searchUsers() {
+            const emailQuery = document.getElementById('add-friend-email').value.trim();
+            const resultsContainer = document.getElementById('friend-search-results');
+            if (!emailQuery) return;
+
+            resultsContainer.innerHTML = '<p class="text-gray-400">Buscando...</p>';
+            const usersRef = query(collection(db, "users"), where("email", "==", emailQuery));
+            const querySnapshot = await getDocs(usersRef);
+
+            if (querySnapshot.empty) {
+                resultsContainer.innerHTML = '<p class="text-red-400">Nenhum jogador encontrado com esse email.</p>';
+                return;
+            }
+            resultsContainer.innerHTML = '';
+            querySnapshot.forEach(doc => {
+                if(doc.id === currentUser.uid) return;
+                const user = {id: doc.id, ...doc.data()};
+                const div = document.createElement('div');
+                div.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                div.innerHTML = `<span>${user.name} (${user.email})</span> <button data-id="${user.id}" data-name="${user.name}" class="add-friend-btn bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700">Adicionar</button>`;
+                resultsContainer.appendChild(div);
+            });
+             document.querySelectorAll('.add-friend-btn').forEach(btn => btn.addEventListener('click', (e) => sendFriendRequest(e.target.dataset.id, e.target.dataset.name)));
+        }
+
+        async function sendFriendRequest(targetId, targetName) {
+            if (targetId === currentUser.uid) return;
+            
+            const requestRef = doc(collection(db, "users", targetId, "friendRequests"));
+            const friendRef = doc(db, "users", currentUser.uid, "friends", targetId);
+            
+            await setDoc(requestRef, {
+                requesterId: currentUser.uid,
+                requesterName: currentUserData.name,
+                status: 'pending',
+                createdAt: serverTimestamp()
+            });
+
+            await setDoc(friendRef, {
+                friendName: targetName,
+                status: 'sent'
+            });
+            createAlertModal("Sucesso", `Pedido de amizade enviado para ${targetName}.`);
+        }
+
+        async function acceptFriendRequest(requesterId, requesterName, docId) {
+            const requestRef = doc(db, "users", currentUser.uid, "friendRequests", docId);
+            const myFriendRef = doc(db, "users", currentUser.uid, "friends", requesterId);
+            const theirFriendRef = doc(db, "users", requesterId, "friends", currentUser.uid);
+
+            await runTransaction(db, async (transaction) => {
+                transaction.delete(requestRef);
+                transaction.set(myFriendRef, { friendName: requesterName, status: 'accepted' });
+                transaction.set(theirFriendRef, { friendName: currentUserData.name, status: 'accepted' });
+            });
+        }
+
+        async function declineFriendRequest(docId) {
+            const requestRef = doc(db, "users", currentUser.uid, "friendRequests", docId);
+            await deleteDoc(requestRef);
+        }
+
+        async function removeFriend(friendId) {
+            createConfirmationModal("Remover Amigo", "Tem certeza que deseja remover este amigo? Esta ação é irreversível.", async () => {
+                const myFriendRef = doc(db, "users", currentUser.uid, "friends", friendId);
+                const theirFriendRef = doc(db, "users", friendId, "friends", currentUser.uid);
+                await deleteDoc(myFriendRef);
+                await deleteDoc(theirFriendRef);
+            });
+        }
+
+        async function startTutorial() {
+            const steps = [
+                {
+                    title: "Bem-vindo(a)!",
+                    text: "Este é um rápido tutorial para te guiar pelo jogo. Vamos começar?",
+                },
+                {
+                    element: '#user-score',
+                    title: "Pontos",
+                    text: "Aqui ficam seus pontos. Você os ganha ao completar desafios e pode usá-los na Loja."
+                },
+                {
+                    element: '#xp-bar-container',
+                    title: "Nível e XP",
+                    text: "Completar desafios também te dá XP (Experiência) para subir de nível e desbloquear recompensas."
+                },
+                {
+                    element: '#category-grid',
+                    title: "Categorias",
+                    text: "Primeiro, escolha uma categoria de desafios para começar a jogar."
+                },
+                {
+                    element: '#start-button',
+                    title: "Comece a Jogar!",
+                    text: "Depois de escolher a categoria, clique aqui para receber um desafio aleatório. Boa sorte!",
+                }
+            ];
+            
+            let currentStep = 0;
+
+            const showStep = () => {
+                const step = steps[currentStep];
+                const content = `
+                    <p class="text-gray-300 mb-6">${step.text}</p>
+                    <div class="flex justify-end gap-4">
+                        ${currentStep > 0 ? `<button id="tutorial-prev-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Anterior</button>` : ''}
+                        <button id="tutorial-next-btn" class="button-primary text-white font-bold py-2 px-4 rounded-lg hover:opacity-90">${currentStep === steps.length - 1 ? 'Finalizar' : 'Próximo'}</button>
+                    </div>
+                `;
+                createModal('tutorial-modal', step.title, content, 'max-w-md');
+                
+                document.getElementById('tutorial-next-btn').addEventListener('click', () => {
+                    currentStep++;
+                    if (currentStep < steps.length) {
+                        showStep();
+                    } else {
+                        document.getElementById('tutorial-modal')?.remove();
+                        endTutorial();
+                    }
+                });
+                
+                if (currentStep > 0) {
+                     document.getElementById('tutorial-prev-btn').addEventListener('click', () => {
+                        currentStep--;
+                        showStep();
+                     });
+                }
+            };
+            
+            showStep();
+        }
+
+        async function endTutorial() {
+            await updateDoc(doc(db, "users", currentUser.uid), { hasCompletedTutorial: true });
+            currentUserData.hasCompletedTutorial = true;
         }
 
     </script>
