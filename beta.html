@@ -1,1 +1,1965 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio de Projetos Mecânicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Customizados -->
+    <style>
+        :root {
+            --bg-color: #0d1b2a;
+            --text-color: #FFFFFF;
+            --primary-color: #6366f1;
+            --card-bg-color: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.04) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 2px, transparent 2px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+            transition: background-color 0.5s ease;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+        }
+        .button-primary {
+            background-color: var(--primary-color);
+        }
+        ::placeholder { color: #9ca3af; opacity: 1; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader {
+            border: 4px solid #f3f3f340; border-top: 4px solid var(--primary-color);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
+        .zoomable { cursor: zoom-in; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+        * { scrollbar-width: thin; scrollbar-color: #4a5568 rgba(0, 0, 0, 0.2); }
+        .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
+        
+        .category-btn.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.2); /* Mantendo uma cor base para o seletor */
+            transform: scale(1.05);
+        }
+        @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slide-out { from { transform: translateX(0); } to { transform: translateX(100%); } }
+        .animate-slide-in-out {
+            animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container de Autenticação (Visível por padrão) -->
+    <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="card w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+            <div class="flex justify-center">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
+            </div>
+            <div class="flex border-b border-gray-500">
+                <button id="tab-login" class="flex-1 py-2 text-center font-semibold text-white border-b-2 border-indigo-500 transition-colors duration-300">Login</button>
+                <button id="tab-register" class="flex-1 py-2 text-center font-semibold text-gray-400 border-b-2 border-transparent transition-colors duration-300">Cadastro</button>
+            </div>
+            <div id="message-box" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+            <!-- Formulário de Login -->
+            <div id="form-login">
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="login-email" class="text-sm font-medium text-gray-300">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label for="login-password" class="text-sm font-medium text-gray-300">Senha</label>
+                            <a href="#" id="forgot-password" class="text-xs font-medium text-indigo-400 hover:underline">Esqueceu a senha?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="login-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="********">
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
+                </form>
+            </div>
+            <!-- Formulário de Cadastro -->
+            <div id="form-register" class="hidden">
+                 <form id="register-form" class="space-y-4">
+                    <input type="text" id="register-name" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Nome Completo">
+                    <input type="email" id="register-email" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Email">
+                    <div class="relative">
+                        <input type="password" id="register-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="register-confirm-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Confirmar Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container do Jogo (Oculto por padrão) -->
+    <div id="game-container" class="hidden">
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+              <div class="card w-full max-w-4xl backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold">Desafio de Projetos</h1>
+                        <p id="user-email" class="text-sm text-gray-300"></p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div id="active-bonus-indicator" class="hidden bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-right text-xs font-bold animate-pulse">
+                        </div>
+                        <div class="bg-black/20 px-4 py-2 rounded-lg text-right">
+                            <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
+                            <span class="text-gray-400 text-sm">pontos</span>
+                        </div>
+                        
+                        <!-- Menu Dropdown -->
+                        <div class="relative">
+                            <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="ml-2 hidden sm:inline">Menu</span>
+                            </button>
+                            <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20">
+                                <a href="#" id="solo-mode-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                    Modo Solo
+                                </a>
+                                <a href="#" id="competition-mode-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+                                     Competir
+                                </a>
+                                <a href="#" id="profile-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd" /></svg>
+                                    Meu Perfil
+                                </a>
+                                <a href="#" id="ranking-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
+                                    Ranking
+                                </a>
+                                <a href="#" id="shop-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
+                                    Loja
+                                </a>
+                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                    Completos
+                                </a>
+                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
+                                    Ativar Código
+                                </a>
+                            </div>
+                        </div>
+
+                        <button id="logout-button" class="flex items-center justify-center bg-red-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-red-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                            <span class="ml-2 hidden sm:inline">Sair</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="solo-mode-container">
+                    <!-- Seleção de Categoria -->
+                    <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                        <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
+                        <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                            <!-- Categorias serão inseridas aqui -->
+                        </div>
+                         <div class="flex flex-col items-center justify-center gap-4 mt-6">
+                            <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                                Sortear Desafio
+                            </button>
+                            <div id="choice-button-container" class="w-full max-w-xs hidden">
+                                <div class="relative py-2">
+                                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                    <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                </div>
+                                <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                    Escolher Desafio (<span id="choice-token-count">0</span>)
+                                </button>
+                            </div>
+                       </div>
+                      <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                    </div>
+    
+                    <!-- Área do Desafio -->
+                    <div id="challenge-container" class="hidden space-y-4">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                                 <p id="timer-display" class="font-bold text-2xl"></p>
+                                 <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
+                                    (<span id="abandon-token-count">0</span>)
+                                </button>
+                                <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                                    (<span id="reroll-token-count">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                        <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                            <div id="loader" class="loader hidden"></div>
+                            <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                            <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-black/20 p-3 rounded-lg text-center">
+                                <p class="text-sm text-gray-400">Material Fornecido:</p>
+                                <p id="material-info" class="font-bold text-lg"></p>
+                            </div>
+                            <div class="bg-black/20 p-3 rounded-lg text-center">
+                                <p class="text-sm text-gray-400">Pontuação:</p>
+                                <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                            </div>
+                        </div>
+    
+                        <!-- Formulário de Resposta -->
+                        <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                            <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                            <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                        </form>
+                        <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                        <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                    </div>
+                </div>
+
+                <!-- Container do Modo Competição -->
+                <div id="competition-container" class="hidden">
+                    <!-- Hub de Competição -->
+                    <div id="competition-hub" class="text-center py-8">
+                        <h2 class="text-2xl font-bold mb-4">Modo Competição</h2>
+                        <button id="create-room-btn" class="button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90">Criar Nova Sala</button>
+                        <div class="mt-8 max-w-md mx-auto">
+                            <h3 class="text-xl font-semibold mb-3">Meus Convites</h3>
+                            <div id="invitations-list" class="space-y-2">
+                                <p class="text-gray-400">Nenhum convite no momento.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lobby da Competição -->
+                    <div id="competition-lobby" class="hidden py-8 max-w-2xl mx-auto">
+                        <div class="flex justify-between items-center">
+                            <h2 id="lobby-room-name" class="text-2xl font-bold"></h2>
+                            <button id="leave-lobby-btn" class="bg-red-600 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-700 text-sm">Sair</button>
+                        </div>
+                        <p class="text-gray-400 mb-4">Aguardando jogadores...</p>
+                        <div id="lobby-participants-list" class="space-y-3 mb-6"></div>
+                        <div id="lobby-creator-controls" class="hidden space-y-4">
+                            <button id="invite-player-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">Convidar Jogador</button>
+                            <button id="start-competition-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed">Iniciar Partida</button>
+                        </div>
+                        <div id="lobby-participant-controls" class="hidden">
+                            <button id="ready-btn" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700">Estou Pronto</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área da Competição (Jogo) -->
+                <div id="competition-game-container" class="hidden">
+                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div id="competition-challenge-area" class="lg:col-span-2 space-y-4">
+                            <!-- O conteúdo do desafio será injetado aqui, similar ao #challenge-container -->
+                        </div>
+                        <div id="competition-leaderboard-area" class="lg:col-span-1 bg-black/20 p-4 rounded-lg">
+                            <h3 class="text-xl font-bold mb-4 text-center">Classificação da Sala</h3>
+                            <div id="competition-leaderboard-list" class="space-y-3"></div>
+                        </div>
+                     </div>
+                </div>
+
+
+                
+                 <!-- Barra de XP -->
+                <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-1">
+                            <span id="level-name" class="text-sm font-bold"></span>
+                            <span id="xp-text" class="text-xs text-gray-300"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-4">
+                            <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-container"></div>
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed bottom-24 right-4 z-50"></div>
+
+
+    <script type="module">
+        // --- SDKs DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
+          authDomain: "projects-debbb.firebaseapp.com",
+          projectId: "projects-debbb",
+          storageBucket: "projects-debbb.appspot.com",
+          messagingSenderId: "1016788358282",
+          appId: "1:1016788358282:web:491d260dfac9bc19f88973",
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let currentUser = null;
+        let currentUserData = {};
+        let currentChallenge = null;
+        let allChallenges = [];
+        let allLevels = [];
+        let allAchievements = [];
+        let allThemes = [];
+        let unlockedAchievements = new Map();
+        let unlockedThemes = new Map();
+        let completedChallenges = new Map();
+        let activeChallengeData = {};
+        let challengeTimerInterval = null;
+        let selectedCategory = null;
+        let invitationListener = null;
+        let roomListener = null;
+
+
+        // --- ELEMENTOS DO DOM ---
+        const authContainer = document.getElementById('auth-container');
+        const gameContainer = document.getElementById('game-container');
+        const soloModeContainer = document.getElementById('solo-mode-container');
+        const competitionContainer = document.getElementById('competition-container');
+        const messageBox = document.getElementById('message-box');
+        const userScoreEl = document.getElementById('user-score');
+        const modalContainer = document.getElementById('modal-container');
+        
+        // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (invitationListener) invitationListener(); // Unsubscribe from old listener
+            if (roomListener) roomListener();
+
+            if (user) {
+                await loadGameData(user);
+                authContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                document.getElementById('user-email').textContent = `Logado como: ${currentUserData.name || user.email}`;
+                listenForInvitations(user.uid);
+            } else {
+                document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
+                authContainer.classList.remove('hidden');
+                gameContainer.classList.add('hidden');
+            }
+        });
+        
+        <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio de Projetos Mecânicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Customizados -->
+    <style>
+        :root {
+            --bg-color: #0d1b2a;
+            --text-color: #FFFFFF;
+            --primary-color: #6366f1;
+            --card-bg-color: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.04) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 2px, transparent 2px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+            transition: background-color 0.5s ease;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+        }
+        .button-primary {
+            background-color: var(--primary-color);
+        }
+        ::placeholder { color: #9ca3af; opacity: 1; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader {
+            border: 4px solid #f3f3f340; border-top: 4px solid var(--primary-color);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
+        .zoomable { cursor: zoom-in; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+        * { scrollbar-width: thin; scrollbar-color: #4a5568 rgba(0, 0, 0, 0.2); }
+        .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
+        
+        .category-btn.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.2); /* Mantendo uma cor base para o seletor */
+            transform: scale(1.05);
+        }
+        @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slide-out { from { transform: translateX(0); } to { transform: translateX(100%); } }
+        .animate-slide-in-out {
+            animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container de Autenticação (Visível por padrão) -->
+    <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="card w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+            <div class="flex justify-center">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
+            </div>
+            <div class="flex border-b border-gray-500">
+                <button id="tab-login" class="flex-1 py-2 text-center font-semibold text-white border-b-2 border-indigo-500 transition-colors duration-300">Login</button>
+                <button id="tab-register" class="flex-1 py-2 text-center font-semibold text-gray-400 border-b-2 border-transparent transition-colors duration-300">Cadastro</button>
+            </div>
+            <div id="message-box" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+            <!-- Formulário de Login -->
+            <div id="form-login">
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="login-email" class="text-sm font-medium text-gray-300">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label for="login-password" class="text-sm font-medium text-gray-300">Senha</label>
+                            <a href="#" id="forgot-password" class="text-xs font-medium text-indigo-400 hover:underline">Esqueceu a senha?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="login-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="********">
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
+                </form>
+            </div>
+            <!-- Formulário de Cadastro -->
+            <div id="form-register" class="hidden">
+                 <form id="register-form" class="space-y-4">
+                    <input type="text" id="register-name" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Nome Completo">
+                    <input type="email" id="register-email" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Email">
+                    <div class="relative">
+                        <input type="password" id="register-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="register-confirm-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Confirmar Senha">
+                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container do Jogo (Oculto por padrão) -->
+    <div id="game-container" class="hidden">
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+              <div class="card w-full max-w-4xl backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold">Desafio de Projetos</h1>
+                        <p id="user-email" class="text-sm text-gray-300"></p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div id="active-bonus-indicator" class="hidden bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-right text-xs font-bold animate-pulse">
+                        </div>
+                        <div class="bg-black/20 px-4 py-2 rounded-lg text-right">
+                            <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
+                            <span class="text-gray-400 text-sm">pontos</span>
+                        </div>
+                        
+                        <!-- Menu Dropdown -->
+                        <div class="relative">
+                            <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="ml-2 hidden sm:inline">Menu</span>
+                            </button>
+                            <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20">
+                                <a href="#" id="profile-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd" /></svg>
+                                    Meu Perfil
+                                </a>
+                                <a href="#" id="ranking-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
+                                    Ranking
+                                </a>
+                                <a href="#" id="shop-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
+                                    Loja
+                                </a>
+                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                    Completos
+                                </a>
+                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
+                                    Ativar Código
+                                </a>
+                            </div>
+                        </div>
+
+                        <button id="logout-button" class="flex items-center justify-center bg-red-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-red-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                            <span class="ml-2 hidden sm:inline">Sair</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Seleção de Categoria -->
+                <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                    <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
+                    <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                        <!-- Categorias serão inseridas aqui -->
+                    </div>
+                     <div class="flex flex-col items-center justify-center gap-4 mt-6">
+                        <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                            Sortear Desafio
+                        </button>
+                        <div id="choice-button-container" class="w-full max-w-xs hidden">
+                            <div class="relative py-2">
+                                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                            </div>
+                            <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                Escolher Desafio (<span id="choice-token-count">0</span>)
+                            </button>
+                        </div>
+                   </div>
+                  <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                </div>
+
+                <!-- Área do Desafio -->
+                <div id="challenge-container" class="hidden space-y-4">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                             <p id="timer-display" class="font-bold text-2xl"></p>
+                             <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
+                                (<span id="abandon-token-count">0</span>)
+                            </button>
+                            <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                                (<span id="reroll-token-count">0</span>)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                        <div id="loader" class="loader hidden"></div>
+                        <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-black/20 p-3 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">Material Fornecido:</p>
+                            <p id="material-info" class="font-bold text-lg"></p>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">Pontuação:</p>
+                            <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Resposta -->
+                    <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                        <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                        <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                    </form>
+                    <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                    <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                </div>
+                
+                 <!-- Barra de XP -->
+                <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-1">
+                            <span id="level-name" class="text-sm font-bold"></span>
+                            <span id="xp-text" class="text-xs text-gray-300"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-4">
+                            <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-container"></div>
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed bottom-24 right-4 z-50"></div>
+
+
+    <script type="module">
+        // --- SDKs DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
+          authDomain: "projects-debbb.firebaseapp.com",
+          projectId: "projects-debbb",
+          storageBucket: "projects-debbb.appspot.com",
+          messagingSenderId: "1016788358282",
+          appId: "1:1016788358282:web:491d260dfac9bc19f88973",
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let currentUser = null;
+        let currentUserData = {};
+        let currentChallenge = null;
+        let allChallenges = [];
+        let allLevels = [];
+        let allAchievements = [];
+        let allThemes = [];
+        let unlockedAchievements = new Map();
+        let unlockedThemes = new Map();
+        let completedChallenges = new Map();
+        let activeChallengeData = {};
+        let challengeTimerInterval = null;
+        let selectedCategory = null;
+
+
+        // --- ELEMENTOS DO DOM ---
+        const authContainer = document.getElementById('auth-container');
+        const gameContainer = document.getElementById('game-container');
+        const messageBox = document.getElementById('message-box');
+        const userScoreEl = document.getElementById('user-score');
+        const modalContainer = document.getElementById('modal-container');
+        
+        // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                await loadGameData(user);
+                authContainer.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                document.getElementById('user-email').textContent = `Logado como: ${currentUserData.name || user.email}`;
+            } else {
+                document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
+                authContainer.classList.remove('hidden');
+                gameContainer.classList.add('hidden');
+            }
+        });
+
+        async function loadGameData(user) {
+            // Carregar em paralelo
+            const levelsPromise = getDocs(query(collection(db, "levels"), orderBy("xpRequired", "asc")));
+            const challengesPromise = getDocs(collection(db, "challenges"));
+            const achievementsPromise = getDocs(collection(db, "achievements"));
+            const themesPromise = getDocs(collection(db, "themes"));
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocPromise = getDoc(userDocRef);
+
+            const [levelsSnapshot, challengesSnapshot, achievementsSnapshot, themesSnapshot, userDocSnap] = await Promise.all([levelsPromise, challengesPromise, achievementsPromise, themesPromise, userDocPromise]);
+
+            allLevels = levelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allAchievements = achievementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allThemes = themesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            if (userDocSnap.exists()) {
+                currentUserData = userDocSnap.data();
+                activeChallengeData = {
+                    id: currentUserData.activeChallenge,
+                    startTime: currentUserData.activeChallengeStartTime?.toDate()
+                };
+            }
+            
+            const unlockedAchievementsRef = collection(db, "users", user.uid, "unlockedAchievements");
+            const unlockedAchievementsSnapshot = await getDocs(unlockedAchievementsRef);
+            unlockedAchievements.clear();
+            unlockedAchievementsSnapshot.forEach(doc => unlockedAchievements.set(doc.id, doc.data()));
+
+            const unlockedThemesRef = collection(db, "users", user.uid, "unlockedThemes");
+            const unlockedThemesSnapshot = await getDocs(unlockedThemesRef);
+            unlockedThemes.clear();
+            unlockedThemesSnapshot.forEach(doc => unlockedThemes.set(doc.id, doc.data()));
+
+            if(currentUserData.profile?.activeTheme) {
+                applyTheme(currentUserData.profile.activeTheme);
+            }
+            
+            await checkActiveBonus();
+            updateXpBar();
+            updateConsumablesUI();
+
+            const completedRef = collection(db, "users", user.uid, "completedChallenges");
+            const completedSnapshot = await getDocs(completedRef);
+            completedChallenges.clear();
+            completedSnapshot.forEach((doc) => completedChallenges.set(doc.id, doc.data()));
+            
+            populateCategories();
+
+            if (activeChallengeData.id) {
+                const challenge = allChallenges.find(c => c.id === activeChallengeData.id);
+                if (challenge) {
+                    currentChallenge = challenge;
+                    displayChallenge(challenge, activeChallengeData.startTime);
+                }
+            }
+        }
+
+        function updateConsumablesUI() {
+            userScoreEl.textContent = currentUserData.score || 0;
+            const userConsumables = currentUserData.consumables || { reroll: 0, choice: 0, abandon: 0 };
+            
+            document.getElementById('choice-token-count').textContent = userConsumables.choice || 0;
+            document.getElementById('choice-button-container').classList.toggle('hidden', !(userConsumables.choice > 0));
+
+            const rerollBtn = document.getElementById('reroll-button');
+            rerollBtn.classList.toggle('hidden', !(userConsumables.reroll > 0 && currentChallenge));
+            if(!rerollBtn.classList.contains('hidden')) document.getElementById('reroll-token-count').textContent = userConsumables.reroll;
+            
+            const abandonBtn = document.getElementById('abandon-button');
+            abandonBtn.classList.toggle('hidden', !(userConsumables.abandon > 0 && currentChallenge));
+            if(!abandonBtn.classList.contains('hidden')) document.getElementById('abandon-token-count').textContent = userConsumables.abandon;
+        }
+        
+        function updateXpBar() {
+            const userXp = currentUserData.xp || 0;
+            if (allLevels.length === 0) return;
+            
+            const currentLevel = getLevelForXp(userXp);
+            if (!currentLevel) return;
+
+            const currentLevelIndex = allLevels.findIndex(l => l.id === currentLevel.id);
+            const nextLevel = allLevels[currentLevelIndex + 1];
+            
+            document.getElementById('level-name').textContent = `Nível: ${currentLevel.name}`;
+            
+            const xpForCurrentLevel = Number(currentLevel.xpRequired);
+            
+            if(nextLevel){
+                const xpForNextLevel = Number(nextLevel.xpRequired);
+                const xpInRange = Number(userXp) - xpForCurrentLevel;
+                const range = xpForNextLevel - xpForCurrentLevel;
+                const percentage = range > 0 ? (xpInRange / range) * 100 : 100;
+                
+                document.getElementById('xp-progress').style.width = `${Math.min(100, percentage)}%`;
+                document.getElementById('xp-text').textContent = `${userXp} / ${xpForNextLevel} XP`;
+            } else {
+                document.getElementById('xp-progress').style.width = '100%';
+                document.getElementById('xp-text').textContent = `${userXp} XP (Nível Máximo)`;
+            }
+        }
+
+        function populateCategories() {
+            const categoryGrid = document.getElementById('category-grid');
+            const categories = [...new Set(allChallenges.map(c => c.category))];
+            categoryGrid.innerHTML = '';
+            categories.sort().forEach(cat => {
+                const button = document.createElement('button');
+                button.className = 'category-btn p-4 card backdrop-blur-lg border-2 border-transparent rounded-lg font-semibold transition-all duration-300 hover:bg-white/20';
+                button.textContent = cat;
+                button.dataset.category = cat;
+                categoryGrid.appendChild(button);
+            });
+        }
+        
+        document.getElementById('category-grid').addEventListener('click', (e) => {
+            const target = e.target.closest('.category-btn');
+            if (!target) return;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            target.classList.add('selected');
+            selectedCategory = target.dataset.category;
+
+            document.getElementById('start-button').disabled = false;
+            document.getElementById('choice-button').disabled = false;
+        });
+
+        // --- LÓGICA DE AUTENTICAÇÃO ---
+        document.getElementById('tab-login').addEventListener('click', (e) => switchTab(e.target));
+        document.getElementById('tab-register').addEventListener('click', (e) => switchTab(e.target));
+        function switchTab(clickedTab) {
+            const isLogin = clickedTab.id === 'tab-login';
+            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-login').classList.toggle('border-indigo-500', isLogin);
+            document.getElementById('tab-login').classList.toggle('text-white', isLogin);
+            document.getElementById('tab-login').classList.toggle('text-gray-400', !isLogin);
+            document.getElementById('tab-register').classList.toggle('border-indigo-500', !isLogin);
+            document.getElementById('tab-register').classList.toggle('text-white', !isLogin);
+            document.getElementById('tab-register').classList.toggle('text-gray-400', isLogin);
+        }
+        document.querySelectorAll('.password-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const input = button.previousElementSibling;
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        });
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
+            messageBox.classList.remove('hidden');
+        }
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", userCredential.user.uid), { 
+                    name, email, 
+                    activeChallenge: null, score: 0, xp: 0, pointsSpent: 0,
+                    consumables: { reroll: 0, choice: 0, abandon: 0 },
+                    profile: { title: null, badgeUrl: null, activeTheme: null },
+                    activeBonus: null
+                });
+                showMessage('Cadastro realizado! Faça o login.');
+                switchTab(document.getElementById('tab-login'));
+            } catch (error) { showMessage('Erro: ' + error.code, true); }
+        });
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
+            } catch (error) { showMessage('Email ou senha inválidos.', true); }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+        document.getElementById('forgot-password').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            if(!email) return showMessage('Por favor, digite seu e-mail no campo de login.', true);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage('Link para redefinição de senha enviado para seu e-mail!');
+            } catch (error) {
+                showMessage('Erro ao enviar e-mail. Verifique se o e-mail está correto.', true);
+            }
+        });
+
+        // --- LÓGICA DO JOGO ---
+        const startButton = document.getElementById('start-button');
+        const challengeContainer = document.getElementById('challenge-container');
+        const challengeImage = document.getElementById('challenge-image');
+        const materialInfo = document.getElementById('material-info');
+        const scoreInfo = document.getElementById('score-info');
+        const answerForm = document.getElementById('answer-form');
+        const answerFeedback = document.getElementById('answer-feedback');
+        const nextChallengeButton = document.getElementById('next-challenge-button');
+        const choiceButton = document.getElementById('choice-button');
+        const rerollButton = document.getElementById('reroll-button');
+        const abandonButton = document.getElementById('abandon-button');
+
+        function displayChallenge(challenge, startTime) {
+            const startContainer = document.getElementById('start-challenge-container');
+            const loader = document.getElementById('loader');
+            const placeholderText = document.getElementById('placeholder-text');
+
+            startContainer.classList.add('hidden');
+            challengeContainer.classList.remove('hidden');
+            
+            loader.classList.remove('hidden');
+            placeholderText.classList.add('hidden');
+            challengeImage.classList.add('hidden');
+
+            materialInfo.textContent = challenge.material;
+            scoreInfo.textContent = `${challenge.score} pts`;
+            challengeImage.src = `https://lh3.googleusercontent.com/d/${challenge.id}`;
+            challengeImage.onload = () => {
+                loader.classList.add('hidden');
+                challengeImage.classList.remove('hidden');
+            };
+            challengeImage.onerror = () => {
+                loader.classList.add('hidden');
+                placeholderText.textContent = 'Erro ao carregar a imagem do desafio.';
+                placeholderText.classList.remove('hidden');
+            }
+
+            // Timer Logic
+            clearInterval(challengeTimerInterval);
+            const timerContainer = document.getElementById('timer-container');
+            const timerDisplay = document.getElementById('timer-display');
+            const timerBonus = document.getElementById('timer-bonus');
+            const timeLimit = parseInt(challenge.timeLimit);
+
+            if (timeLimit > 0) {
+                 timerBonus.textContent = `(x${challenge.bonusMultiplier || 1.5} Bônus)`;
+            } else {
+                 timerBonus.textContent = '';
+            }
+
+            if (timeLimit > 0 && startTime) {
+                timerContainer.classList.remove('hidden');
+                challengeTimerInterval = setInterval(() => {
+                    const now = new Date();
+                    const elapsed = Math.floor((now - activeChallengeData.startTime) / 1000);
+                    const remaining = timeLimit - elapsed;
+                    
+                    if (remaining <= 0) {
+                        clearInterval(challengeTimerInterval);
+                        timerDisplay.textContent = "Tempo Esgotado!";
+                        timerDisplay.classList.add('text-red-500');
+                    } else {
+                        const minutes = Math.floor(remaining / 60);
+                        const seconds = remaining % 60;
+                        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        timerDisplay.classList.remove('text-red-500');
+                    }
+                }, 1000);
+            } else {
+                timerContainer.classList.add('hidden');
+            }
+            
+            updateConsumablesUI();
+        }
+        
+        async function startNewChallenge(challenge) {
+            currentChallenge = challenge;
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const startTime = new Date();
+            await setDoc(userDocRef, { 
+                activeChallenge: currentChallenge.id,
+                activeChallengeStartTime: startTime
+            }, { merge: true });
+            
+            activeChallengeData = { id: currentChallenge.id, startTime: startTime };
+            displayChallenge(currentChallenge, startTime);
+        }
+
+        startButton.addEventListener('click', async () => {
+            const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
+
+            if (availableChallenges.length === 0) {
+                document.getElementById('start-message').textContent = 'Parabéns! Você completou todos os desafios desta categoria.';
+                return;
+            }
+            
+            const newChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+            await startNewChallenge(newChallenge);
+        });
+
+        answerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !currentChallenge) return;
+
+            const userMass = parseFloat(document.getElementById('mass-input').value);
+            const userVolume = parseFloat(document.getElementById('volume-input').value);
+            
+            const correctData = currentChallenge;
+            const correctMass = parseFloat(correctData.mass);
+            const correctVolume = parseFloat(correctData.volume);
+            const tolerance = parseFloat(correctData.tolerance || 5);
+
+            const isMassCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100);
+            const isVolumeCorrect = Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
+            const isCorrect = isMassCorrect && isVolumeCorrect;
+            
+            let finalScore = parseInt(currentChallenge.score || 0);
+            
+            // Aplicar bônus de código ativo
+            if (isCorrect && currentUserData.activeBonus && currentUserData.activeBonus.expiresAt.toDate() > new Date()) {
+                if (currentUserData.activeBonus.type === 'SCORE_MULTIPLIER') {
+                    finalScore = Math.round(finalScore * currentUserData.activeBonus.value);
+                }
+            }
+
+
+            if (isCorrect) {
+                const timeLimit = parseInt(currentChallenge.timeLimit);
+                if (timeLimit > 0 && activeChallengeData.startTime) {
+                    const now = new Date();
+                    const elapsed = (now - activeChallengeData.startTime) / 1000;
+                    if (elapsed <= timeLimit) {
+                        const multiplier = parseFloat(currentChallenge.bonusMultiplier || 1);
+                        const bonusScore = Math.round(finalScore * multiplier);
+                        answerFeedback.textContent = `Correto! +${bonusScore} pontos (Bônus de tempo!)`;
+                        finalScore = bonusScore;
+                    } else {
+                        answerFeedback.textContent = `Correto (tempo esgotado)! +${finalScore} pontos`;
+                    }
+                } else {
+                    answerFeedback.textContent = `Resposta Correta! +${finalScore} pontos`;
+                }
+            } else {
+                answerFeedback.textContent = "Resposta Incorreta.";
+            }
+            
+            answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
+            answerFeedback.classList.remove('hidden');
+            
+            if(isCorrect) {
+                clearInterval(challengeTimerInterval);
+                answerForm.classList.add('hidden');
+                nextChallengeButton.classList.remove('hidden');
+                rerollButton.classList.add('hidden');
+                abandonButton.classList.add('hidden');
+                
+                const userDocRef = doc(db, "users", currentUser.uid);
+                
+                const oldLevel = getLevelForXp(currentUserData.xp);
+
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const userData = userDoc.data();
+                    const newScore = (userData.score || 0) + finalScore;
+                    const newXp = (userData.xp || 0) + finalScore;
+                    transaction.update(userDocRef, { score: newScore, xp: newXp, activeChallenge: null, activeChallengeStartTime: null });
+                    
+                    const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
+                    const userFinalAnswer = { mass: userMass, volume: userVolume };
+                    transaction.set(completedDocRef, { 
+                        challengeName: currentChallenge.name, 
+                        category: currentChallenge.category,
+                        completedAt: serverTimestamp(), 
+                        userAnswer: userFinalAnswer 
+                    });
+                });
+                
+                currentUserData.score += finalScore;
+                currentUserData.xp += finalScore;
+
+                const newLevel = getLevelForXp(currentUserData.xp);
+
+                if (newLevel && (!oldLevel || newLevel.id !== oldLevel.id)) {
+                    await checkForLevelUpRewards(newLevel);
+                }
+
+                completedChallenges.set(currentChallenge.id, { 
+                    challengeName: currentChallenge.name, 
+                    category: currentChallenge.category,
+                    userAnswer: { mass: userMass, volume: userVolume } 
+                });
+
+                await checkAchievements();
+                updateConsumablesUI();
+                updateXpBar();
+            }
+
+            await addDoc(collection(db, "attempts"), {
+                userId: currentUser.uid, userEmail: currentUser.email,
+                challengeId: currentChallenge.id, challengeName: currentChallenge.name,
+                userAnswer: { mass: userMass, volume: userVolume }, isCorrect, timestamp: serverTimestamp()
+            });
+        });
+        
+        function resetToStartScreen() {
+            challengeContainer.classList.add('hidden');
+            document.getElementById('start-challenge-container').classList.remove('hidden');
+            answerForm.classList.remove('hidden');
+            nextChallengeButton.classList.add('hidden');
+            answerFeedback.classList.add('hidden');
+            answerForm.reset();
+            currentChallenge = null;
+            activeChallengeData = {};
+            selectedCategory = null;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('start-button').disabled = true;
+            document.getElementById('choice-button').disabled = true;
+            clearInterval(challengeTimerInterval);
+        }
+        
+        nextChallengeButton.addEventListener('click', resetToStartScreen);
+
+        // --- LÓGICA DOS CONSUMÍVEIS E CÓDIGOS ---
+        rerollButton.addEventListener('click', async () => {
+            const userConsumables = currentUserData.consumables || {};
+            if ((userConsumables.reroll || 0) <= 0) {
+                return createAlertModal("Sem Tokens", "Você não tem tokens de troca.");
+            }
+            createConfirmationModal("Confirmar Troca", "Usar 1 token para trocar de desafio? (O tempo do novo desafio iniciará imediatamente)", async () => {
+                const availableChallenges = allChallenges.filter(c => c.category === currentChallenge.category && !completedChallenges.has(c.id) && c.id !== currentChallenge.id);
+
+                if (availableChallenges.length === 0) {
+                   return createAlertModal("Sem Desafios", "Não há outros desafios disponíveis nesta categoria para trocar.");
+                }
+
+                const userDocRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const currentConsumables = userDoc.data().consumables || { reroll: 0 };
+                    if (currentConsumables.reroll <= 0) throw "Sem tokens de troca.";
+                    currentConsumables.reroll--;
+                    transaction.update(userDocRef, { consumables: currentConsumables });
+                });
+                currentUserData.consumables.reroll--;
+                
+                const newChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+                await startNewChallenge(newChallenge);
+            });
+        });
+        
+        abandonButton.addEventListener('click', async () => {
+            const userConsumables = currentUserData.consumables || {};
+            if ((userConsumables.abandon || 0) <= 0) {
+                return createAlertModal("Sem Tokens", "Você não tem tokens para abandonar desafios.");
+            }
+            createConfirmationModal("Confirmar Abandono", "Usar 1 token para abandonar o desafio atual e voltar à tela inicial?", async () => {
+                 const userDocRef = doc(db, "users", currentUser.uid);
+                 await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const currentConsumables = userDoc.data().consumables || { abandon: 0 };
+                    if (currentConsumables.abandon <= 0) throw "Sem tokens de abandono.";
+                    currentConsumables.abandon--;
+                    transaction.update(userDocRef, { 
+                        consumables: currentConsumables,
+                        activeChallenge: null,
+                        activeChallengeStartTime: null
+                    });
+                });
+                currentUserData.consumables.abandon--;
+                resetToStartScreen();
+            });
+        });
+        
+        choiceButton.addEventListener('click', () => {
+            const userConsumables = currentUserData.consumables || {};
+            if ((userConsumables.choice || 0) <= 0) {
+                return createAlertModal("Sem Tokens", "Você não tem tokens de escolha.");
+            }
+            
+            const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
+            
+            if (availableChallenges.length === 0) {
+                return createAlertModal("Sem Desafios", "Não há desafios disponíveis para escolher nesta categoria.");
+            }
+
+            let content = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">';
+            availableChallenges.forEach(c => {
+                content += `
+                    <div data-id="${c.id}" class="choice-item-btn bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform">
+                        <img src="https://lh3.googleusercontent.com/d/${c.id}" class="w-full h-32 object-cover">
+                        <p class="text-white text-sm p-2 text-center truncate">${c.name}</p>
+                    </div>
+                `;
+            });
+            content += '</div>';
+            
+            createModal('choice-modal', `Escolha um Desafio em ${selectedCategory}`, content, 'max-w-2xl');
+            
+            document.querySelectorAll('.choice-item-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const challengeId = e.currentTarget.dataset.id;
+                    const chosenChallenge = allChallenges.find(c => c.id === challengeId);
+                    
+                    createConfirmationModal("Confirmar Escolha", `Usar 1 token para iniciar o desafio "${chosenChallenge.name}"?`, async () => {
+                        const userDocRef = doc(db, "users", currentUser.uid);
+                        await runTransaction(db, async (transaction) => {
+                             const userDoc = await transaction.get(userDocRef);
+                             const currentConsumables = userDoc.data().consumables || { choice: 0 };
+                             if (currentConsumables.choice <= 0) throw "Sem tokens de escolha.";
+                             currentConsumables.choice--;
+                             transaction.update(userDocRef, { consumables: currentConsumables });
+                        });
+                        currentUserData.consumables.choice--;
+                        await startNewChallenge(chosenChallenge);
+                        document.getElementById('choice-modal')?.remove();
+                    });
+                });
+            });
+        });
+
+        // --- LÓGICA DO MENU E MODAIS PRINCIPAIS ---
+        const menuToggleButton = document.getElementById('menu-toggle-button');
+        const menuDropdown = document.getElementById('menu-dropdown');
+
+        menuToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuToggleButton.contains(e.target)) {
+                menuDropdown.classList.add('hidden');
+            }
+        });
+
+        async function openShopModal() {
+            createModal('shop-modal', `Sua Pontuação: ${currentUserData.score || 0}`, `
+                <div id="shop-items-list" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2">Carregando...</div>
+            `, 'max-w-2xl');
+        
+            const listEl = document.getElementById('shop-items-list');
+            listEl.innerHTML = ''; // Limpa o "Carregando..."
+        
+            // --- Renderizar Itens Consumíveis ---
+            const itemsSnapshot = await getDocs(query(collection(db, "shopItems")));
+            if (!itemsSnapshot.empty) {
+                const consumablesHeader = document.createElement('h3');
+                consumablesHeader.className = 'text-lg font-bold text-white';
+                consumablesHeader.textContent = 'Itens Consumíveis';
+                listEl.appendChild(consumablesHeader);
+        
+                itemsSnapshot.forEach(doc => {
+                    const item = { id: doc.id, ...doc.data() };
+                    const canAfford = (currentUserData.score || 0) >= item.price;
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-xs text-gray-400">${item.type.startsWith('consumable') ? 'Item Consumível' : (item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-bold">${item.price} pts</p>
+                            <button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${!canAfford ? 'disabled' : ''}>Comprar</button>
+                        </div>`;
+                    listEl.appendChild(div);
+                });
+            }
+        
+            // --- Renderizar Temas ---
+            const shopThemes = allThemes.filter(t => t.obtainMethod === 'shop');
+            if (shopThemes.length > 0) {
+                const themesHeader = document.createElement('h3');
+                themesHeader.className = 'text-lg font-bold text-white pt-4';
+                themesHeader.textContent = 'Temas';
+                listEl.appendChild(themesHeader);
+        
+                shopThemes.forEach(theme => {
+                    const canAfford = (currentUserData.score || 0) >= theme.price;
+                    const isUnlocked = unlockedThemes.has(theme.id);
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${theme.name}</p>
+                            <p class="text-xs text-gray-400">${theme.description}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-bold">${theme.price} pts</p>
+                            <button data-id="${theme.id}" data-price="${theme.price}" data-type="theme" data-name="${theme.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${!canAfford || isUnlocked ? 'disabled' : ''}>${isUnlocked ? 'Adquirido' : 'Comprar'}</button>
+                        </div>`;
+                    listEl.appendChild(div);
+                });
+            }
+        
+            // --- Verificar se a loja está vazia ---
+            if (itemsSnapshot.empty && shopThemes.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400">A loja está vazia no momento.</p>';
+            }
+        
+            // --- Anexar todos os listeners no final ---
+            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
+        }
+
+        function openCompletedModal() {
+            let content = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pr-2">';
+            if (completedChallenges.size === 0) {
+                content += '<p class="text-gray-400 col-span-full">Você ainda não completou nenhum desafio.</p>';
+            } else {
+                completedChallenges.forEach((data, id) => {
+                    content += `
+                        <div class="aspect-square bg-gray-700 rounded-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-transform" onclick="window.showDetailsModal('${id}')">
+                            <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-cover">
+                        </div>`;
+                });
+            }
+            content += '</div>';
+            createModal('completed-modal', 'Desafios Completos', content);
+        }
+
+        async function openRankingModal() {
+            const titleHtml = `
+                <div class="flex justify-between items-center w-full">
+                    <h2 class="text-xl font-bold text-white">Ranking de Jogadores</h2>
+                    <button id="show-all-users-btn" class="text-sm bg-blue-600 text-white font-bold py-1 px-3 rounded-lg hover:bg-blue-700">Listar Todos</button>
+                </div>`;
+
+            createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
+            document.getElementById('show-all-users-btn').addEventListener('click', showFullRanking);
+
+            const listEl = document.getElementById('ranking-list');
+            
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, orderBy("xp", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+                
+                listEl.innerHTML = '';
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhum jogador no ranking ainda.</p>';
+                    return;
+                }
+
+                let rank = 1;
+                let isUserInTop10 = false;
+                querySnapshot.forEach(doc => {
+                    if (doc.id === currentUser.uid) isUserInTop10 = true;
+                    listEl.appendChild(createRankingRow(doc, rank));
+                    rank++;
+                });
+
+                if (!isUserInTop10 && (currentUserData.xp || 0) > 0) {
+                    const userRank = (await getDocs(query(collection(db, "users"), orderBy("xp", "desc")))).docs.findIndex(doc => doc.id === currentUser.uid) + 1;
+                    listEl.innerHTML += '<div class="my-4 text-center text-gray-500 text-xl">...</div>';
+                    
+                    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                    listEl.appendChild(createRankingRow(userDoc, userRank));
+                }
+
+            } catch (error) {
+                console.error("Error fetching ranking:", error);
+                listEl.innerHTML = '<p class="text-red-400">Erro ao carregar o ranking.</p>';
+            }
+        }
+
+        function createRankingRow(userDoc, rank) {
+            const user = userDoc.data();
+            const isCurrentUser = userDoc.id === currentUser.uid;
+            const bgColor = isCurrentUser ? 'bg-indigo-600/50' : 'bg-gray-700';
+            const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
+            
+            const level = getLevelForXp(user.xp || 0);
+            const nameColor = level ? level.color : '#FFFFFF';
+
+            const div = document.createElement('div');
+            div.className = `${bgColor} p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
+            div.dataset.userId = userDoc.id;
+            div.innerHTML = `
+                <div class="flex items-center">
+                    <span class="font-bold text-lg w-8 text-center ${rankColor}">#${rank}</span>
+                    <div class="ml-4">
+                        <span class="font-bold" style="color: ${nameColor};">${user.name || user.email}</span>
+                        <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
+                    </div>
+                </div>
+                <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
+            `;
+            div.addEventListener('click', () => openPublicProfileModal(userDoc.id));
+            return div;
+        }
+
+        async function showFullRanking() {
+            const listEl = document.getElementById('ranking-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando todos os jogadores...</p>';
+            const btn = document.getElementById('show-all-users-btn');
+            if(btn) btn.disabled = true;
+
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, orderBy("xp", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                listEl.innerHTML = '';
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhum jogador encontrado.</p>';
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach(doc => {
+                    listEl.appendChild(createRankingRow(doc, rank));
+                    rank++;
+                });
+
+            } catch (error) {
+                console.error("Error fetching full ranking:", error);
+                listEl.innerHTML = '<p class="text-red-400">Erro ao carregar o ranking completo.</p>';
+            } finally {
+                 if(btn) btn.disabled = false;
+            }
+        }
+        
+        document.getElementById('profile-button').addEventListener('click', (e) => { e.preventDefault(); openMyProfileModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('shop-button-menu').addEventListener('click', (e) => { e.preventDefault(); openShopModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); openCompletedModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); openRankingModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('redeem-code-button').addEventListener('click', (e) => { e.preventDefault(); openRedeemCodeModal(); menuDropdown.classList.add('hidden'); });
+
+        async function buyItem(e) {
+            const { id, price, type, name } = e.target.dataset;
+            const itemPrice = parseInt(price);
+            
+            createConfirmationModal('Confirmar Compra', `Comprar "${name}" por ${itemPrice} pontos?`, async () => {
+                const userDocRef = doc(db, "users", currentUser.uid);
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const userDoc = await transaction.get(userDocRef);
+                        if (!userDoc.exists()) throw "Usuário não encontrado.";
+                        
+                        const userData = userDoc.data();
+                        const currentScore = userData.score || 0;
+                        if (currentScore < itemPrice) throw "Pontos insuficientes!";
+                        
+                        const newScore = currentScore - itemPrice;
+                        const newPointsSpent = (userData.pointsSpent || 0) + itemPrice;
+                        
+                        if (type.startsWith('consumable')) {
+                            let newConsumables = userData.consumables || { reroll: 0, choice: 0, abandon: 0 };
+                            if (type === 'consumable_reroll') newConsumables.reroll = (newConsumables.reroll || 0) + 1;
+                            else if (type === 'consumable_choice') newConsumables.choice = (newConsumables.choice || 0) + 1;
+                            else if (type === 'consumable_abandon') newConsumables.abandon = (newConsumables.abandon || 0) + 1;
+                             transaction.update(userDocRef, { score: newScore, consumables: newConsumables, pointsSpent: newPointsSpent });
+                        } else if (type === 'theme') {
+                            const unlockedThemeRef = doc(db, "users", currentUser.uid, "unlockedThemes", id);
+                            transaction.set(unlockedThemeRef, { unlockedAt: serverTimestamp() });
+                            transaction.update(userDocRef, { score: newScore, pointsSpent: newPointsSpent });
+                        }
+                        
+                        const notificationRef = doc(collection(db, "purchaseNotifications"));
+                        transaction.set(notificationRef, {
+                            userEmail: currentUser.email,
+                            userId: currentUser.uid,
+                            itemName: name,
+                            price: itemPrice,
+                            timestamp: serverTimestamp(),
+                            read: false,
+                            type: type
+                        });
+                    });
+                    
+                    currentUserData.score -= itemPrice;
+                    currentUserData.pointsSpent = (currentUserData.pointsSpent || 0) + itemPrice;
+                    if (type === 'consumable_reroll') currentUserData.consumables.reroll++;
+                    if (type === 'consumable_choice') currentUserData.consumables.choice++;
+                    if (type === 'consumable_abandon') currentUserData.consumables.abandon++;
+                    if (type === 'theme') unlockedThemes.set(id, { unlockedAt: new Date() });
+                    
+                    updateConsumablesUI();
+                    document.getElementById('shop-modal')?.remove();
+                    createAlertModal("Sucesso", "Compra realizada com sucesso!");
+                    await checkAchievements();
+
+                } catch (error) {
+                    console.error(error);
+                    createAlertModal("Erro na Compra", String(error));
+                }
+            });
+        }
+        
+        // --- FUNÇÕES DE PERFIL, TEMAS E CONQUISTAS ---
+        async function openMyProfileModal() {
+            const unlockedTitles = [];
+            const unlockedBadges = [];
+            unlockedAchievements.forEach((achieveData, achieveId) => {
+                const achievement = allAchievements.find(a => a.id === achieveId);
+                if (achievement?.reward?.title) unlockedTitles.push(achievement.reward.title);
+                if (achievement?.reward?.badgeUrl) unlockedBadges.push(achievement.reward.badgeUrl);
+            });
+            
+            const titleOptions = unlockedTitles.map(t => `<option value="${t}">${t}</option>`).join('');
+            const badgeOptions = unlockedBadges.map(b => `
+                <label class="cursor-pointer">
+                    <input type="radio" name="badge-select" value="${b}" class="sr-only peer">
+                    <img src="${b}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-600 peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-500">
+                </label>
+            `).join('');
+
+            const allAchievementsHtml = allAchievements.map(achieve => `
+                <div class="bg-gray-700 p-3 rounded-lg flex items-center gap-4 ${!unlockedAchievements.has(achieve.id) ? 'achievement-locked' : ''}">
+                    <img src="${achieve.iconUrl}" class="w-12 h-12 rounded-md">
+                    <div>
+                        <p class="font-semibold text-white">${achieve.name}</p>
+                        <p class="text-xs text-gray-400">${achieve.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const unlockedThemesHtml = allThemes
+                .filter(t => unlockedThemes.has(t.id))
+                .map(theme => `
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="theme-select" value="${theme.id}" class="sr-only peer">
+                    <div class="w-full p-4 rounded-lg border-2 border-gray-600 peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-500" style="background:${theme.colors.bg}; color:${theme.colors.text};">
+                        <h4 class="font-bold">${theme.name}</h4>
+                        <p class="text-xs">${theme.description}</p>
+                    </div>
+                </label>
+            `).join('');
+            
+            const content = `
+                <div class="border-b border-gray-600 mb-4">
+                    <nav class="flex -mb-px">
+                        <button data-tab="equip" class="tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Equipar</button>
+                        <button data-tab="themes" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Temas</button>
+                        <button data-tab="achievements" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Conquistas</button>
+                    </nav>
+                </div>
+                <div id="tab-content-equip" class="tab-content space-y-6">
+                    <div>
+                        <label for="title-select" class="text-sm font-medium text-gray-300">Seu Título</label>
+                        <select id="title-select" class="mt-1 w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                            <option value="">Nenhum</option>
+                            ${titleOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-300">Sua Insígnia</label>
+                        <div class="mt-2 flex flex-wrap gap-4">
+                            <label class="cursor-pointer"><input type="radio" name="badge-select" value="" class="sr-only peer"><div class="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center text-gray-400 border-2 border-gray-600 peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-500">Nenhuma</div></label>
+                            ${badgeOptions}
+                        </div>
+                    </div>
+                     <button id="save-profile-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Perfil</button>
+                </div>
+                 <div id="tab-content-themes" class="tab-content hidden space-y-4">
+                    ${unlockedThemesHtml || '<p class="text-gray-400">Nenhum tema desbloqueado.</p>'}
+                    <button id="save-theme-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 mt-4">Salvar Tema</button>
+                </div>
+                <div id="tab-content-achievements" class="tab-content hidden max-h-[60vh] overflow-y-auto space-y-2 pr-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                   ${allAchievementsHtml}
+                </div>
+            `;
+            
+            createModal('my-profile-modal', 'Meu Perfil', content, 'max-w-2xl');
+
+            document.getElementById('title-select').value = currentUserData.profile?.title || '';
+            const currentBadge = currentUserData.profile?.badgeUrl || '';
+            document.querySelector(`input[name="badge-select"][value="${currentBadge}"]`)?.setAttribute('checked', '');
+
+            const activeTheme = currentUserData.profile?.activeTheme || '';
+            document.querySelector(`input[name="theme-select"][value="${activeTheme}"]`)?.setAttribute('checked', '');
+
+
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.addEventListener('click', (e) => {
+                tabs.forEach(t => {t.classList.remove('border-indigo-500', 'text-white'); t.classList.add('border-transparent', 'text-gray-400')});
+                e.target.classList.add('border-indigo-500', 'text-white');
+                e.target.classList.remove('border-transparent', 'text-gray-400');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(`tab-content-${e.target.dataset.tab}`).classList.remove('hidden');
+            }));
+
+            document.getElementById('save-profile-btn').addEventListener('click', async () => {
+                const newTitle = document.getElementById('title-select').value;
+                const newBadge = document.querySelector('input[name="badge-select"]:checked').value;
+                await updateDoc(doc(db, "users", currentUser.uid), { "profile.title": newTitle, "profile.badgeUrl": newBadge });
+                currentUserData.profile.title = newTitle;
+                currentUserData.profile.badgeUrl = newBadge;
+                createAlertModal('Sucesso', 'Seu perfil foi atualizado!');
+            });
+            document.getElementById('save-theme-btn').addEventListener('click', async () => {
+                const newThemeId = document.querySelector('input[name="theme-select"]:checked')?.value || null;
+                await updateDoc(doc(db, "users", currentUser.uid), { "profile.activeTheme": newThemeId });
+                currentUserData.profile.activeTheme = newThemeId;
+                applyTheme(newThemeId);
+                createAlertModal('Sucesso', 'Tema aplicado!');
+            });
+        }
+        
+        async function openPublicProfileModal(userId) {
+            const userDoc = await getDoc(doc(db, "users", userId));
+            if (!userDoc.exists()) return;
+            const userData = userDoc.data();
+            
+            const unlockedSnapshot = await getDocs(collection(db, "users", userId, "unlockedAchievements"));
+            const unlockedIds = new Set(unlockedSnapshot.docs.map(d => d.id));
+            
+            const level = getLevelForXp(userData.xp || 0);
+            const nameColor = level ? level.color : '#FFFFFF';
+
+            const achievementsHtml = allAchievements
+                .filter(a => unlockedIds.has(a.id))
+                .map(achieve => `
+                    <div class="bg-gray-700 p-3 rounded-lg flex items-center gap-4">
+                        <img src="${achieve.iconUrl}" class="w-12 h-12 rounded-md">
+                        <div>
+                            <p class="font-semibold text-white">${achieve.name}</p>
+                            <p class="text-xs text-gray-400">${achieve.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+            const content = `
+                <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-900/50 rounded-lg">
+                    <img src="${userData.profile?.badgeUrl || 'https://placehold.co/96x96/718096/FFFFFF?text=?'}" class="w-24 h-24 rounded-full object-cover border-4 border-indigo-500">
+                    <div>
+                        <h3 class="text-2xl font-bold" style="color: ${nameColor};">${userData.name}</h3>
+                        <p class="text-indigo-400 font-semibold">${userData.profile?.title || 'Novo Jogador'}</p>
+                        <p class="text-sm text-cyan-400 mt-1">${userData.xp || 0} XP</p>
+                    </div>
+                </div>
+                <h4 class="font-bold text-white mt-6 mb-2">Conquistas Desbloqueadas</h4>
+                <div class="max-h-[40vh] overflow-y-auto space-y-2 pr-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${achievementsHtml || '<p class="text-gray-400 col-span-full">Este jogador ainda não desbloqueou conquistas.</p>'}
+                </div>
+            `;
+            createModal(`public-profile-${userId}`, `Perfil de ${userData.name}`, content, 'max-w-2xl');
+        }
+
+        async function checkAchievements() {
+             const userStats = {
+                xp: currentUserData.xp || 0,
+                pointsSpent: currentUserData.pointsSpent || 0,
+                completedTotal: completedChallenges.size,
+                completedByCategory: (() => {
+                    const counts = {};
+                    completedChallenges.forEach(c => {
+                        counts[c.category] = (counts[c.category] || 0) + 1;
+                    });
+                    return counts;
+                })()
+             };
+             
+              for (const achievement of allAchievements) {
+                   if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
+
+                   let isUnlocked = false;
+                   const { type, value, category } = achievement.condition;
+
+                   if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
+                   if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
+                   if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
+                   if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
+                   
+                   if (isUnlocked) {
+                       const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
+                       await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
+                       unlockedAchievements.set(achievement.id, {});
+                       showToast(`Conquista Desbloqueada: ${achievement.name}`);
+                   }
+              }
+        }
+        
+        async function checkForLevelUpRewards(newLevel) {
+            const reward = newLevel.reward;
+            if (!reward || Object.values(reward).every(v => v === 0)) return;
+
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const rewardsSummary = [];
+            
+            await runTransaction(db, async (transaction) => {
+                const userDoc = await transaction.get(userDocRef);
+                const userData = userDoc.data();
+                const newScore = (userData.score || 0) + (reward.points || 0);
+                const newConsumables = userData.consumables || { reroll: 0, choice: 0, abandon: 0 };
+                newConsumables.reroll += (reward.reroll || 0);
+                newConsumables.choice += (reward.choice || 0);
+                newConsumables.abandon += (reward.abandon || 0);
+                
+                transaction.update(userDocRef, { score: newScore, consumables: newConsumables });
+
+                if (reward.points > 0) rewardsSummary.push(`${reward.points} pontos`);
+                if (reward.reroll > 0) rewardsSummary.push(`${reward.reroll} token(s) de troca`);
+                if (reward.choice > 0) rewardsSummary.push(`${reward.choice} token(s) de escolha`);
+                if (reward.abandon > 0) rewardsSummary.push(`${reward.abandon} token(s) de abandono`);
+            });
+            
+            currentUserData.score += (reward.points || 0);
+            currentUserData.consumables.reroll += (reward.reroll || 0);
+            currentUserData.consumables.choice += (reward.choice || 0);
+            currentUserData.consumables.abandon += (reward.abandon || 0);
+
+            // Verificar se há um tema como recompensa para este nível
+            const themeReward = allThemes.find(t => t.obtainMethod === 'level' && t.levelId === newLevel.id);
+            if(themeReward && !unlockedThemes.has(themeReward.id)) {
+                await setDoc(doc(db, "users", currentUser.uid, "unlockedThemes", themeReward.id), { unlockedAt: serverTimestamp() });
+                unlockedThemes.set(themeReward.id, {});
+                rewardsSummary.push(`Tema: ${themeReward.name}`);
+            }
+
+            showToast(`Nível alcançado: ${newLevel.name}! Você ganhou: ${rewardsSummary.join(', ')}`);
+            updateConsumablesUI();
+        }
+
+        function showToast(message) {
+            const toastId = `toast-${Date.now()}`;
+            const toastHtml = `
+                <div id="${toastId}" class="button-primary text-white font-bold p-4 rounded-lg shadow-lg transform translate-x-full animate-slide-in-out">
+                    ${message}
+                </div>`;
+            document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHtml);
+            
+            setTimeout(() => {
+                document.getElementById(toastId)?.remove();
+            }, 5000);
+        }
+        
+        // --- FUNÇÕES DE MODAL GENÉRICAS ---
+        function createModal(id, titleHtml, content, maxWidth = 'max-w-4xl') {
+            const existingModal = document.getElementById(id);
+            if(existingModal) existingModal.remove();
+            
+            const modalHtml = `
+                <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
+                    <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
+                        <div class="flex justify-between items-center mb-4">
+                            ${titleHtml}
+                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
+                        </div>
+                        <div class="max-h-[75vh] overflow-auto">${content}</div>
+                    </div>
+                </div>`;
+            modalContainer.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modal = document.getElementById(id);
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+
+        function createAlertModal(title, message, onOk) {
+             const modalId = 'alert-modal';
+             const titleHtml = `<h2 class="text-xl font-bold text-white">${title}</h2>`;
+             const content = `
+                <p class="text-gray-300 mb-6">${message}</p>
+                <div class="flex justify-end gap-4">
+                    <button id="alert-ok-btn" class="w-full sm:w-auto button-primary text-white font-bold py-2 px-6 rounded-lg hover:opacity-90">OK</button>
+                </div>
+             `;
+             createModal(modalId, titleHtml, content, 'max-w-md');
+             
+             document.getElementById('alert-ok-btn').addEventListener('click', () => {
+                 document.getElementById(modalId)?.remove();
+                 if(onOk) onOk();
+             });
+        }
+        
+        function createConfirmationModal(title, message, onConfirm) {
+            const modalId = 'confirmation-modal';
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${title}</h2>`;
+            const content = `
+                <p class="text-gray-300 mb-6">${message}</p>
+                <div class="flex justify-end gap-4">
+                    <button onclick="document.getElementById('${modalId}').remove()" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
+                    <button id="confirm-ok-btn" class="button-primary text-white font-bold py-2 px-6 rounded-lg hover:opacity-90">Confirmar</button>
+                </div>
+            `;
+            createModal(modalId, titleHtml, content, 'max-w-md');
+
+            document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+                document.getElementById(modalId)?.remove();
+                onConfirm();
+            });
+        }
+
+        // --- MODAIS DE COMPLETOS E ZOOM ---
+        challengeImage.addEventListener('click', () => {
+             if(currentChallenge) showImageZoomModal(currentChallenge);
+        });
+
+        window.showDetailsModal = (id) => {
+            const data = completedChallenges.get(id);
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${data.challengeName || "Detalhes"}</h2>`;
+            const content = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`;
+            createModal('details-modal', titleHtml, content, 'max-w-lg');
+        }
+
+        function showImageZoomModal(challenge) {
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${challenge.name}</h2>`;
+            createModal('zoom-modal', titleHtml, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
+        }
+        
+        function getLevelForXp(xp) {
+            let currentLevel = null;
+            for (const level of allLevels) {
+                if (xp >= level.xpRequired) {
+                    currentLevel = level;
+                } else {
+                    break;
+                }
+            }
+            return currentLevel;
+        }
+
+        function applyTheme(themeId) {
+            const root = document.documentElement;
+            const theme = allThemes.find(t => t.id === themeId);
+            if (theme) {
+                root.style.setProperty('--bg-color', theme.colors.bg);
+                root.style.setProperty('--text-color', theme.colors.text);
+                root.style.setProperty('--primary-color', theme.colors.primary);
+                root.style.setProperty('--card-bg-color', theme.colors.cardBg);
+            } else {
+                root.style.cssText = ''; // Limpa para o padrão
+            }
+        }
+        
+        function openRedeemCodeModal() {
+             const titleHtml = `<h2 class="text-xl font-bold text-white">Ativar Código de Bônus</h2>`;
+             createModal('redeem-code-modal', titleHtml, `
+                <form id="redeem-code-form" class="space-y-4">
+                    <input type="text" id="code-input" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg font-mono tracking-widest text-center" placeholder="DIGITE O CÓDIGO AQUI">
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 rounded-lg hover:opacity-90">Ativar</button>
+                </form>
+            `, 'max-w-md');
+            document.getElementById('redeem-code-form').addEventListener('submit', redeemCode);
+        }
+
+        async function redeemCode(e) {
+            e.preventDefault();
+            const codeString = document.getElementById('code-input').value.toUpperCase();
+            if (!codeString) return;
+
+            const codeRef = doc(db, "specialCodes", codeString);
+            const userRedeemedRef = doc(db, "specialCodes", codeString, "redeemedBy", currentUser.uid);
+            const userRef = doc(db, "users", currentUser.uid);
+
+            try {
+                const codeDoc = await getDoc(codeRef);
+                if (!codeDoc.exists()) throw new Error("Código inválido ou não encontrado.");
+                const codeData = codeDoc.data();
+                
+                await runTransaction(db, async (transaction) => {
+                    const userRedeemedDoc = await transaction.get(userRedeemedRef);
+                    const freshCodeDoc = await transaction.get(codeRef);
+                    const freshCodeData = freshCodeDoc.data();
+
+                    if (freshCodeData.expiresAt.toDate() < new Date()) throw new Error("Este código expirou.");
+                    if (freshCodeData.usesLeft === 0) throw new Error("Este código já atingiu o limite de usos.");
+                    if (userRedeemedDoc.exists()) throw new Error("Você já ativou este código.");
+
+                    if (freshCodeData.effectType === 'PAUSE_TIMER') {
+                        const userDoc = await transaction.get(userRef);
+                        const userData = userDoc.data();
+                        if (!userData.activeChallenge || !userData.activeChallengeStartTime) {
+                             throw new Error("Você precisa estar em um desafio com tempo para usar este código.");
+                        }
+                        const pauseMinutes = freshCodeData.effectValue;
+                        const currentStartTime = userData.activeChallengeStartTime.toDate();
+                        const newStartTime = new Date(currentStartTime.getTime() + pauseMinutes * 60000);
+                        transaction.update(userRef, { activeChallengeStartTime: Timestamp.fromDate(newStartTime) });
+
+                    } else if (freshCodeData.effectType === 'SCORE_MULTIPLIER') {
+                        const expiresAt = new Date();
+                        expiresAt.setMinutes(expiresAt.getMinutes() + freshCodeData.durationMinutes);
+                        const bonusData = {
+                            type: freshCodeData.effectType,
+                            value: freshCodeData.effectValue,
+                            expiresAt: Timestamp.fromDate(expiresAt)
+                        };
+                        transaction.update(userRef, { activeBonus: bonusData });
+                    }
+
+                    if (freshCodeData.usesLeft > 0) {
+                        transaction.update(codeRef, { usesLeft: freshCodeData.usesLeft - 1 });
+                    }
+                    transaction.set(userRedeemedRef, { redeemedAt: serverTimestamp() });
+                });
+
+                document.getElementById('redeem-code-modal')?.remove();
+                await loadGameData(currentUser); 
+                
+                let successMessage = "Código ativado! Seu bônus já está valendo.";
+                if(codeData.effectType === 'PAUSE_TIMER') {
+                    successMessage = `Sucesso! O tempo do seu desafio foi estendido em ${codeData.effectValue} minutos.`;
+                }
+                createAlertModal("Sucesso!", successMessage);
+
+            } catch (error) {
+                 createAlertModal("Erro", error.message);
+            }
+        }
+        
+        async function checkActiveBonus() {
+            const bonus = currentUserData.activeBonus;
+            const indicator = document.getElementById('active-bonus-indicator');
+
+            if (bonus && bonus.expiresAt.toDate() > new Date()) {
+                const minutesLeft = Math.round((bonus.expiresAt.toDate() - new Date()) / 60000);
+                indicator.innerHTML = `BÔNUS ATIVO: ${bonus.value}x PONTOS (${minutesLeft}min restantes)`;
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+                if(bonus) { // Se tinha bônus mas expirou, limpa do banco
+                    await updateDoc(doc(db, "users", currentUser.uid), { activeBonus: null });
+                    currentUserData.activeBonus = null;
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
+        
+    </script>
+</body>
+</html>
+
