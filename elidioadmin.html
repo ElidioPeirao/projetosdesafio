@@ -64,7 +64,7 @@
             <!-- Cabeçalho -->
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-white">Painel Administrativo</h1>
+                    <h1 id="main-title" class="text-3xl font-bold text-white cursor-pointer hover:text-gray-300">Painel Administrativo</h1>
                     <p id="admin-user-email" class="text-sm text-gray-300"></p>
                 </div>
                 <div class="flex items-center gap-4">
@@ -82,9 +82,30 @@
                     <button id="admin-logout-button" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
                 </div>
             </div>
+            
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="space-y-8">
+                <!-- Métricas Principais -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-black/20 p-6 rounded-lg text-white"><p class="text-sm text-gray-300">Total de Usuários</p><h3 id="total-users-metric" class="text-3xl font-bold">...</h3></div>
+                    <div class="bg-black/20 p-6 rounded-lg text-white"><p class="text-sm text-gray-300">Novos Usuários (24h)</p><h3 id="new-users-metric" class="text-3xl font-bold">...</h3></div>
+                    <div class="bg-black/20 p-6 rounded-lg text-white"><p class="text-sm text-gray-300">Desafios Ativos</p><h3 id="total-challenges-metric" class="text-3xl font-bold">...</h3></div>
+                </div>
+                <!-- Atividades e Ranking -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-4">Atividades Recentes</h3>
+                        <div id="recent-activities-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-4">Ranking de Jogadores (Top 5)</h3>
+                        <div id="user-ranking-list" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Menu Principal -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div id="main-menu" class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <button id="manage-challenges-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-lg text-lg transition">Desafios</button>
                 <button id="manage-shop-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 rounded-lg text-lg transition">Loja</button>
                 <button id="manage-levels-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-6 rounded-lg text-lg transition">Níveis</button>
@@ -106,7 +127,7 @@
     <script type="module">
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp, addDoc, Timestamp, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         const firebaseConfig = {
           apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
@@ -131,6 +152,8 @@
         const panelContainer = document.getElementById('admin-panel-container');
         const messageBox = document.getElementById('admin-message-box');
         const dynamicContent = document.getElementById('dynamic-content');
+        const dashboardView = document.getElementById('dashboard-view');
+        const mainMenu = document.getElementById('main-menu');
         const modalContainer = document.getElementById('modal-container');
         const notificationsBtn = document.getElementById('notifications-btn');
         const notificationsCount = document.getElementById('notifications-count');
@@ -144,6 +167,7 @@
                 panelContainer.classList.remove('hidden');
                 document.getElementById('admin-user-email').textContent = `Admin: admin`;
                 listenForNotifications();
+                showDashboard();
                 await Promise.all([fetchAllChallenges(), loadAllAchievements(), fetchAllLevels()]);
             } else {
                 showAdminMessage('Usuário ou senha inválidos.', true);
@@ -157,6 +181,61 @@
         function showAdminMessage(message, isError = false) {
             messageBox.textContent = message;
             messageBox.className = `p-3 rounded-lg text-center text-sm font-medium ${isError ? 'bg-red-500/50 text-red-100' : 'bg-green-500/50 text-green-100'}`;
+        }
+
+        // --- DASHBOARD ---
+        async function showDashboard() {
+            dashboardView.classList.remove('hidden');
+            mainMenu.classList.remove('hidden');
+            dynamicContent.classList.add('hidden');
+            await loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            // Métricas
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            const challengesSnapshot = await getDocs(collection(db, "challenges"));
+            document.getElementById('total-users-metric').textContent = usersSnapshot.size;
+            document.getElementById('total-challenges-metric').textContent = challengesSnapshot.size;
+            document.getElementById('new-users-metric').textContent = 'N/A'; // Requer campo 'createdAt' nos usuários
+            
+            // Atividades Recentes
+            const activitiesList = document.getElementById('recent-activities-list');
+            activitiesList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const attemptsQuery = query(collection(db, "attempts"), orderBy("timestamp", "desc"), limit(5));
+            const attemptsSnapshot = await getDocs(attemptsQuery);
+            activitiesList.innerHTML = '';
+            if (attemptsSnapshot.empty) {
+                 activitiesList.innerHTML = '<p class="text-gray-400">Nenhuma atividade recente.</p>';
+            } else {
+                attemptsSnapshot.forEach(doc => {
+                    const attempt = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `p-3 rounded-lg text-sm flex justify-between items-center ${attempt.isCorrect ? 'bg-green-800/40' : 'bg-red-800/40'}`;
+                    div.innerHTML = `<div><p class="font-semibold text-white">${attempt.userEmail}</p><p class="text-gray-300">Tentou: ${attempt.challengeName}</p></div><p class="text-xs text-gray-400">${new Date(attempt.timestamp?.toDate()).toLocaleDateString()}</p>`;
+                    activitiesList.appendChild(div);
+                });
+            }
+
+            // Ranking de Usuários
+            const rankingList = document.getElementById('user-ranking-list');
+            rankingList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const usersQuery = query(collection(db, "users"), orderBy("xp", "desc"), limit(5));
+            const topUsersSnapshot = await getDocs(usersQuery);
+            rankingList.innerHTML = '';
+            if (topUsersSnapshot.empty) {
+                rankingList.innerHTML = '<p class="text-gray-400">Nenhum usuário no ranking.</p>';
+            } else {
+                let rank = 1;
+                topUsersSnapshot.forEach(doc => {
+                    const user = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700/50 p-3 rounded-lg flex items-center justify-between';
+                    div.innerHTML = `<div class="flex items-center gap-3"><span class="font-bold text-lg text-indigo-400 w-6 text-center">${rank}</span><div><p class="font-semibold text-white">${user.email}</p><p class="text-xs text-yellow-400">${user.score || 0} pts</p></div></div><p class="text-cyan-400 font-semibold">${user.xp || 0} XP</p>`;
+                    rankingList.appendChild(div);
+                    rank++;
+                });
+            }
         }
         
         // --- SISTEMA DE NOTIFICAÇÕES ---
@@ -188,13 +267,21 @@
         });
 
         // --- NAVEGAÇÃO DO PAINEL ---
-        document.getElementById('manage-challenges-btn').addEventListener('click', showChallengesManagement);
-        document.getElementById('manage-shop-btn').addEventListener('click', showShopManagement);
-        document.getElementById('manage-levels-btn').addEventListener('click', showLevelsManagement);
-        document.getElementById('manage-achievements-btn').addEventListener('click', showAchievementsManagement);
-        document.getElementById('manage-themes-btn').addEventListener('click', showThemesManagement);
-        document.getElementById('manage-codes-btn').addEventListener('click', showCodesManagement);
-        document.getElementById('view-users-btn').addEventListener('click', showUsersManagement);
+        document.getElementById('main-title').addEventListener('click', showDashboard);
+
+        function showSection(sectionFunction) {
+            dashboardView.classList.add('hidden');
+            mainMenu.classList.add('hidden');
+            sectionFunction();
+        }
+
+        document.getElementById('manage-challenges-btn').addEventListener('click', () => showSection(showChallengesManagement));
+        document.getElementById('manage-shop-btn').addEventListener('click', () => showSection(showShopManagement));
+        document.getElementById('manage-levels-btn').addEventListener('click', () => showSection(showLevelsManagement));
+        document.getElementById('manage-achievements-btn').addEventListener('click', () => showSection(showAchievementsManagement));
+        document.getElementById('manage-themes-btn').addEventListener('click', () => showSection(showThemesManagement));
+        document.getElementById('manage-codes-btn').addEventListener('click', () => showSection(showCodesManagement));
+        document.getElementById('view-users-btn').addEventListener('click', () => showSection(showUsersManagement));
 
         // --- FUNÇÕES DE MODAL GENÉRICAS ---
         function createModal(id, title, content, maxWidth = 'max-w-xl') {
@@ -1074,3 +1161,4 @@
     </script>
 </body>
 </html>
+
