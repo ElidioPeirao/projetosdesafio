@@ -15,9 +15,16 @@
     
     <!-- Estilos Customizados -->
     <style>
+        :root {
+            --bg-color: #0d1b2a;
+            --text-color: #FFFFFF;
+            --primary-color: #6366f1;
+            --card-bg-color: rgba(255, 255, 255, 0.1);
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1b2a; /* Tom de azul escuro */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -25,16 +32,23 @@
                 linear-gradient(90deg, rgba(255, 255, 255, 0.04) 2px, transparent 2px);
             background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
             background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+            transition: background-color 0.5s ease;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+        }
+        .button-primary {
+            background-color: var(--primary-color);
         }
         ::placeholder { color: #9ca3af; opacity: 1; }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
-          -webkit-appearance: none; 
-          margin: 0; 
+            -webkit-appearance: none; 
+            margin: 0; 
         }
         input[type=number] { -moz-appearance: textfield; }
         .loader {
-            border: 4px solid #f3f3f340; border-top: 4px solid #3498db;
+            border: 4px solid #f3f3f340; border-top: 4px solid var(--primary-color);
             border-radius: 50%; width: 40px; height: 40px;
             animation: spin 1s linear infinite;
         }
@@ -52,8 +66,8 @@
         .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
         
         .category-btn.selected {
-            border-color: #6366f1; /* indigo-500 */
-            background-color: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.2); /* Mantendo uma cor base para o seletor */
             transform: scale(1.05);
         }
         @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -67,7 +81,7 @@
 
     <!-- Container de Autenticação (Visível por padrão) -->
     <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+        <div class="card w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
             <div class="flex justify-center">
                 <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
             </div>
@@ -95,7 +109,7 @@
                             </button>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
                 </form>
             </div>
             <!-- Formulário de Cadastro -->
@@ -115,7 +129,7 @@
                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                         </button>
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
                 </form>
             </div>
         </div>
@@ -124,13 +138,15 @@
     <!-- Container do Jogo (Oculto por padrão) -->
     <div id="game-container" class="hidden">
         <div class="relative min-h-screen flex items-center justify-center p-4">
-             <div class="w-full max-w-4xl bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
+              <div class="card w-full max-w-4xl backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-white">Desafio de Projetos</h1>
+                        <h1 class="text-2xl font-bold">Desafio de Projetos</h1>
                         <p id="user-email" class="text-sm text-gray-300"></p>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
+                        <div id="active-bonus-indicator" class="hidden bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-right text-xs font-bold animate-pulse">
+                        </div>
                         <div class="bg-black/20 px-4 py-2 rounded-lg text-right">
                             <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
                             <span class="text-gray-400 text-sm">pontos</span>
@@ -155,9 +171,13 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
                                     Loja
                                 </a>
-                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                     Completos
+                                </a>
+                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
+                                    Ativar Código
                                 </a>
                             </div>
                         </div>
@@ -171,12 +191,12 @@
                 
                 <!-- Seleção de Categoria -->
                 <div id="start-challenge-container" class="space-y-4 text-center py-8">
-                    <h2 class="text-xl font-semibold text-white">Selecione uma Categoria</h2>
+                    <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
                     <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
                         <!-- Categorias serão inseridas aqui -->
                     </div>
                      <div class="flex flex-col items-center justify-center gap-4 mt-6">
-                        <button id="start-button" class="w-full max-w-xs bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                        <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
                             Sortear Desafio
                         </button>
                         <div id="choice-button-container" class="w-full max-w-xs hidden">
@@ -188,15 +208,15 @@
                                 Escolher Desafio (<span id="choice-token-count">0</span>)
                             </button>
                         </div>
-                     </div>
-                   <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                   </div>
+                  <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                 </div>
 
                 <!-- Área do Desafio -->
                 <div id="challenge-container" class="hidden space-y-4">
                     <div class="flex justify-between items-center flex-wrap gap-2">
                         <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
-                             <p id="timer-display" class="font-bold text-2xl text-white"></p>
+                             <p id="timer-display" class="font-bold text-2xl"></p>
                              <p id="timer-bonus" class="text-sm text-cyan-400"></p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -219,7 +239,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="bg-black/20 p-3 rounded-lg text-center">
                             <p class="text-sm text-gray-400">Material Fornecido:</p>
-                            <p id="material-info" class="font-bold text-white text-lg"></p>
+                            <p id="material-info" class="font-bold text-lg"></p>
                         </div>
                         <div class="bg-black/20 p-3 rounded-lg text-center">
                             <p class="text-sm text-gray-400">Pontuação:</p>
@@ -241,7 +261,7 @@
                 <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
                     <div class="max-w-4xl mx-auto">
                         <div class="flex justify-between items-center mb-1">
-                            <span id="level-name" class="text-sm font-bold text-white"></span>
+                            <span id="level-name" class="text-sm font-bold"></span>
                             <span id="xp-text" class="text-xs text-gray-300"></span>
                         </div>
                         <div class="w-full bg-gray-700 rounded-full h-4">
@@ -264,7 +284,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -286,7 +306,9 @@
         let allChallenges = [];
         let allLevels = [];
         let allAchievements = [];
+        let allThemes = [];
         let unlockedAchievements = new Map();
+        let unlockedThemes = new Map();
         let completedChallenges = new Map();
         let activeChallengeData = {};
         let challengeTimerInterval = null;
@@ -309,6 +331,7 @@
                 gameContainer.classList.remove('hidden');
                 document.getElementById('user-email').textContent = `Logado como: ${currentUserData.name || user.email}`;
             } else {
+                document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
                 authContainer.classList.remove('hidden');
                 gameContainer.classList.add('hidden');
             }
@@ -319,14 +342,16 @@
             const levelsPromise = getDocs(query(collection(db, "levels"), orderBy("xpRequired", "asc")));
             const challengesPromise = getDocs(collection(db, "challenges"));
             const achievementsPromise = getDocs(collection(db, "achievements"));
+            const themesPromise = getDocs(collection(db, "themes"));
             const userDocRef = doc(db, "users", user.uid);
             const userDocPromise = getDoc(userDocRef);
 
-            const [levelsSnapshot, challengesSnapshot, achievementsSnapshot, userDocSnap] = await Promise.all([levelsPromise, challengesPromise, achievementsPromise, userDocPromise]);
+            const [levelsSnapshot, challengesSnapshot, achievementsSnapshot, themesSnapshot, userDocSnap] = await Promise.all([levelsPromise, challengesPromise, achievementsPromise, themesPromise, userDocPromise]);
 
             allLevels = levelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allAchievements = achievementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allThemes = themesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
             if (userDocSnap.exists()) {
                 currentUserData = userDocSnap.data();
@@ -337,10 +362,20 @@
             }
             
             const unlockedAchievementsRef = collection(db, "users", user.uid, "unlockedAchievements");
-            const unlockedSnapshot = await getDocs(unlockedAchievementsRef);
+            const unlockedAchievementsSnapshot = await getDocs(unlockedAchievementsRef);
             unlockedAchievements.clear();
-            unlockedSnapshot.forEach(doc => unlockedAchievements.set(doc.id, doc.data()));
+            unlockedAchievementsSnapshot.forEach(doc => unlockedAchievements.set(doc.id, doc.data()));
 
+            const unlockedThemesRef = collection(db, "users", user.uid, "unlockedThemes");
+            const unlockedThemesSnapshot = await getDocs(unlockedThemesRef);
+            unlockedThemes.clear();
+            unlockedThemesSnapshot.forEach(doc => unlockedThemes.set(doc.id, doc.data()));
+
+            if(currentUserData.profile?.activeTheme) {
+                applyTheme(currentUserData.profile.activeTheme);
+            }
+            
+            await checkActiveBonus();
             updateXpBar();
             updateConsumablesUI();
 
@@ -410,7 +445,7 @@
             categoryGrid.innerHTML = '';
             categories.sort().forEach(cat => {
                 const button = document.createElement('button');
-                button.className = 'category-btn p-4 bg-white/10 border-2 border-transparent rounded-lg text-white font-semibold transition-all duration-300 hover:bg-white/20';
+                button.className = 'category-btn p-4 card backdrop-blur-lg border-2 border-transparent rounded-lg font-semibold transition-all duration-300 hover:bg-white/20';
                 button.textContent = cat;
                 button.dataset.category = cat;
                 categoryGrid.appendChild(button);
@@ -466,7 +501,8 @@
                     name, email, 
                     activeChallenge: null, score: 0, xp: 0, pointsSpent: 0,
                     consumables: { reroll: 0, choice: 0, abandon: 0 },
-                    profile: { title: null, badgeUrl: null }
+                    profile: { title: null, badgeUrl: null, activeTheme: null },
+                    activeBonus: null
                 });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
@@ -546,7 +582,7 @@
                 timerContainer.classList.remove('hidden');
                 challengeTimerInterval = setInterval(() => {
                     const now = new Date();
-                    const elapsed = Math.floor((now - startTime) / 1000);
+                    const elapsed = Math.floor((now - activeChallengeData.startTime) / 1000);
                     const remaining = timeLimit - elapsed;
                     
                     if (remaining <= 0) {
@@ -609,6 +645,14 @@
             const isCorrect = isMassCorrect && isVolumeCorrect;
             
             let finalScore = parseInt(currentChallenge.score || 0);
+            
+            // Aplicar bônus de código ativo
+            if (isCorrect && currentUserData.activeBonus && currentUserData.activeBonus.expiresAt.toDate() > new Date()) {
+                if (currentUserData.activeBonus.type === 'SCORE_MULTIPLIER') {
+                    finalScore = Math.round(finalScore * currentUserData.activeBonus.value);
+                }
+            }
+
 
             if (isCorrect) {
                 const timeLimit = parseInt(currentChallenge.timeLimit);
@@ -642,6 +686,8 @@
                 
                 const userDocRef = doc(db, "users", currentUser.uid);
                 
+                const oldLevel = getLevelForXp(currentUserData.xp);
+
                 await runTransaction(db, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
                     const userData = userDoc.data();
@@ -661,6 +707,12 @@
                 
                 currentUserData.score += finalScore;
                 currentUserData.xp += finalScore;
+
+                const newLevel = getLevelForXp(currentUserData.xp);
+
+                if (newLevel && (!oldLevel || newLevel.id !== oldLevel.id)) {
+                    await checkForLevelUpRewards(newLevel);
+                }
 
                 completedChallenges.set(currentChallenge.id, { 
                     challengeName: currentChallenge.name, 
@@ -698,7 +750,7 @@
         
         nextChallengeButton.addEventListener('click', resetToStartScreen);
 
-        // --- LÓGICA DOS CONSUMÍVEIS ---
+        // --- LÓGICA DOS CONSUMÍVEIS E CÓDIGOS ---
         rerollButton.addEventListener('click', async () => {
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.reroll || 0) <= 0) {
@@ -813,29 +865,70 @@
 
         async function openShopModal() {
             createModal('shop-modal', `Sua Pontuação: ${currentUserData.score || 0}`, `
-                <div id="shop-items-list" class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">Carregando itens...</div>
+                <div id="shop-items-list" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2">Carregando...</div>
             `, 'max-w-2xl');
-
-            const itemsSnapshot = await getDocs(collection(db, "shopItems"));
+        
             const listEl = document.getElementById('shop-items-list');
-            listEl.innerHTML = '';
-            itemsSnapshot.forEach(doc => {
-                const item = { id: doc.id, ...doc.data() };
-                const canAfford = (currentUserData.score || 0) >= item.price;
-                
-                const div = document.createElement('div');
-                div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
-                div.innerHTML = `
-                    <div>
-                        <p class="text-white font-semibold">${item.name}</p>
-                        <p class="text-xs text-gray-400">${item.type.startsWith('consumable') ? 'Item Consumível' : (item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes')}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-yellow-400 font-bold">${item.price} pts</p>
-                        <button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${!canAfford ? 'disabled' : ''}>Comprar</button>
-                    </div>`;
-                listEl.appendChild(div);
-            });
+            listEl.innerHTML = ''; // Limpa o "Carregando..."
+        
+            // --- Renderizar Itens Consumíveis ---
+            const itemsSnapshot = await getDocs(query(collection(db, "shopItems")));
+            if (!itemsSnapshot.empty) {
+                const consumablesHeader = document.createElement('h3');
+                consumablesHeader.className = 'text-lg font-bold text-white';
+                consumablesHeader.textContent = 'Itens Consumíveis';
+                listEl.appendChild(consumablesHeader);
+        
+                itemsSnapshot.forEach(doc => {
+                    const item = { id: doc.id, ...doc.data() };
+                    const canAfford = (currentUserData.score || 0) >= item.price;
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-xs text-gray-400">${item.type.startsWith('consumable') ? 'Item Consumível' : (item.type === 'unico' ? 'Item único' : 'Pode ser comprado várias vezes')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-bold">${item.price} pts</p>
+                            <button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${!canAfford ? 'disabled' : ''}>Comprar</button>
+                        </div>`;
+                    listEl.appendChild(div);
+                });
+            }
+        
+            // --- Renderizar Temas ---
+            const shopThemes = allThemes.filter(t => t.obtainMethod === 'shop');
+            if (shopThemes.length > 0) {
+                const themesHeader = document.createElement('h3');
+                themesHeader.className = 'text-lg font-bold text-white pt-4';
+                themesHeader.textContent = 'Temas';
+                listEl.appendChild(themesHeader);
+        
+                shopThemes.forEach(theme => {
+                    const canAfford = (currentUserData.score || 0) >= theme.price;
+                    const isUnlocked = unlockedThemes.has(theme.id);
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${theme.name}</p>
+                            <p class="text-xs text-gray-400">${theme.description}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-bold">${theme.price} pts</p>
+                            <button data-id="${theme.id}" data-price="${theme.price}" data-type="theme" data-name="${theme.name}" class="buy-item-btn bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 disabled:bg-gray-500" ${!canAfford || isUnlocked ? 'disabled' : ''}>${isUnlocked ? 'Adquirido' : 'Comprar'}</button>
+                        </div>`;
+                    listEl.appendChild(div);
+                });
+            }
+        
+            // --- Verificar se a loja está vazia ---
+            if (itemsSnapshot.empty && shopThemes.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400">A loja está vazia no momento.</p>';
+            }
+        
+            // --- Anexar todos os listeners no final ---
             listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
         }
 
@@ -856,7 +949,15 @@
         }
 
         async function openRankingModal() {
-            createModal('ranking-modal', 'Ranking de Jogadores', '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
+            const titleHtml = `
+                <div class="flex justify-between items-center w-full">
+                    <h2 class="text-xl font-bold text-white">Ranking de Jogadores</h2>
+                    <button id="show-all-users-btn" class="text-sm bg-blue-600 text-white font-bold py-1 px-3 rounded-lg hover:bg-blue-700">Listar Todos</button>
+                </div>`;
+
+            createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
+            document.getElementById('show-all-users-btn').addEventListener('click', showFullRanking);
+
             const listEl = document.getElementById('ranking-list');
             
             try {
@@ -874,52 +975,16 @@
                 let isUserInTop10 = false;
                 querySnapshot.forEach(doc => {
                     if (doc.id === currentUser.uid) isUserInTop10 = true;
-                    const user = doc.data();
-                    const bgColor = doc.id === currentUser.uid ? 'bg-indigo-600/50' : 'bg-gray-700';
-                    const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
-                    
-                    const level = getLevelForXp(user.xp || 0);
-                    const nameColor = level ? level.color : '#FFFFFF';
-
-                    const div = document.createElement('div');
-                    div.className = `${bgColor} p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
-                    div.dataset.userId = doc.id;
-                    div.innerHTML = `
-                        <div class="flex items-center">
-                            <span class="font-bold text-lg w-8 text-center ${rankColor}">#${rank}</span>
-                            <div class="ml-4">
-                                <span class="font-bold" style="color: ${nameColor};">${user.name || user.email}</span>
-                                <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
-                            </div>
-                        </div>
-                        <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
-                    `;
-                    div.addEventListener('click', () => openPublicProfileModal(doc.id));
-                    listEl.appendChild(div);
+                    listEl.appendChild(createRankingRow(doc, rank));
                     rank++;
                 });
 
                 if (!isUserInTop10 && (currentUserData.xp || 0) > 0) {
                     const userRank = (await getDocs(query(collection(db, "users"), orderBy("xp", "desc")))).docs.findIndex(doc => doc.id === currentUser.uid) + 1;
                     listEl.innerHTML += '<div class="my-4 text-center text-gray-500 text-xl">...</div>';
-                    const user = currentUserData;
-                    const level = getLevelForXp(user.xp || 0);
-                    const nameColor = level ? level.color : '#FFFFFF';
-                    const div = document.createElement('div');
-                    div.className = `bg-indigo-600/50 p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
-                    div.dataset.userId = currentUser.uid;
-                    div.innerHTML = `
-                        <div class="flex items-center">
-                            <span class="font-bold text-lg w-8 text-center text-gray-400">#${userRank}</span>
-                             <div class="ml-4">
-                                <span class="font-bold" style="color: ${nameColor};">${user.name || currentUser.email}</span>
-                                <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
-                            </div>
-                        </div>
-                        <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
-                    `;
-                    div.addEventListener('click', () => openPublicProfileModal(currentUser.uid));
-                    listEl.appendChild(div);
+                    
+                    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                    listEl.appendChild(createRankingRow(userDoc, userRank));
                 }
 
             } catch (error) {
@@ -927,11 +992,69 @@
                 listEl.innerHTML = '<p class="text-red-400">Erro ao carregar o ranking.</p>';
             }
         }
+
+        function createRankingRow(userDoc, rank) {
+            const user = userDoc.data();
+            const isCurrentUser = userDoc.id === currentUser.uid;
+            const bgColor = isCurrentUser ? 'bg-indigo-600/50' : 'bg-gray-700';
+            const rankColor = rank === 1 ? 'text-yellow-400' : (rank === 2 ? 'text-gray-300' : (rank === 3 ? 'text-yellow-600' : 'text-gray-400'));
+            
+            const level = getLevelForXp(user.xp || 0);
+            const nameColor = level ? level.color : '#FFFFFF';
+
+            const div = document.createElement('div');
+            div.className = `${bgColor} p-3 rounded flex justify-between items-center mb-2 cursor-pointer hover:bg-gray-600`;
+            div.dataset.userId = userDoc.id;
+            div.innerHTML = `
+                <div class="flex items-center">
+                    <span class="font-bold text-lg w-8 text-center ${rankColor}">#${rank}</span>
+                    <div class="ml-4">
+                        <span class="font-bold" style="color: ${nameColor};">${user.name || user.email}</span>
+                        <span class="text-xs text-gray-400 block">${user.profile?.title || ''}</span>
+                    </div>
+                </div>
+                <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
+            `;
+            div.addEventListener('click', () => openPublicProfileModal(userDoc.id));
+            return div;
+        }
+
+        async function showFullRanking() {
+            const listEl = document.getElementById('ranking-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando todos os jogadores...</p>';
+            const btn = document.getElementById('show-all-users-btn');
+            if(btn) btn.disabled = true;
+
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, orderBy("xp", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                listEl.innerHTML = '';
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhum jogador encontrado.</p>';
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach(doc => {
+                    listEl.appendChild(createRankingRow(doc, rank));
+                    rank++;
+                });
+
+            } catch (error) {
+                console.error("Error fetching full ranking:", error);
+                listEl.innerHTML = '<p class="text-red-400">Erro ao carregar o ranking completo.</p>';
+            } finally {
+                 if(btn) btn.disabled = false;
+            }
+        }
         
         document.getElementById('profile-button').addEventListener('click', (e) => { e.preventDefault(); openMyProfileModal(); menuDropdown.classList.add('hidden'); });
         document.getElementById('shop-button-menu').addEventListener('click', (e) => { e.preventDefault(); openShopModal(); menuDropdown.classList.add('hidden'); });
         document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); openCompletedModal(); menuDropdown.classList.add('hidden'); });
         document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); openRankingModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('redeem-code-button').addEventListener('click', (e) => { e.preventDefault(); openRedeemCodeModal(); menuDropdown.classList.add('hidden'); });
 
         async function buyItem(e) {
             const { id, price, type, name } = e.target.dataset;
@@ -950,11 +1073,18 @@
                         
                         const newScore = currentScore - itemPrice;
                         const newPointsSpent = (userData.pointsSpent || 0) + itemPrice;
-                        let newConsumables = userData.consumables || { reroll: 0, choice: 0, abandon: 0 };
-
-                        if (type === 'consumable_reroll') newConsumables.reroll = (newConsumables.reroll || 0) + 1;
-                        else if (type === 'consumable_choice') newConsumables.choice = (newConsumables.choice || 0) + 1;
-                        else if (type === 'consumable_abandon') newConsumables.abandon = (newConsumables.abandon || 0) + 1;
+                        
+                        if (type.startsWith('consumable')) {
+                            let newConsumables = userData.consumables || { reroll: 0, choice: 0, abandon: 0 };
+                            if (type === 'consumable_reroll') newConsumables.reroll = (newConsumables.reroll || 0) + 1;
+                            else if (type === 'consumable_choice') newConsumables.choice = (newConsumables.choice || 0) + 1;
+                            else if (type === 'consumable_abandon') newConsumables.abandon = (newConsumables.abandon || 0) + 1;
+                             transaction.update(userDocRef, { score: newScore, consumables: newConsumables, pointsSpent: newPointsSpent });
+                        } else if (type === 'theme') {
+                            const unlockedThemeRef = doc(db, "users", currentUser.uid, "unlockedThemes", id);
+                            transaction.set(unlockedThemeRef, { unlockedAt: serverTimestamp() });
+                            transaction.update(userDocRef, { score: newScore, pointsSpent: newPointsSpent });
+                        }
                         
                         const notificationRef = doc(collection(db, "purchaseNotifications"));
                         transaction.set(notificationRef, {
@@ -963,10 +1093,9 @@
                             itemName: name,
                             price: itemPrice,
                             timestamp: serverTimestamp(),
-                            read: false
+                            read: false,
+                            type: type
                         });
-                        
-                        transaction.update(userDocRef, { score: newScore, consumables: newConsumables, pointsSpent: newPointsSpent });
                     });
                     
                     currentUserData.score -= itemPrice;
@@ -974,6 +1103,7 @@
                     if (type === 'consumable_reroll') currentUserData.consumables.reroll++;
                     if (type === 'consumable_choice') currentUserData.consumables.choice++;
                     if (type === 'consumable_abandon') currentUserData.consumables.abandon++;
+                    if (type === 'theme') unlockedThemes.set(id, { unlockedAt: new Date() });
                     
                     updateConsumablesUI();
                     document.getElementById('shop-modal')?.remove();
@@ -981,12 +1111,13 @@
                     await checkAchievements();
 
                 } catch (error) {
+                    console.error(error);
                     createAlertModal("Erro na Compra", String(error));
                 }
             });
         }
         
-        // --- FUNÇÕES DE PERFIL E CONQUISTAS ---
+        // --- FUNÇÕES DE PERFIL, TEMAS E CONQUISTAS ---
         async function openMyProfileModal() {
             const unlockedTitles = [];
             const unlockedBadges = [];
@@ -1013,11 +1144,24 @@
                     </div>
                 </div>
             `).join('');
+
+            const unlockedThemesHtml = allThemes
+                .filter(t => unlockedThemes.has(t.id))
+                .map(theme => `
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="theme-select" value="${theme.id}" class="sr-only peer">
+                    <div class="w-full p-4 rounded-lg border-2 border-gray-600 peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-500" style="background:${theme.colors.bg}; color:${theme.colors.text};">
+                        <h4 class="font-bold">${theme.name}</h4>
+                        <p class="text-xs">${theme.description}</p>
+                    </div>
+                </label>
+            `).join('');
             
             const content = `
                 <div class="border-b border-gray-600 mb-4">
                     <nav class="flex -mb-px">
                         <button data-tab="equip" class="tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Equipar</button>
+                        <button data-tab="themes" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Temas</button>
                         <button data-tab="achievements" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Conquistas</button>
                     </nav>
                 </div>
@@ -1038,6 +1182,10 @@
                     </div>
                      <button id="save-profile-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Perfil</button>
                 </div>
+                 <div id="tab-content-themes" class="tab-content hidden space-y-4">
+                    ${unlockedThemesHtml || '<p class="text-gray-400">Nenhum tema desbloqueado.</p>'}
+                    <button id="save-theme-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 mt-4">Salvar Tema</button>
+                </div>
                 <div id="tab-content-achievements" class="tab-content hidden max-h-[60vh] overflow-y-auto space-y-2 pr-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                    ${allAchievementsHtml}
                 </div>
@@ -1047,13 +1195,17 @@
 
             document.getElementById('title-select').value = currentUserData.profile?.title || '';
             const currentBadge = currentUserData.profile?.badgeUrl || '';
-            const badgeRadio = document.querySelector(`input[name="badge-select"][value="${currentBadge}"]`);
-            if (badgeRadio) badgeRadio.checked = true;
+            document.querySelector(`input[name="badge-select"][value="${currentBadge}"]`)?.setAttribute('checked', '');
+
+            const activeTheme = currentUserData.profile?.activeTheme || '';
+            document.querySelector(`input[name="theme-select"][value="${activeTheme}"]`)?.setAttribute('checked', '');
+
 
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => tab.addEventListener('click', (e) => {
-                tabs.forEach(t => t.classList.remove('border-indigo-500', 'text-white'));
+                tabs.forEach(t => {t.classList.remove('border-indigo-500', 'text-white'); t.classList.add('border-transparent', 'text-gray-400')});
                 e.target.classList.add('border-indigo-500', 'text-white');
+                e.target.classList.remove('border-transparent', 'text-gray-400');
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
                 document.getElementById(`tab-content-${e.target.dataset.tab}`).classList.remove('hidden');
             }));
@@ -1061,16 +1213,17 @@
             document.getElementById('save-profile-btn').addEventListener('click', async () => {
                 const newTitle = document.getElementById('title-select').value;
                 const newBadge = document.querySelector('input[name="badge-select"]:checked').value;
-                
-                const userDocRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userDocRef, {
-                    "profile.title": newTitle,
-                    "profile.badgeUrl": newBadge
-                });
-                
-                currentUserData.profile = { title: newTitle, badgeUrl: newBadge };
-                document.getElementById('my-profile-modal').remove();
+                await updateDoc(doc(db, "users", currentUser.uid), { "profile.title": newTitle, "profile.badgeUrl": newBadge });
+                currentUserData.profile.title = newTitle;
+                currentUserData.profile.badgeUrl = newBadge;
                 createAlertModal('Sucesso', 'Seu perfil foi atualizado!');
+            });
+            document.getElementById('save-theme-btn').addEventListener('click', async () => {
+                const newThemeId = document.querySelector('input[name="theme-select"]:checked')?.value || null;
+                await updateDoc(doc(db, "users", currentUser.uid), { "profile.activeTheme": newThemeId });
+                currentUserData.profile.activeTheme = newThemeId;
+                applyTheme(newThemeId);
+                createAlertModal('Sucesso', 'Tema aplicado!');
             });
         }
         
@@ -1127,7 +1280,7 @@
                     return counts;
                 })()
              };
-              
+             
               for (const achievement of allAchievements) {
                    if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
 
@@ -1147,11 +1300,52 @@
                    }
               }
         }
+        
+        async function checkForLevelUpRewards(newLevel) {
+            const reward = newLevel.reward;
+            if (!reward || Object.values(reward).every(v => v === 0)) return;
+
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const rewardsSummary = [];
+            
+            await runTransaction(db, async (transaction) => {
+                const userDoc = await transaction.get(userDocRef);
+                const userData = userDoc.data();
+                const newScore = (userData.score || 0) + (reward.points || 0);
+                const newConsumables = userData.consumables || { reroll: 0, choice: 0, abandon: 0 };
+                newConsumables.reroll += (reward.reroll || 0);
+                newConsumables.choice += (reward.choice || 0);
+                newConsumables.abandon += (reward.abandon || 0);
+                
+                transaction.update(userDocRef, { score: newScore, consumables: newConsumables });
+
+                if (reward.points > 0) rewardsSummary.push(`${reward.points} pontos`);
+                if (reward.reroll > 0) rewardsSummary.push(`${reward.reroll} token(s) de troca`);
+                if (reward.choice > 0) rewardsSummary.push(`${reward.choice} token(s) de escolha`);
+                if (reward.abandon > 0) rewardsSummary.push(`${reward.abandon} token(s) de abandono`);
+            });
+            
+            currentUserData.score += (reward.points || 0);
+            currentUserData.consumables.reroll += (reward.reroll || 0);
+            currentUserData.consumables.choice += (reward.choice || 0);
+            currentUserData.consumables.abandon += (reward.abandon || 0);
+
+            // Verificar se há um tema como recompensa para este nível
+            const themeReward = allThemes.find(t => t.obtainMethod === 'level' && t.levelId === newLevel.id);
+            if(themeReward && !unlockedThemes.has(themeReward.id)) {
+                await setDoc(doc(db, "users", currentUser.uid, "unlockedThemes", themeReward.id), { unlockedAt: serverTimestamp() });
+                unlockedThemes.set(themeReward.id, {});
+                rewardsSummary.push(`Tema: ${themeReward.name}`);
+            }
+
+            showToast(`Nível alcançado: ${newLevel.name}! Você ganhou: ${rewardsSummary.join(', ')}`);
+            updateConsumablesUI();
+        }
 
         function showToast(message) {
             const toastId = `toast-${Date.now()}`;
             const toastHtml = `
-                <div id="${toastId}" class="bg-indigo-600 text-white font-bold p-4 rounded-lg shadow-lg transform translate-x-full animate-slide-in-out">
+                <div id="${toastId}" class="button-primary text-white font-bold p-4 rounded-lg shadow-lg transform translate-x-full animate-slide-in-out">
                     ${message}
                 </div>`;
             document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHtml);
@@ -1162,7 +1356,7 @@
         }
         
         // --- FUNÇÕES DE MODAL GENÉRICAS ---
-        function createModal(id, title, content, maxWidth = 'max-w-4xl') {
+        function createModal(id, titleHtml, content, maxWidth = 'max-w-4xl') {
             const existingModal = document.getElementById(id);
             if(existingModal) existingModal.remove();
             
@@ -1170,8 +1364,8 @@
                 <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
                     <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold text-white">${title}</h2>
-                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                            ${titleHtml}
+                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
                         </div>
                         <div class="max-h-[75vh] overflow-auto">${content}</div>
                     </div>
@@ -1185,15 +1379,17 @@
             }, 10);
         }
 
+
         function createAlertModal(title, message, onOk) {
              const modalId = 'alert-modal';
+             const titleHtml = `<h2 class="text-xl font-bold text-white">${title}</h2>`;
              const content = `
                 <p class="text-gray-300 mb-6">${message}</p>
                 <div class="flex justify-end gap-4">
-                    <button id="alert-ok-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">OK</button>
+                    <button id="alert-ok-btn" class="w-full sm:w-auto button-primary text-white font-bold py-2 px-6 rounded-lg hover:opacity-90">OK</button>
                 </div>
              `;
-             createModal(modalId, title, content, 'max-w-md');
+             createModal(modalId, titleHtml, content, 'max-w-md');
              
              document.getElementById('alert-ok-btn').addEventListener('click', () => {
                  document.getElementById(modalId)?.remove();
@@ -1203,14 +1399,15 @@
         
         function createConfirmationModal(title, message, onConfirm) {
             const modalId = 'confirmation-modal';
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${title}</h2>`;
             const content = `
                 <p class="text-gray-300 mb-6">${message}</p>
                 <div class="flex justify-end gap-4">
                     <button onclick="document.getElementById('${modalId}').remove()" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
-                    <button id="confirm-ok-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">Confirmar</button>
+                    <button id="confirm-ok-btn" class="button-primary text-white font-bold py-2 px-6 rounded-lg hover:opacity-90">Confirmar</button>
                 </div>
             `;
-            createModal(modalId, title, content, 'max-w-md');
+            createModal(modalId, titleHtml, content, 'max-w-md');
 
             document.getElementById('confirm-ok-btn').addEventListener('click', () => {
                 document.getElementById(modalId)?.remove();
@@ -1225,17 +1422,18 @@
 
         window.showDetailsModal = (id) => {
             const data = completedChallenges.get(id);
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${data.challengeName || "Detalhes"}</h2>`;
             const content = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`;
-            createModal('details-modal', data.challengeName || "Detalhes", content, 'max-w-lg');
+            createModal('details-modal', titleHtml, content, 'max-w-lg');
         }
 
         function showImageZoomModal(challenge) {
-            createModal('zoom-modal', challenge.name, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
+            const titleHtml = `<h2 class="text-xl font-bold text-white">${challenge.name}</h2>`;
+            createModal('zoom-modal', titleHtml, `<img src="https://lh3.googleusercontent.com/d/${challenge.id}" class="w-full h-auto rounded-md">`);
         }
         
         function getLevelForXp(xp) {
             let currentLevel = null;
-            // a lista `allLevels` já vem ordenada por `xpRequired`
             for (const level of allLevels) {
                 if (xp >= level.xpRequired) {
                     currentLevel = level;
@@ -1246,7 +1444,112 @@
             return currentLevel;
         }
 
+        function applyTheme(themeId) {
+            const root = document.documentElement;
+            const theme = allThemes.find(t => t.id === themeId);
+            if (theme) {
+                root.style.setProperty('--bg-color', theme.colors.bg);
+                root.style.setProperty('--text-color', theme.colors.text);
+                root.style.setProperty('--primary-color', theme.colors.primary);
+                root.style.setProperty('--card-bg-color', theme.colors.cardBg);
+            } else {
+                root.style.cssText = ''; // Limpa para o padrão
+            }
+        }
+        
+        function openRedeemCodeModal() {
+             const titleHtml = `<h2 class="text-xl font-bold text-white">Ativar Código de Bônus</h2>`;
+             createModal('redeem-code-modal', titleHtml, `
+                <form id="redeem-code-form" class="space-y-4">
+                    <input type="text" id="code-input" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg font-mono tracking-widest text-center" placeholder="DIGITE O CÓDIGO AQUI">
+                    <button type="submit" class="w-full button-primary text-white font-bold py-3 rounded-lg hover:opacity-90">Ativar</button>
+                </form>
+            `, 'max-w-md');
+            document.getElementById('redeem-code-form').addEventListener('submit', redeemCode);
+        }
+
+        async function redeemCode(e) {
+            e.preventDefault();
+            const codeString = document.getElementById('code-input').value.toUpperCase();
+            if (!codeString) return;
+
+            const codeRef = doc(db, "specialCodes", codeString);
+            const userRedeemedRef = doc(db, "specialCodes", codeString, "redeemedBy", currentUser.uid);
+            const userRef = doc(db, "users", currentUser.uid);
+
+            try {
+                const codeDoc = await getDoc(codeRef);
+                if (!codeDoc.exists()) throw new Error("Código inválido ou não encontrado.");
+                const codeData = codeDoc.data();
+                
+                await runTransaction(db, async (transaction) => {
+                    const userRedeemedDoc = await transaction.get(userRedeemedRef);
+                    const freshCodeDoc = await transaction.get(codeRef);
+                    const freshCodeData = freshCodeDoc.data();
+
+                    if (freshCodeData.expiresAt.toDate() < new Date()) throw new Error("Este código expirou.");
+                    if (freshCodeData.usesLeft === 0) throw new Error("Este código já atingiu o limite de usos.");
+                    if (userRedeemedDoc.exists()) throw new Error("Você já ativou este código.");
+
+                    if (freshCodeData.effectType === 'PAUSE_TIMER') {
+                        const userDoc = await transaction.get(userRef);
+                        const userData = userDoc.data();
+                        if (!userData.activeChallenge || !userData.activeChallengeStartTime) {
+                             throw new Error("Você precisa estar em um desafio com tempo para usar este código.");
+                        }
+                        const pauseMinutes = freshCodeData.effectValue;
+                        const currentStartTime = userData.activeChallengeStartTime.toDate();
+                        const newStartTime = new Date(currentStartTime.getTime() + pauseMinutes * 60000);
+                        transaction.update(userRef, { activeChallengeStartTime: Timestamp.fromDate(newStartTime) });
+
+                    } else if (freshCodeData.effectType === 'SCORE_MULTIPLIER') {
+                        const expiresAt = new Date();
+                        expiresAt.setMinutes(expiresAt.getMinutes() + freshCodeData.durationMinutes);
+                        const bonusData = {
+                            type: freshCodeData.effectType,
+                            value: freshCodeData.effectValue,
+                            expiresAt: Timestamp.fromDate(expiresAt)
+                        };
+                        transaction.update(userRef, { activeBonus: bonusData });
+                    }
+
+                    if (freshCodeData.usesLeft > 0) {
+                        transaction.update(codeRef, { usesLeft: freshCodeData.usesLeft - 1 });
+                    }
+                    transaction.set(userRedeemedRef, { redeemedAt: serverTimestamp() });
+                });
+
+                document.getElementById('redeem-code-modal')?.remove();
+                await loadGameData(currentUser); 
+                
+                let successMessage = "Código ativado! Seu bônus já está valendo.";
+                if(codeData.effectType === 'PAUSE_TIMER') {
+                    successMessage = `Sucesso! O tempo do seu desafio foi estendido em ${codeData.effectValue} minutos.`;
+                }
+                createAlertModal("Sucesso!", successMessage);
+
+            } catch (error) {
+                 createAlertModal("Erro", error.message);
+            }
+        }
+        
+        async function checkActiveBonus() {
+            const bonus = currentUserData.activeBonus;
+            const indicator = document.getElementById('active-bonus-indicator');
+
+            if (bonus && bonus.expiresAt.toDate() > new Date()) {
+                const minutesLeft = Math.round((bonus.expiresAt.toDate() - new Date()) / 60000);
+                indicator.innerHTML = `BÔNUS ATIVO: ${bonus.value}x PONTOS (${minutesLeft}min restantes)`;
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+                if(bonus) { // Se tinha bônus mas expirou, limpa do banco
+                    await updateDoc(doc(db, "users", currentUser.uid), { activeBonus: null });
+                    currentUserData.activeBonus = null;
+                }
+            }
+        }
+
     </script>
 </body>
 </html>
-
