@@ -82,6 +82,17 @@
         #create-lobby-private:checked ~ .block {
             background-color: var(--primary-color);
         }
+        
+        /* Animações de View */
+        .view-container {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .view-hidden {
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+            position: absolute; /* Evita que o elemento ocupe espaço quando escondido */
+        }
     </style>
 </head>
 <body>
@@ -186,9 +197,12 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                     Completos
                                 </a>
-                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
                                     Ativar Código
+                                </a>
+                                <a href="#" id="sound-toggle-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
+                                    <!-- Sound Icon will be inserted here -->
                                 </a>
                             </div>
                         </div>
@@ -200,109 +214,111 @@
                     </div>
                 </div>
                 
-                <!-- Tela Principal (Solo e Competitivo) -->
-                <div id="main-view-container">
-                    <!-- Seleção de Categoria (Modo Solo) -->
-                    <div id="start-challenge-container" class="space-y-4 text-center py-8">
-                        <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
-                        <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                            <!-- Categorias serão inseridas aqui -->
-                        </div>
-                         <div class="flex flex-col items-center justify-center gap-4 mt-6">
-                             <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                                 Sortear Desafio
-                             </button>
-                             <div id="choice-button-container" class="w-full max-w-xs hidden">
-                                 <div class="relative py-2">
-                                     <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
-                                     <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
-                                 </div>
-                                 <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                     Escolher Desafio (<span id="choice-token-count">0</span>)
-                                 </button>
-                             </div>
-                             <!-- Botão para Modo Competitivo -->
-                            <div class="relative py-2 w-full max-w-xs">
-                                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
-                                <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                <div class="relative w-full">
+                    <!-- Tela Principal (Solo e Competitivo) -->
+                    <div id="main-view-container" class="view-container">
+                        <!-- Seleção de Categoria (Modo Solo) -->
+                        <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                            <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
+                            <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                                <!-- Categorias serão inseridas aqui -->
                             </div>
-                            <button id="show-competitive-mode-btn" class="w-full max-w-xs bg-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-purple-700">
-                                Modo Competitivo
-                            </button>
-                        </div>
-                       <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
-                    </div>
-
-                    <!-- Área do Desafio (Modo Solo) -->
-                    <div id="challenge-container" class="hidden space-y-4">
-                        <div class="flex justify-between items-center flex-wrap gap-2">
-                            <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
-                                 <p id="timer-display" class="font-bold text-2xl"></p>
-                                 <p id="timer-bonus" class="text-sm text-cyan-400"></p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
-                                    (<span id="abandon-token-count">0</span>)
+                            <div class="flex flex-col items-center justify-center gap-4 mt-6">
+                                <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                                    Sortear Desafio
                                 </button>
-                                <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                                    (<span id="reroll-token-count">0</span>)
+                                <div id="choice-button-container" class="w-full max-w-xs hidden">
+                                    <div class="relative py-2">
+                                        <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                        <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                    </div>
+                                    <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                        Escolher Desafio (<span id="choice-token-count">0</span>)
+                                    </button>
+                                </div>
+                                <!-- Botão para Modo Competitivo -->
+                                <div class="relative py-2 w-full max-w-xs">
+                                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                    <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                </div>
+                                <button id="show-competitive-mode-btn" class="w-full max-w-xs bg-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-purple-700">
+                                    Modo Competitivo
                                 </button>
                             </div>
-                        </div>
-                        <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
-                            <div id="loader" class="loader hidden"></div>
-                            <p id="placeholder-text" class="text-gray-400 text-center"></p>
-                            <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-black/20 p-3 rounded-lg text-center">
-                                <p class="text-sm text-gray-400">Material Fornecido:</p>
-                                <p id="material-info" class="font-bold text-lg"></p>
-                            </div>
-                            <div class="bg-black/20 p-3 rounded-lg text-center">
-                                <p class="text-sm text-gray-400">Pontuação:</p>
-                                <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
-                            </div>
+                        <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
                         </div>
 
-                        <!-- Formulário de Resposta -->
-                        <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                            <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
-                            <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
-                            <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
-                        </form>
-                        <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
-                        <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                        <!-- Área do Desafio (Modo Solo) -->
+                        <div id="challenge-container" class="hidden space-y-4">
+                            <div class="flex justify-between items-center flex-wrap gap-2">
+                                <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                                    <p id="timer-display" class="font-bold text-2xl"></p>
+                                    <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
+                                        (<span id="abandon-token-count">0</span>)
+                                    </button>
+                                    <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                                        (<span id="reroll-token-count">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                                <div id="loader" class="loader hidden"></div>
+                                <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                                <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-black/20 p-3 rounded-lg text-center">
+                                    <p class="text-sm text-gray-400">Material Fornecido:</p>
+                                    <p id="material-info" class="font-bold text-lg"></p>
+                                </div>
+                                <div class="bg-black/20 p-3 rounded-lg text-center">
+                                    <p class="text-sm text-gray-400">Pontuação:</p>
+                                    <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                                </div>
+                            </div>
+
+                            <!-- Formulário de Resposta -->
+                            <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                                <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                                <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                            </form>
+                            <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                            <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Container do Modo Competitivo -->
-                <div id="competitive-container" class="hidden">
-                    <!-- Navegador de Lobbies -->
-                    <div id="lobby-browser">
-                        <div class="flex justify-between items-center mb-4">
-                             <h2 class="text-xl font-semibold">Salas Competitivas</h2>
-                             <button id="back-to-solo-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Voltar</button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <button id="create-lobby-btn" class="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700">Criar Nova Sala</button>
-                            <div class="bg-black/20 p-4 rounded-lg">
-                                <input type="text" id="join-lobby-id" class="w-full bg-white/20 text-white p-2 rounded-lg" placeholder="ID da Sala">
-                                <button id="join-lobby-btn" class="w-full mt-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Entrar na Sala</button>
+                    <!-- Container do Modo Competitivo -->
+                    <div id="competitive-container" class="view-container view-hidden">
+                        <!-- Navegador de Lobbies -->
+                        <div id="lobby-browser">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold">Salas Competitivas</h2>
+                                <button id="back-to-solo-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Voltar</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button id="create-lobby-btn" class="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700">Criar Nova Sala</button>
+                                <div class="bg-black/20 p-4 rounded-lg">
+                                    <input type="text" id="join-lobby-id" class="w-full bg-white/20 text-white p-2 rounded-lg" placeholder="ID da Sala">
+                                    <button id="join-lobby-btn" class="w-full mt-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Entrar na Sala</button>
+                                </div>
+                            </div>
+                            <h3 class="font-semibold mt-6 mb-2">Salas Abertas</h3>
+                            <div id="lobbies-list" class="space-y-2 max-h-64 overflow-y-auto">
+                                <!-- Lista de salas abertas -->
                             </div>
                         </div>
-                        <h3 class="font-semibold mt-6 mb-2">Salas Abertas</h3>
-                        <div id="lobbies-list" class="space-y-2 max-h-64 overflow-y-auto">
-                            <!-- Lista de salas abertas -->
-                        </div>
-                    </div>
 
-                    <!-- Visualização do Lobby -->
-                    <div id="lobby-view" class="hidden">
-                        <!-- Conteúdo dinâmico do lobby (espera, jogo, resultados) -->
+                        <!-- Visualização do Lobby -->
+                        <div id="lobby-view" class="hidden">
+                            <!-- Conteúdo dinâmico do lobby (espera, jogo, resultados) -->
+                        </div>
                     </div>
                 </div>
                 
@@ -376,6 +392,10 @@
         let lobbiesListener = null; // Para a lista de salas
         let matchTimerInterval = null;
 
+        // --- VARIÁVEIS DE UI/UX ---
+        let soundEnabled = true;
+        let audioCtx;
+
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -438,6 +458,11 @@
             if(currentUserData.profile?.activeTheme) {
                 applyTheme(currentUserData.profile.activeTheme);
             }
+
+            // Inicia o sistema de som e define o estado com base no perfil do usuário
+            initializeAudio();
+            soundEnabled = currentUserData.profile?.soundEnabled ?? true;
+            updateSoundIcon();
             
             await checkActiveBonus();
             updateXpBar();
@@ -456,6 +481,8 @@
                     currentChallenge = challenge;
                     displayChallenge(challenge, activeChallengeData.startTime);
                 }
+            } else if (!currentUserData.hasCompletedTutorial) {
+                startTutorial();
             }
         }
 
@@ -517,6 +544,7 @@
         }
         
         document.getElementById('category-grid').addEventListener('click', (e) => {
+            playSound('click');
             const target = e.target.closest('.category-btn');
             if (!target) return;
             
@@ -565,8 +593,10 @@
                     name, email, 
                     activeChallenge: null, score: 0, xp: 0, pointsSpent: 0,
                     consumables: { reroll: 0, choice: 0, abandon: 0 },
-                    profile: { title: null, badgeUrl: null, activeTheme: null },
-                    activeBonus: null
+                    profile: { title: null, badgeUrl: null, activeTheme: null, soundEnabled: true },
+                    activeBonus: null,
+                    stats: { totalAttempts: 0, correctAttempts: 0 },
+                    hasCompletedTutorial: false
                 });
                 showMessage('Cadastro realizado! Faça o login.');
                 switchTab(document.getElementById('tab-login'));
@@ -580,7 +610,7 @@
         });
         document.getElementById('logout-button').addEventListener('click', async () => {
              if (currentLobbyId) {
-                await leaveLobby(currentLobbyId);
+                await leaveLobby();
              }
              signOut(auth);
         });
@@ -614,8 +644,8 @@
             const loader = document.getElementById('loader');
             const placeholderText = document.getElementById('placeholder-text');
 
-            startContainer.classList.add('hidden');
-            challengeContainer.classList.remove('hidden');
+            // Animação de troca de view
+            switchView(startContainer, challengeContainer);
             
             loader.classList.remove('hidden');
             placeholderText.classList.add('hidden');
@@ -688,6 +718,7 @@
         }
 
         startButton.addEventListener('click', async () => {
+            playSound('click');
             const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
 
             if (availableChallenges.length === 0) {
@@ -709,7 +740,7 @@
         });
 
         async function submitSoloAnswer() {
-             if (!currentUser || !currentChallenge) return;
+            if (!currentUser || !currentChallenge) return;
 
             const userMass = parseFloat(document.getElementById('mass-input').value);
             const userVolume = parseFloat(document.getElementById('volume-input').value);
@@ -734,6 +765,7 @@
 
 
             if (isCorrect) {
+                playSound('correct');
                 const timeLimit = parseInt(currentChallenge.timeLimit);
                 if (timeLimit > 0 && activeChallengeData.startTime) {
                     const now = new Date();
@@ -750,20 +782,21 @@
                     answerFeedback.textContent = `Resposta Correta! +${finalScore} pontos`;
                 }
             } else {
+                playSound('incorrect');
                 answerFeedback.textContent = "Resposta Incorreta.";
             }
             
             answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium ${isCorrect ? 'bg-green-500/50 text-green-100' : 'bg-red-500/50 text-red-100'}`;
             answerFeedback.classList.remove('hidden');
             
+            const userDocRef = doc(db, "users", currentUser.uid);
+
             if(isCorrect) {
                 clearInterval(challengeTimerInterval);
                 answerForm.classList.add('hidden');
                 nextChallengeButton.classList.remove('hidden');
                 rerollButton.classList.add('hidden');
                 abandonButton.classList.add('hidden');
-                
-                const userDocRef = doc(db, "users", currentUser.uid);
                 
                 const oldLevel = getLevelForXp(currentUserData.xp);
 
@@ -772,7 +805,17 @@
                     const userData = userDoc.data();
                     const newScore = (userData.score || 0) + finalScore;
                     const newXp = (userData.xp || 0) + finalScore;
-                    transaction.update(userDocRef, { score: newScore, xp: newXp, activeChallenge: null, activeChallengeStartTime: null });
+                    const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                    newStats.totalAttempts++;
+                    newStats.correctAttempts++;
+
+                    transaction.update(userDocRef, { 
+                        score: newScore, 
+                        xp: newXp, 
+                        activeChallenge: null, 
+                        activeChallengeStartTime: null,
+                        stats: newStats
+                    });
                     
                     const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentChallenge.id);
                     const userFinalAnswer = { mass: userMass, volume: userVolume };
@@ -786,6 +829,9 @@
                 
                 currentUserData.score += finalScore;
                 currentUserData.xp += finalScore;
+                currentUserData.stats.totalAttempts++;
+                currentUserData.stats.correctAttempts++;
+
 
                 const newLevel = getLevelForXp(currentUserData.xp);
 
@@ -802,6 +848,16 @@
                 await checkAchievements();
                 updateConsumablesUI();
                 updateXpBar();
+            } else {
+                // Se errou, apenas atualiza as estatísticas de tentativa
+                await runTransaction(db, async (transaction) => {
+                     const userDoc = await transaction.get(userDocRef);
+                     const userData = userDoc.data();
+                     const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                     newStats.totalAttempts++;
+                     transaction.update(userDocRef, { stats: newStats });
+                });
+                currentUserData.stats.totalAttempts++;
             }
 
             await addDoc(collection(db, "attempts"), {
@@ -812,8 +868,15 @@
         }
         
         function resetToStartScreen() {
-            challengeContainer.classList.add('hidden');
-            document.getElementById('start-challenge-container').classList.remove('hidden');
+            const startContainer = document.getElementById('start-challenge-container');
+            if(challengeContainer.classList.contains('hidden') && startContainer.classList.contains('hidden')) {
+                 // Estava no modo competitivo, então mostra a tela de solo
+                 switchView(competitiveContainer, mainViewContainer.querySelector('#start-challenge-container'));
+            } else if (!challengeContainer.classList.contains('hidden')) {
+                 // Estava em um desafio solo, volta para a seleção de categoria
+                 switchView(challengeContainer, startContainer);
+            }
+
             answerForm.classList.remove('hidden');
             nextChallengeButton.classList.add('hidden');
             answerFeedback.classList.add('hidden');
@@ -827,15 +890,20 @@
             clearInterval(challengeTimerInterval);
         }
         
-        nextChallengeButton.addEventListener('click', resetToStartScreen);
+        nextChallengeButton.addEventListener('click', () => {
+             playSound('click');
+             resetToStartScreen();
+        });
 
         // --- LÓGICA DOS CONSUMÍVEIS E CÓDIGOS ---
         rerollButton.addEventListener('click', async () => {
+            playSound('click');
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.reroll || 0) <= 0) {
                 return createAlertModal("Sem Tokens", "Você não tem tokens de troca.");
             }
             createConfirmationModal("Confirmar Troca", "Usar 1 token para trocar de desafio? (O tempo do novo desafio iniciará imediatamente)", async () => {
+                playSound('click');
                 const availableChallenges = allChallenges.filter(c => c.category === currentChallenge.category && !completedChallenges.has(c.id) && c.id !== currentChallenge.id);
 
                 if (availableChallenges.length === 0) {
@@ -858,11 +926,13 @@
         });
         
         abandonButton.addEventListener('click', async () => {
+            playSound('click');
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.abandon || 0) <= 0) {
                 return createAlertModal("Sem Tokens", "Você não tem tokens para abandonar desafios.");
             }
             createConfirmationModal("Confirmar Abandono", "Usar 1 token para abandonar o desafio atual e voltar à tela inicial?", async () => {
+                 playSound('click');
                  const userDocRef = doc(db, "users", currentUser.uid);
                  await runTransaction(db, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
@@ -881,6 +951,7 @@
         });
         
         choiceButton.addEventListener('click', () => {
+            playSound('click');
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.choice || 0) <= 0) {
                 return createAlertModal("Sem Tokens", "Você não tem tokens de escolha.");
@@ -907,10 +978,12 @@
             
             document.querySelectorAll('.choice-item-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
+                    playSound('click');
                     const challengeId = e.currentTarget.dataset.id;
                     const chosenChallenge = allChallenges.find(c => c.id === challengeId);
                     
                     createConfirmationModal("Confirmar Escolha", `Usar 1 token para iniciar o desafio "${chosenChallenge.name}"?`, async () => {
+                        playSound('click');
                         const userDocRef = doc(db, "users", currentUser.uid);
                         await runTransaction(db, async (transaction) => {
                              const userDoc = await transaction.get(userDocRef);
@@ -932,12 +1005,13 @@
         const menuDropdown = document.getElementById('menu-dropdown');
 
         menuToggleButton.addEventListener('click', (e) => {
+            playSound('click');
             e.stopPropagation();
             menuDropdown.classList.toggle('hidden');
         });
 
         document.addEventListener('click', (e) => {
-            if (!menuToggleButton.contains(e.target)) {
+            if (!menuToggleButton.contains(e.target) && !menuDropdown.classList.contains('hidden')) {
                 menuDropdown.classList.add('hidden');
             }
         });
@@ -1008,7 +1082,7 @@
             }
         
             // --- Anexar todos os listeners no final ---
-            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', buyItem));
+            listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', (e) => { playSound('click'); buyItem(e); }));
         }
 
         function openCompletedModal() {
@@ -1035,7 +1109,7 @@
                 </div>`;
 
             createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2">Carregando...</div>', 'max-w-lg');
-            document.getElementById('show-all-users-btn').addEventListener('click', showFullRanking);
+            document.getElementById('show-all-users-btn').addEventListener('click', () => { playSound('click'); showFullRanking(); });
 
             const listEl = document.getElementById('ranking-list');
             
@@ -1094,7 +1168,7 @@
                 </div>
                 <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
             `;
-            div.addEventListener('click', () => openPublicProfileModal(userDoc.id));
+            div.addEventListener('click', () => { playSound('click'); openPublicProfileModal(userDoc.id); });
             return div;
         }
 
@@ -1129,17 +1203,19 @@
             }
         }
         
-        document.getElementById('profile-button').addEventListener('click', (e) => { e.preventDefault(); openMyProfileModal(); menuDropdown.classList.add('hidden'); });
-        document.getElementById('shop-button-menu').addEventListener('click', (e) => { e.preventDefault(); openShopModal(); menuDropdown.classList.add('hidden'); });
-        document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); openCompletedModal(); menuDropdown.classList.add('hidden'); });
-        document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); openRankingModal(); menuDropdown.classList.add('hidden'); });
-        document.getElementById('redeem-code-button').addEventListener('click', (e) => { e.preventDefault(); openRedeemCodeModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('profile-button').addEventListener('click', (e) => { e.preventDefault(); playSound('click'); openMyProfileModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('shop-button-menu').addEventListener('click', (e) => { e.preventDefault(); playSound('click'); openShopModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('completed-button-menu').addEventListener('click', (e) => { e.preventDefault(); playSound('click'); openCompletedModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('ranking-button').addEventListener('click', (e) => { e.preventDefault(); playSound('click'); openRankingModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('redeem-code-button').addEventListener('click', (e) => { e.preventDefault(); playSound('click'); openRedeemCodeModal(); menuDropdown.classList.add('hidden'); });
+        document.getElementById('sound-toggle-button').addEventListener('click', (e) => { e.preventDefault(); toggleSound(); menuDropdown.classList.add('hidden'); });
 
         async function buyItem(e) {
             const { id, price, type, name } = e.target.dataset;
             const itemPrice = parseInt(price);
             
             createConfirmationModal('Confirmar Compra', `Comprar "${name}" por ${itemPrice} pontos?`, async () => {
+                playSound('click');
                 const userDocRef = doc(db, "users", currentUser.uid);
                 try {
                     await runTransaction(db, async (transaction) => {
@@ -1235,11 +1311,24 @@
                     </div>
                 </label>
             `).join('');
+
+            const stats = currentUserData.stats || { totalAttempts: 0, correctAttempts: 0 };
+            const accuracy = stats.totalAttempts > 0 ? ((stats.correctAttempts / stats.totalAttempts) * 100).toFixed(1) : "N/A";
+            
+            let favoriteCategory = "Nenhuma";
+            if(completedChallenges.size > 0) {
+                const categoryCounts = {};
+                completedChallenges.forEach(c => {
+                    categoryCounts[c.category] = (categoryCounts[c.category] || 0) + 1;
+                });
+                favoriteCategory = Object.keys(categoryCounts).reduce((a, b) => categoryCounts[a] > categoryCounts[b] ? a : b);
+            }
             
             const content = `
                 <div class="border-b border-gray-600 mb-4">
-                    <nav class="flex -mb-px">
+                    <nav class="flex -mb-px flex-wrap">
                         <button data-tab="equip" class="tab-btn border-b-2 border-indigo-500 text-white py-2 px-4">Equipar</button>
+                        <button data-tab="stats" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Estatísticas</button>
                         <button data-tab="themes" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Temas</button>
                         <button data-tab="achievements" class="tab-btn border-b-2 border-transparent text-gray-400 py-2 px-4">Conquistas</button>
                     </nav>
@@ -1260,6 +1349,14 @@
                         </div>
                     </div>
                      <button id="save-profile-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Perfil</button>
+                </div>
+                <div id="tab-content-stats" class="tab-content hidden space-y-4">
+                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${completedChallenges.size}</p><p class="text-sm text-gray-400">Desafios Concluídos</p></div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${accuracy}%</p><p class="text-sm text-gray-400">Taxa de Acerto</p></div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg"><p class="text-2xl font-bold">${favoriteCategory}</p><p class="text-sm text-gray-400">Categoria Favorita</p></div>
+                     </div>
+                     <p class="text-center text-gray-500 text-xs pt-4">Mais estatísticas em breve!</p>
                 </div>
                  <div id="tab-content-themes" class="tab-content hidden space-y-4">
                     ${unlockedThemesHtml || '<p class="text-gray-400">Nenhum tema desbloqueado.</p>'}
@@ -1282,6 +1379,7 @@
 
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => tab.addEventListener('click', (e) => {
+                playSound('click');
                 tabs.forEach(t => {t.classList.remove('border-indigo-500', 'text-white'); t.classList.add('border-transparent', 'text-gray-400')});
                 e.target.classList.add('border-indigo-500', 'text-white');
                 e.target.classList.remove('border-transparent', 'text-gray-400');
@@ -1290,6 +1388,7 @@
             }));
 
             document.getElementById('save-profile-btn').addEventListener('click', async () => {
+                playSound('click');
                 const newTitle = document.getElementById('title-select').value;
                 const newBadge = document.querySelector('input[name="badge-select"]:checked').value;
                 await updateDoc(doc(db, "users", currentUser.uid), { "profile.title": newTitle, "profile.badgeUrl": newBadge });
@@ -1298,6 +1397,7 @@
                 createAlertModal('Sucesso', 'Seu perfil foi atualizado!');
             });
             document.getElementById('save-theme-btn').addEventListener('click', async () => {
+                playSound('click');
                 const newThemeId = document.querySelector('input[name="theme-select"]:checked')?.value || null;
                 await updateDoc(doc(db, "users", currentUser.uid), { "profile.activeTheme": newThemeId });
                 currentUserData.profile.activeTheme = newThemeId;
@@ -1376,11 +1476,13 @@
                         await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
                         unlockedAchievements.set(achievement.id, {});
                         showToast(`Conquista Desbloqueada: ${achievement.name}`);
+                        playSound('achievement');
                     }
                }
         }
         
         async function checkForLevelUpRewards(newLevel) {
+            playSound('levelUp');
             const reward = newLevel.reward;
             if (!reward || Object.values(reward).every(v => v === 0)) return;
 
@@ -1444,7 +1546,7 @@
                     <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
                         <div class="flex justify-between items-center mb-4">
                             ${typeof titleHtml === 'string' ? `<h2 class="text-xl font-bold text-white">${titleHtml}</h2>` : titleHtml}
-                            <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
+                            <button onclick="document.getElementById('${id}').remove(); playSound('click');" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
                         </div>
                         <div class="max-h-[75vh] overflow-auto">${content}</div>
                     </div>
@@ -1471,6 +1573,7 @@
              createModal(modalId, titleHtml, content, 'max-w-md');
              
              document.getElementById('alert-ok-btn').addEventListener('click', () => {
+                 playSound('click');
                  document.getElementById(modalId)?.remove();
                  if(onOk) onOk();
              });
@@ -1482,7 +1585,7 @@
             const content = `
                 <p class="text-gray-300 mb-6">${message}</p>
                 <div class="flex justify-end gap-4">
-                    <button onclick="document.getElementById('${modalId}').remove()" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
+                    <button onclick="document.getElementById('${modalId}').remove(); playSound('click');" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
                     <button id="confirm-ok-btn" class="button-primary text-white font-bold py-2 px-6 rounded-lg hover:opacity-90">Confirmar</button>
                 </div>
             `;
@@ -1500,6 +1603,7 @@
         });
 
         window.showDetailsModal = (id) => {
+            playSound('click');
             const data = completedChallenges.get(id);
             const titleHtml = `<h2 class="text-xl font-bold text-white">${data.challengeName || "Detalhes"}</h2>`;
             const content = `<img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-auto rounded-md">`;
@@ -1635,14 +1739,14 @@
         const abandonCompetitionBtn = document.getElementById('abandon-competition-btn');
 
         document.getElementById('show-competitive-mode-btn').addEventListener('click', () => {
-            mainViewContainer.classList.add('hidden');
-            competitiveContainer.classList.remove('hidden');
+            playSound('click');
+            switchView(mainViewContainer, competitiveContainer);
             listenToLobbies();
         });
 
         document.getElementById('back-to-solo-btn').addEventListener('click', () => {
-            mainViewContainer.classList.remove('hidden');
-            competitiveContainer.classList.add('hidden');
+            playSound('click');
+            switchView(competitiveContainer, mainViewContainer);
             if (lobbiesListener) lobbiesListener(); // Para de ouvir a lista de salas
         });
 
@@ -1673,7 +1777,7 @@
                     `;
                     listEl.appendChild(lobbyEl);
                 });
-                document.querySelectorAll('.join-lobby-list-btn').forEach(btn => btn.addEventListener('click', (e) => joinLobby(e.target.dataset.id)))
+                document.querySelectorAll('.join-lobby-list-btn').forEach(btn => btn.addEventListener('click', (e) => { playSound('click'); joinLobby(e.target.dataset.id); }))
             });
         }
 
@@ -1718,7 +1822,7 @@
                 passwordContainer.classList.toggle('hidden', !privateToggle.checked);
             });
 
-            document.getElementById('confirm-create-lobby-btn').addEventListener('click', createLobby);
+            document.getElementById('confirm-create-lobby-btn').addEventListener('click', () => { playSound('click'); createLobby(); });
         }
 
         async function createLobby() {
@@ -1752,8 +1856,9 @@
             document.getElementById('create-lobby-modal')?.remove();
             await joinLobby(lobbyRef.id, true); // O 'true' pula a verificação de senha
         }
-        document.getElementById('create-lobby-btn').addEventListener('click', openCreateLobbyModal);
+        document.getElementById('create-lobby-btn').addEventListener('click', () => { playSound('click'); openCreateLobbyModal(); });
         document.getElementById('join-lobby-btn').addEventListener('click', () => {
+            playSound('click');
             const id = document.getElementById('join-lobby-id').value.trim();
             if(id) joinLobby(id);
         });
@@ -1786,8 +1891,7 @@
              });
 
             currentLobbyId = lobbyId;
-            document.getElementById('lobby-browser').classList.add('hidden');
-            document.getElementById('lobby-view').classList.remove('hidden');
+            switchView(competitiveContainer.querySelector('#lobby-browser'), competitiveContainer.querySelector('#lobby-view'));
             abandonCompetitionBtn.classList.remove('hidden');
 
 
@@ -1814,6 +1918,7 @@
             createModal('password-prompt-modal', 'Senha da Sala', content, 'max-w-sm');
             document.getElementById('lobby-password-form').addEventListener('submit', (e) => {
                 e.preventDefault();
+                playSound('click');
                 const inputPassword = document.getElementById('lobby-password-input').value;
                 if (inputPassword === lobbyData.settings.password) {
                     document.getElementById('password-prompt-modal')?.remove();
@@ -1852,17 +1957,16 @@
             if (lobbyListener) lobbyListener();
             lobbyListener = null;
             currentLobbyId = null;
-
-            document.getElementById('lobby-browser').classList.remove('hidden');
-            document.getElementById('lobby-view').classList.add('hidden');
-            document.getElementById('mini-ranking-container').classList.add('hidden');
+            
             abandonCompetitionBtn.classList.add('hidden');
+            document.getElementById('mini-ranking-container').classList.add('hidden');
             clearInterval(matchTimerInterval);
-            resetToStartScreen(); 
-            competitiveContainer.classList.add('hidden');
-            mainViewContainer.classList.remove('hidden');
+            resetToStartScreen();
+            
+            switchView(competitiveContainer, mainViewContainer);
         }
         abandonCompetitionBtn.addEventListener('click', () => {
+            playSound('click');
             createConfirmationModal("Abandonar Partida", "Tem certeza que deseja sair da competição?", () => leaveLobby());
         });
         
@@ -1909,17 +2013,18 @@
                         </div>
                      </div>
                 `;
-                document.getElementById('leave-lobby-btn').addEventListener('click', leaveLobby);
+                document.getElementById('leave-lobby-btn').addEventListener('click', () => { playSound('click'); leaveLobby(); });
                 if (isHost) {
-                    document.getElementById('start-lobby-btn').addEventListener('click', startLobby);
+                    document.getElementById('start-lobby-btn').addEventListener('click', () => { playSound('click'); startLobby(); });
                     document.getElementById('lobby-category-select').addEventListener('change', (e) => updateLobbySettings({ category: e.target.value }));
                     document.getElementById('lobby-time-input').addEventListener('change', (e) => updateLobbySettings({ timeLimitMinutes: parseInt(e.target.value) }));
                 }
 
             } else if (lobbyData.status === 'in_progress') {
-                lobbyView.innerHTML = ''; // Limpa a view do lobby
+                lobbyView.classList.add('hidden'); // Esconde a view do lobby
+                competitiveContainer.classList.add('hidden'); // Esconde o container competitivo
                 mainViewContainer.classList.remove('hidden'); // Mostra a view principal do jogo
-                competitiveContainer.classList.add('hidden');
+                switchView(mainViewContainer.querySelector('#start-challenge-container'), mainViewContainer.querySelector('#challenge-container'));
 
                 const challenge = allChallenges.find(c => c.id === lobbyData.currentChallengeId);
                 if(challenge) {
@@ -1938,7 +2043,7 @@
                         if(isHost) {
                             nextChallengeButton.classList.remove('hidden');
                             nextChallengeButton.textContent = 'Próximo Desafio';
-                            nextChallengeButton.onclick = () => selectNextCompetitiveChallenge(lobbyData);
+                            nextChallengeButton.onclick = () => { playSound('click'); selectNextCompetitiveChallenge(lobbyData); };
                         }
                     } else {
                         answerForm.classList.remove('hidden');
@@ -1993,6 +2098,7 @@
                  `;
                 createModal('lobby-results', 'Resultados Finais', content, 'max-w-md');
                 document.getElementById('close-results-btn').addEventListener('click', () => {
+                     playSound('click');
                      document.getElementById('lobby-results').remove();
                      if(isHost) deleteDoc(doc(db, "lobbies", currentLobbyId));
                      leaveLobby();
@@ -2038,6 +2144,7 @@
             const isCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100) && Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
 
             if (isCorrect) {
+                playSound('correct');
                 const lobbyRef = doc(db, "lobbies", currentLobbyId);
                 const finalScore = parseInt(currentChallenge.score || 0);
 
@@ -2070,6 +2177,7 @@
                  updateXpBar();
                  updateConsumablesUI();
             } else {
+                playSound('incorrect');
                 answerFeedback.textContent = "Resposta Incorreta.";
                 answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium bg-red-500/50 text-red-100`;
                 answerFeedback.classList.remove('hidden');
@@ -2091,6 +2199,160 @@
         
         async function finishLobby() {
             await updateDoc(doc(db, "lobbies", currentLobbyId), { status: 'finished' });
+        }
+
+        // --- FUNÇÕES DE UI/UX ---
+
+        function switchView(from, to) {
+            if (!from || !to) return;
+            from.classList.add('view-hidden');
+            
+            setTimeout(() => {
+                from.classList.add('hidden');
+                to.classList.remove('hidden');
+                setTimeout(() => {
+                    to.classList.remove('view-hidden');
+                }, 10);
+            }, 300); // Deve corresponder à duração da transição do CSS
+        }
+
+        function initializeAudio() {
+            try {
+                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch(e) {
+                console.warn("Web Audio API is not supported in this browser");
+                soundEnabled = false;
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            gainNode.gain.value = 0.1;
+
+            switch (type) {
+                case 'click':
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
+                    break;
+                case 'correct':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    oscillator.frequency.linearRampToValueAtTime(698.46, audioCtx.currentTime + 0.1); // F5
+                    gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
+                    break;
+                case 'incorrect':
+                     oscillator.type = 'square';
+                     oscillator.frequency.setValueAtTime(164.81, audioCtx.currentTime); // E3
+                     oscillator.frequency.linearRampToValueAtTime(130.81, audioCtx.currentTime + 0.2); // C3
+                     gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+                     break;
+                case 'levelUp':
+                     oscillator.type = 'sine';
+                     oscillator.frequency.setValueAtTime(261.63, audioCtx.currentTime); // C4
+                     oscillator.frequency.linearRampToValueAtTime(523.25, audioCtx.currentTime + 0.2);
+                     oscillator.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + 0.4); // C6
+                     gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+                     break;
+                case 'achievement':
+                     oscillator.type = 'triangle';
+                     oscillator.frequency.setValueAtTime(880.00, audioCtx.currentTime); // A5
+                     oscillator.frequency.linearRampToValueAtTime(1396.91, audioCtx.currentTime + 0.1); // F6
+                     gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+                     break;
+            }
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        async function toggleSound() {
+            soundEnabled = !soundEnabled;
+            updateSoundIcon();
+            playSound('click');
+            await updateDoc(doc(db, "users", currentUser.uid), { "profile.soundEnabled": soundEnabled });
+            currentUserData.profile.soundEnabled = soundEnabled;
+        }
+
+        function updateSoundIcon() {
+            const btn = document.getElementById('sound-toggle-button');
+            const iconOn = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>Som: Ligado`;
+            const iconOff = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>Som: Desligado`;
+            btn.innerHTML = soundEnabled ? iconOn : iconOff;
+        }
+
+        async function startTutorial() {
+            const steps = [
+                {
+                    title: "Bem-vindo(a)!",
+                    text: "Este é um rápido tutorial para te guiar pelo jogo. Vamos começar?",
+                },
+                {
+                    element: '#user-score',
+                    title: "Pontos",
+                    text: "Aqui ficam seus pontos. Você os ganha ao completar desafios e pode usá-los na Loja."
+                },
+                {
+                    element: '#xp-bar-container',
+                    title: "Nível e XP",
+                    text: "Completar desafios também te dá XP (Experiência) para subir de nível e desbloquear recompensas."
+                },
+                {
+                    element: '#category-grid',
+                    title: "Categorias",
+                    text: "Primeiro, escolha uma categoria de desafios para começar a jogar."
+                },
+                {
+                    element: '#start-button',
+                    title: "Comece a Jogar!",
+                    text: "Depois de escolher a categoria, clique aqui para receber um desafio aleatório. Boa sorte!",
+                }
+            ];
+            
+            let currentStep = 0;
+
+            const showStep = () => {
+                const step = steps[currentStep];
+                const content = `
+                    <p class="text-gray-300 mb-6">${step.text}</p>
+                    <div class="flex justify-end gap-4">
+                        ${currentStep > 0 ? `<button id="tutorial-prev-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Anterior</button>` : ''}
+                        <button id="tutorial-next-btn" class="button-primary text-white font-bold py-2 px-4 rounded-lg hover:opacity-90">${currentStep === steps.length - 1 ? 'Finalizar' : 'Próximo'}</button>
+                    </div>
+                `;
+                createModal('tutorial-modal', step.title, content, 'max-w-md');
+                
+                document.getElementById('tutorial-next-btn').addEventListener('click', () => {
+                    playSound('click');
+                    currentStep++;
+                    if (currentStep < steps.length) {
+                        showStep();
+                    } else {
+                        document.getElementById('tutorial-modal')?.remove();
+                        endTutorial();
+                    }
+                });
+                
+                if (currentStep > 0) {
+                     document.getElementById('tutorial-prev-btn').addEventListener('click', () => {
+                        playSound('click');
+                        currentStep--;
+                        showStep();
+                     });
+                }
+            };
+            
+            showStep();
+        }
+
+        async function endTutorial() {
+            await updateDoc(doc(db, "users", currentUser.uid), { hasCompletedTutorial: true });
+            currentUserData.hasCompletedTutorial = true;
         }
 
     </script>
