@@ -75,6 +75,13 @@
         .animate-slide-in-out {
             animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
         }
+        /* Toggle Switch CSS */
+        #create-lobby-private:checked ~ .dot {
+            transform: translateX(1.5rem); /* w-6 */
+        }
+        #create-lobby-private:checked ~ .block {
+            background-color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -152,6 +159,10 @@
                             <span class="text-gray-400 text-sm">pontos</span>
                         </div>
                         
+                        <button id="abandon-competition-btn" class="hidden items-center justify-center bg-yellow-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-yellow-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                            <span class="ml-2 hidden sm:inline">Abandonar</span>
+                        </button>
                         <!-- Menu Dropdown -->
                         <div class="relative">
                             <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
@@ -1621,6 +1632,7 @@
         // --- MODO COMPETITIVO ---
         const mainViewContainer = document.getElementById('main-view-container');
         const competitiveContainer = document.getElementById('competitive-container');
+        const abandonCompetitionBtn = document.getElementById('abandon-competition-btn');
 
         document.getElementById('show-competitive-mode-btn').addEventListener('click', () => {
             mainViewContainer.classList.add('hidden');
@@ -1651,9 +1663,10 @@
                     const lobby = doc.data();
                     const lobbyEl = document.createElement('div');
                     lobbyEl.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                    const lockIcon = lobby.settings.isPrivate ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a3 3 0 00-3 3v1H6a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V8a2 2 0 00-2-2h-1V5a3 3 0 00-3-3zm-1 4V5a1 1 0 112 0v1H9z" clip-rule="evenodd" /></svg>` : '';
                     lobbyEl.innerHTML = `
                         <div>
-                            <p class="font-semibold">${lobby.hostName}'s Room</p>
+                            <p class="font-semibold">${lobby.hostName}'s Room ${lockIcon}</p>
                             <p class="text-xs text-gray-400">${lobby.players.length} jogador(es)</p>
                         </div>
                         <button data-id="${doc.id}" class="join-lobby-list-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Entrar</button>
@@ -1664,44 +1677,119 @@
             });
         }
 
+        function openCreateLobbyModal() {
+            const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
+                .map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm">Categoria</label>
+                        <select id="create-lobby-category" class="w-full bg-gray-700 p-2 rounded mt-1">
+                            ${categoriesOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm">Tempo (minutos)</label>
+                        <input type="number" id="create-lobby-time" value="5" min="1" max="60" class="w-full bg-gray-700 p-2 rounded mt-1">
+                    </div>
+                    <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg">
+                        <label for="create-lobby-private" class="flex items-center cursor-pointer">
+                            <span class="mr-3 text-sm font-semibold">Sala Privada</span>
+                            <div class="relative">
+                                <input type="checkbox" id="create-lobby-private" class="sr-only peer">
+                                <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="create-lobby-password-container" class="hidden">
+                        <label class="text-sm">Senha da Sala</label>
+                        <input type="password" id="create-lobby-password" class="w-full bg-gray-700 p-2 rounded mt-1" placeholder="Mínimo 4 caracteres">
+                    </div>
+                    <button id="confirm-create-lobby-btn" class="w-full mt-4 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Criar Sala</button>
+                </div>
+            `;
+            createModal('create-lobby-modal', 'Criar Sala Competitiva', content, 'max-w-md');
+
+            const privateToggle = document.getElementById('create-lobby-private');
+            const passwordContainer = document.getElementById('create-lobby-password-container');
+            privateToggle.addEventListener('change', () => {
+                passwordContainer.classList.toggle('hidden', !privateToggle.checked);
+            });
+
+            document.getElementById('confirm-create-lobby-btn').addEventListener('click', createLobby);
+        }
+
         async function createLobby() {
+            const settings = {
+                category: document.getElementById('create-lobby-category').value,
+                timeLimitMinutes: parseInt(document.getElementById('create-lobby-time').value) || 5,
+                isPrivate: document.getElementById('create-lobby-private').checked,
+                password: null
+            };
+
+            if (settings.isPrivate) {
+                const password = document.getElementById('create-lobby-password').value;
+                if (password.length < 4) {
+                    return createAlertModal("Erro", "A senha deve ter pelo menos 4 caracteres.");
+                }
+                settings.password = password;
+            }
+
             const lobbyRef = doc(collection(db, "lobbies"));
             const lobbyData = {
                 hostId: currentUser.uid,
                 hostName: currentUserData.name,
                 players: [{ uid: currentUser.uid, name: currentUserData.name, score: 0 }],
                 status: 'waiting', // waiting, in_progress, finished
-                settings: {
-                    category: 'Parafusos',
-                    timeLimitMinutes: 5,
-                },
+                settings: settings,
                 currentChallengeId: null,
                 challengeHistory: [],
                 createdAt: serverTimestamp(),
             };
             await setDoc(lobbyRef, lobbyData);
-            await joinLobby(lobbyRef.id);
+            document.getElementById('create-lobby-modal')?.remove();
+            await joinLobby(lobbyRef.id, true); // O 'true' pula a verificação de senha
         }
-        document.getElementById('create-lobby-btn').addEventListener('click', createLobby);
+        document.getElementById('create-lobby-btn').addEventListener('click', openCreateLobbyModal);
         document.getElementById('join-lobby-btn').addEventListener('click', () => {
-            const id = document.getElementById('join-lobby-id').value;
+            const id = document.getElementById('join-lobby-id').value.trim();
             if(id) joinLobby(id);
         });
 
-        async function joinLobby(lobbyId) {
+        async function joinLobby(lobbyId, skipPasswordCheck = false) {
              const lobbyRef = doc(db, "lobbies", lobbyId);
              const lobbyDoc = await getDoc(lobbyRef);
-             if (!lobbyDoc.exists() || lobbyDoc.data().status !== 'waiting') {
-                return createAlertModal("Erro", "Sala não encontrada ou já iniciada.");
+
+             if (!lobbyDoc.exists()) {
+                return createAlertModal("Erro", "Sala não encontrada.");
+             }
+             const lobbyData = lobbyDoc.data();
+             if (lobbyData.status !== 'waiting') {
+                return createAlertModal("Erro", "Esta partida já começou.");
+             }
+
+             if (lobbyData.settings.isPrivate && !skipPasswordCheck) {
+                return promptForLobbyPassword(lobbyId, lobbyData);
              }
             
-             await updateDoc(lobbyRef, {
-                players: arrayUnion({ uid: currentUser.uid, name: currentUserData.name, score: 0 })
+             await runTransaction(db, async (transaction) => {
+                const freshLobbyDoc = await transaction.get(lobbyRef);
+                const currentLobbyData = freshLobbyDoc.data();
+                const isAlreadyIn = currentLobbyData.players.some(p => p.uid === currentUser.uid);
+
+                if (!isAlreadyIn) {
+                    const newPlayer = { uid: currentUser.uid, name: currentUserData.name, score: 0 };
+                    transaction.update(lobbyRef, { players: arrayUnion(newPlayer) });
+                }
              });
 
             currentLobbyId = lobbyId;
             document.getElementById('lobby-browser').classList.add('hidden');
             document.getElementById('lobby-view').classList.remove('hidden');
+            abandonCompetitionBtn.classList.remove('hidden');
+
 
             if (lobbiesListener) lobbiesListener();
             
@@ -1709,28 +1797,57 @@
                 if (doc.exists()) {
                     renderLobby(doc.data());
                 } else {
-                    // Sala foi deletada
-                    leaveLobby();
+                    // Sala foi deletada pelo host
+                    createAlertModal("Sala Fechada", "O líder fechou a sala.", () => leaveLobby(true));
                 }
             });
         }
+        
+        function promptForLobbyPassword(lobbyId, lobbyData) {
+            const content = `
+                 <p class="text-gray-400 text-sm mb-4">A sala de ${lobbyData.hostName} é privada. Por favor, insira a senha.</p>
+                 <form id="lobby-password-form">
+                    <input type="password" id="lobby-password-input" class="w-full bg-gray-700 p-2 rounded mt-1" required>
+                    <button type="submit" class="w-full mt-4 button-primary text-white font-bold py-2 rounded-lg hover:opacity-90">Entrar</button>
+                 </form>
+            `;
+            createModal('password-prompt-modal', 'Senha da Sala', content, 'max-w-sm');
+            document.getElementById('lobby-password-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const inputPassword = document.getElementById('lobby-password-input').value;
+                if (inputPassword === lobbyData.settings.password) {
+                    document.getElementById('password-prompt-modal')?.remove();
+                    joinLobby(lobbyId, true);
+                } else {
+                    createAlertModal("Erro", "Senha incorreta.");
+                }
+            })
+        }
 
-        async function leaveLobby() {
+        async function leaveLobby(wasKicked = false) {
             if (!currentLobbyId) return;
             
             const lobbyRef = doc(db, "lobbies", currentLobbyId);
-            const lobbyDoc = await getDoc(lobbyRef);
-
-            if(lobbyDoc.exists()) {
-                const lobbyData = lobbyDoc.data();
-                if (lobbyData.hostId === currentUser.uid) {
-                    await deleteDoc(lobbyRef);
-                } else {
-                     await updateDoc(lobbyRef, {
-                        players: arrayRemove({ uid: currentUser.uid, name: currentUserData.name, score: 0 })
-                    });
+            
+            // Apenas executa a lógica de remoção se não foi expulso (porque a sala já não existe)
+            if (!wasKicked) {
+                 const lobbyDoc = await getDoc(lobbyRef);
+                 if (lobbyDoc.exists()) {
+                    const lobbyData = lobbyDoc.data();
+                    if (lobbyData.hostId === currentUser.uid) {
+                        await deleteDoc(lobbyRef);
+                    } else {
+                        await runTransaction(db, async (transaction) => {
+                            const freshLobbyDoc = await transaction.get(lobbyRef);
+                            if (!freshLobbyDoc.exists()) return;
+                            const currentPlayers = freshLobbyDoc.data().players;
+                            const newPlayers = currentPlayers.filter(p => p.uid !== currentUser.uid);
+                            transaction.update(lobbyRef, { players: newPlayers });
+                        });
+                    }
                 }
             }
+
 
             if (lobbyListener) lobbyListener();
             lobbyListener = null;
@@ -1739,13 +1856,15 @@
             document.getElementById('lobby-browser').classList.remove('hidden');
             document.getElementById('lobby-view').classList.add('hidden');
             document.getElementById('mini-ranking-container').classList.add('hidden');
+            abandonCompetitionBtn.classList.add('hidden');
             clearInterval(matchTimerInterval);
-            resetToStartScreen(); // Volta para a tela principal
+            resetToStartScreen(); 
             competitiveContainer.classList.add('hidden');
             mainViewContainer.classList.remove('hidden');
-
-            listenToLobbies();
         }
+        abandonCompetitionBtn.addEventListener('click', () => {
+            createConfirmationModal("Abandonar Partida", "Tem certeza que deseja sair da competição?", () => leaveLobby());
+        });
         
         function renderLobby(lobbyData) {
             const lobbyView = document.getElementById('lobby-view');
@@ -1977,3 +2096,4 @@
     </script>
 </body>
 </html>
+
