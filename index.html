@@ -1105,6 +1105,14 @@
 
             const listEl = document.getElementById('ranking-list');
             
+            // Adiciona um único event listener na lista para gerenciar os cliques
+            listEl.addEventListener('click', (e) => {
+                const userRow = e.target.closest('[data-user-id]');
+                if (userRow) {
+                    openPublicProfileModal(userRow.dataset.userId);
+                }
+            });
+            
             try {
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, orderBy("xp", "desc"), limit(10));
@@ -1160,7 +1168,6 @@
                 </div>
                 <span class="font-bold text-cyan-400">${user.xp || 0} XP</span>
             `;
-            div.addEventListener('click', () => { openPublicProfileModal(userDoc.id); });
             return div;
         }
 
@@ -2485,3 +2492,5 @@
     </script>
 </body>
 </html>
+
+
