@@ -123,6 +123,7 @@
         let allChallengesData = [];
         let allAchievementsData = [];
         let allLevelsData = [];
+        let allUsersData = [];
         let unreadNotifications = [];
 
         // --- ELEMENTOS DO DOM ---
@@ -569,29 +570,29 @@
                     <input type="text" id="theme-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Tema">
                     <input type="text" id="theme-description" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Descrição (ex: Um tema escuro e elegante)">
                      <div class="border-t border-gray-600 pt-4">
-                        <label class="text-sm font-medium text-gray-300">Método de Obtenção</label>
-                        <select id="theme-obtain-method" class="w-full mt-2 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
-                            <option value="shop">Loja</option>
-                            <option value="level">Recompensa de Nível</option>
-                        </select>
-                   </div>
-                   <div id="theme-shop-fields">
-                        <input type="number" id="theme-price" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Preço na Loja">
-                   </div>
-                   <div id="theme-level-fields" class="hidden">
-                         <select id="theme-level-id" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
-                            <option value="">Selecione o nível</option>
-                            ${levelOptions}
+                         <label class="text-sm font-medium text-gray-300">Método de Obtenção</label>
+                         <select id="theme-obtain-method" class="w-full mt-2 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                             <option value="shop">Loja</option>
+                             <option value="level">Recompensa de Nível</option>
                          </select>
                    </div>
+                   <div id="theme-shop-fields">
+                         <input type="number" id="theme-price" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Preço na Loja">
+                   </div>
+                   <div id="theme-level-fields" class="hidden">
+                           <select id="theme-level-id" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                             <option value="">Selecione o nível</option>
+                             ${levelOptions}
+                           </select>
+                   </div>
                    <div class="border-t border-gray-600 pt-4">
-                         <label class="text-sm font-medium text-gray-300">Cores do Tema</label>
-                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                            <div class="flex flex-col items-center"><label>Fundo</label><input type="color" id="theme-color-bg" value="#0d1b2a" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
-                            <div class="flex flex-col items-center"><label>Texto</label><input type="color" id="theme-color-text" value="#FFFFFF" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
-                            <div class="flex flex-col items-center"><label>Primária</label><input type="color" id="theme-color-primary" value="#6366f1" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
-                            <div class="flex flex-col items-center"><label>Card</label><input type="color" id="theme-color-cardBg" value="#1a2634" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
-                         </div>
+                           <label class="text-sm font-medium text-gray-300">Cores do Tema</label>
+                           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                             <div class="flex flex-col items-center"><label>Fundo</label><input type="color" id="theme-color-bg" value="#0d1b2a" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                             <div class="flex flex-col items-center"><label>Texto</label><input type="color" id="theme-color-text" value="#FFFFFF" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                             <div class="flex flex-col items-center"><label>Primária</label><input type="color" id="theme-color-primary" value="#6366f1" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                             <div class="flex flex-col items-center"><label>Card</label><input type="color" id="theme-color-cardBg" value="#1a2634" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                           </div>
                    </div>
                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Tema</button>
                 </form>
@@ -698,15 +699,15 @@
 
                     <div id="effect-fields-score-multiplier">
                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-sm font-medium text-gray-300">Multiplicador de Pontos</label>
-                                <input type="number" step="0.1" id="code-score-multiplier-value" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 2 para 2x">
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-300">Duração (minutos)</label>
-                                <input type="number" id="code-score-multiplier-duration" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 60">
-                            </div>
-                        </div>
+                             <div>
+                                 <label class="text-sm font-medium text-gray-300">Multiplicador de Pontos</label>
+                                 <input type="number" step="0.1" id="code-score-multiplier-value" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 2 para 2x">
+                             </div>
+                             <div>
+                                 <label class="text-sm font-medium text-gray-300">Duração (minutos)</label>
+                                 <input type="number" id="code-score-multiplier-duration" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 60">
+                             </div>
+                         </div>
                     </div>
                     
                     <div id="effect-fields-pause-timer" class="hidden">
@@ -720,11 +721,11 @@
                           <div>
                             <label class="text-sm font-medium text-gray-300">Usos Totais (-1 para ilimitado)</label>
                             <input type="number" id="code-uses" required class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" value="-1">
-                        </div>
+                          </div>
                           <div>
                             <label class="text-sm font-medium text-gray-300">Data de Expiração</label>
                             <input type="date" id="code-expires" required class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
-                        </div>
+                          </div>
                     </div>
                     <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Código</button>
                 </form>
@@ -918,21 +919,48 @@
         }
         
         // --- VISUALIZAÇÃO DE USUÁRIOS ---
-        async function showUsersManagement() {
-            dynamicContent.classList.remove('hidden');
-            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Usuários Cadastrados</h2><div id="users-list" class="max-h-[30rem] overflow-y-auto space-y-2 pr-2"></div>`;
+        function renderUsersList(filter = '') {
             const usersList = document.getElementById('users-list');
-            usersList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
-            const usersSnapshot = await getDocs(query(collection(db, "users"), orderBy("xp", "desc")));
-            usersList.innerHTML = usersSnapshot.empty ? '<p class="text-gray-400">Nenhum usuário cadastrado.</p>' : '';
-            usersSnapshot.forEach(userDoc => {
-                const userData = userDoc.data();
+            if (!usersList) return;
+
+            const lowercasedFilter = filter.toLowerCase().trim();
+            const filteredUsers = allUsersData.filter(user => 
+                user.data.email.toLowerCase().includes(lowercasedFilter)
+            );
+
+            usersList.innerHTML = filteredUsers.length === 0 ? '<p class="text-gray-400">Nenhum usuário encontrado.</p>' : '';
+            
+            filteredUsers.forEach(user => {
+                const userDoc = user.doc;
+                const userData = user.data;
                 const div = document.createElement('div');
                 div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center cursor-pointer hover:bg-gray-600';
                 div.innerHTML = `<div><span class="text-white">${userData.email}</span><span class="text-sm text-cyan-400 ml-4">${userData.xp || 0} XP</span></div><span class="text-yellow-400 font-semibold">${userData.score || 0} pts</span>`;
                 div.addEventListener('click', () => showUserDetailsModal(userDoc.id, userData.email));
                 usersList.appendChild(div);
             });
+        }
+
+        async function showUsersManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                     <h2 class="text-2xl font-semibold text-white">Usuários Cadastrados</h2>
+                     <input type="text" id="user-search-input" placeholder="Buscar por email..." class="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 text-sm w-full sm:w-auto">
+                </div>
+                <div id="users-list" class="max-h-[30rem] overflow-y-auto space-y-2 pr-2"></div>`;
+            
+            document.getElementById('user-search-input').addEventListener('input', (e) => {
+                renderUsersList(e.target.value);
+            });
+
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            
+            const usersSnapshot = await getDocs(query(collection(db, "users"), orderBy("xp", "desc")));
+            allUsersData = usersSnapshot.docs.map(doc => ({ doc: doc, data: doc.data() }));
+            
+            renderUsersList(); 
         }
 
         async function showUserDetailsModal(userId, email) {
