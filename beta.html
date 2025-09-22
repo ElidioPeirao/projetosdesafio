@@ -1,409 +1,4 @@
-
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio de Projetos Mecânicos</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Estilos Customizados -->
-    <style>
-        :root {
-            --bg-color: #0d1b2a;
-            --text-color: #FFFFFF;
-            --primary-color: #6366f1;
-            --card-bg-color: rgba(255, 255, 255, 0.1);
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(rgba(255, 255, 255, 0.04) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 2px, transparent 2px);
-            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
-            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
-            transition: background-color 0.5s ease;
-        }
-        .card {
-            background-color: var(--card-bg-color);
-        }
-        .button-primary {
-            background-color: var(--primary-color);
-        }
-        ::placeholder { color: #9ca3af; opacity: 1; }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] { -moz-appearance: textfield; }
-        .loader {
-            border: 4px solid #f3f3f340; border-top: 4px solid var(--primary-color);
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { transition: opacity 0.3s ease; }
-        .modal-content { transition: transform 0.3s ease; }
-        .zoomable { cursor: zoom-in; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #718096; }
-        * { scrollbar-width: thin; scrollbar-color: #4a5568 rgba(0, 0, 0, 0.2); }
-        .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
-        
-        .category-btn.selected {
-            border-color: var(--primary-color);
-            background-color: rgba(99, 102, 241, 0.2); /* Mantendo uma cor base para o seletor */
-            transform: scale(1.05);
-        }
-        @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        @keyframes slide-out { from { transform: translateX(0); } to { transform: translateX(100%); } }
-        .animate-slide-in-out {
-            animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Container de Autenticação (Visível por padrão) -->
-    <div id="auth-container" class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="card w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
-            <div class="flex justify-center">
-                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto" onerror="this.onerror=null; this.src='https://placehold.co/128x50/000000/FFFFFF?text=Logo';">
-            </div>
-            <div class="flex border-b border-gray-500">
-                <button id="tab-login" class="flex-1 py-2 text-center font-semibold text-white border-b-2 border-indigo-500 transition-colors duration-300">Login</button>
-                <button id="tab-register" class="flex-1 py-2 text-center font-semibold text-gray-400 border-b-2 border-transparent transition-colors duration-300">Cadastro</button>
-            </div>
-            <div id="message-box" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
-            <!-- Formulário de Login -->
-            <div id="form-login">
-                <form id="login-form" class="space-y-6">
-                    <div>
-                        <label for="login-email" class="text-sm font-medium text-gray-300">Email</label>
-                        <input type="email" id="login-email" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="seuemail@exemplo.com">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center">
-                            <label for="login-password" class="text-sm font-medium text-gray-300">Senha</label>
-                            <a href="#" id="forgot-password" class="text-xs font-medium text-indigo-400 hover:underline">Esqueceu a senha?</a>
-                        </div>
-                        <div class="relative">
-                            <input type="password" id="login-password" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="********">
-                            <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Entrar</button>
-                </form>
-            </div>
-            <!-- Formulário de Cadastro -->
-            <div id="form-register" class="hidden">
-                 <form id="register-form" class="space-y-4">
-                    <input type="text" id="register-name" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Nome Completo">
-                    <input type="email" id="register-email" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Email">
-                    <div class="relative">
-                        <input type="password" id="register-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Senha">
-                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                        </button>
-                    </div>
-                    <div class="relative">
-                        <input type="password" id="register-confirm-password" required class="w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Confirmar Senha">
-                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-white">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                        </button>
-                    </div>
-                    <button type="submit" class="w-full button-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500">Cadastrar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Container do Jogo (Oculto por padrão) -->
-    <div id="game-container" class="hidden">
-        <div class="relative min-h-screen flex items-center justify-center p-4">
-              <div class="card w-full max-w-4xl backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20 pb-24">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h1 class="text-2xl font-bold">Desafio de Projetos</h1>
-                        <p id="user-email" class="text-sm text-gray-300"></p>
-                    </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <div id="active-bonus-indicator" class="hidden bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-lg text-right text-xs font-bold animate-pulse">
-                        </div>
-                        <div class="bg-black/20 px-4 py-2 rounded-lg text-right">
-                            <span class="text-yellow-400 font-bold text-lg" id="user-score">0</span>
-                            <span class="text-gray-400 text-sm">pontos</span>
-                        </div>
-                        
-                        <!-- Menu Dropdown -->
-                        <div class="relative">
-                            <button id="menu-toggle-button" class="flex items-center justify-center bg-gray-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-gray-600 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                                <span class="ml-2 hidden sm:inline">Menu</span>
-                            </button>
-                            <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20">
-                                <a href="#" id="solo-mode-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                                    Modo Solo
-                                </a>
-                                <a href="#" id="competition-mode-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
-                                     Competir
-                                </a>
-                                <a href="#" id="profile-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clip-rule="evenodd" /></svg>
-                                    Meu Perfil
-                                </a>
-                                <a href="#" id="ranking-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
-                                    Ranking
-                                </a>
-                                <a href="#" id="shop-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
-                                    Loja
-                                </a>
-                                <a href="#" id="completed-button-menu" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                    Completos
-                                </a>
-                                <a href="#" id="redeem-code-button" class="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg>
-                                    Ativar Código
-                                </a>
-                            </div>
-                        </div>
-
-                        <button id="logout-button" class="flex items-center justify-center bg-red-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-red-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
-                            <span class="ml-2 hidden sm:inline">Sair</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="solo-mode-container">
-                    <!-- Seleção de Categoria -->
-                    <div id="start-challenge-container" class="space-y-4 text-center py-8">
-                        <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
-                        <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                            <!-- Categorias serão inseridas aqui -->
-                        </div>
-                         <div class="flex flex-col items-center justify-center gap-4 mt-6">
-                            <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                                Sortear Desafio
-                            </button>
-                            <div id="choice-button-container" class="w-full max-w-xs hidden">
-                                <div class="relative py-2">
-                                    <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
-                                    <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
-                                </div>
-                                <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                    Escolher Desafio (<span id="choice-token-count">0</span>)
-                                </button>
-                            </div>
-                       </div>
-                      <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
-                    </div>
-    
-                    <!-- Área do Desafio -->
-                    <div id="challenge-container" class="hidden space-y-4">
-                        <div class="flex justify-between items-center flex-wrap gap-2">
-                            <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
-                                 <p id="timer-display" class="font-bold text-2xl"></p>
-                                 <p id="timer-bonus" class="text-sm text-cyan-400"></p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
-                                    (<span id="abandon-token-count">0</span>)
-                                </button>
-                                <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                                    (<span id="reroll-token-count">0</span>)
-                                </button>
-                            </div>
-                        </div>
-                        <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
-                            <div id="loader" class="loader hidden"></div>
-                            <p id="placeholder-text" class="text-gray-400 text-center"></p>
-                            <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-black/20 p-3 rounded-lg text-center">
-                                <p class="text-sm text-gray-400">Material Fornecido:</p>
-                                <p id="material-info" class="font-bold text-lg"></p>
-                            </div>
-                            <div class="bg-black/20 p-3 rounded-lg text-center">
-                                <p class="text-sm text-gray-400">Pontuação:</p>
-                                <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
-                            </div>
-                        </div>
-    
-                        <!-- Formulário de Resposta -->
-                        <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                            <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
-                            <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
-                            <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
-                        </form>
-                        <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
-                        <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
-                    </div>
-                </div>
-
-                <!-- Container do Modo Competição -->
-                <div id="competition-container" class="hidden">
-                    <!-- Hub de Competição -->
-                    <div id="competition-hub" class="text-center py-8">
-                        <h2 class="text-2xl font-bold mb-4">Modo Competição</h2>
-                        <button id="create-room-btn" class="button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90">Criar Nova Sala</button>
-                        <div class="mt-8 max-w-md mx-auto">
-                            <h3 class="text-xl font-semibold mb-3">Meus Convites</h3>
-                            <div id="invitations-list" class="space-y-2">
-                                <p class="text-gray-400">Nenhum convite no momento.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Lobby da Competição -->
-                    <div id="competition-lobby" class="hidden py-8 max-w-2xl mx-auto">
-                        <div class="flex justify-between items-center">
-                            <h2 id="lobby-room-name" class="text-2xl font-bold"></h2>
-                            <button id="leave-lobby-btn" class="bg-red-600 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-700 text-sm">Sair</button>
-                        </div>
-                        <p class="text-gray-400 mb-4">Aguardando jogadores...</p>
-                        <div id="lobby-participants-list" class="space-y-3 mb-6"></div>
-                        <div id="lobby-creator-controls" class="hidden space-y-4">
-                            <button id="invite-player-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">Convidar Jogador</button>
-                            <button id="start-competition-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed">Iniciar Partida</button>
-                        </div>
-                        <div id="lobby-participant-controls" class="hidden">
-                            <button id="ready-btn" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700">Estou Pronto</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Área da Competição (Jogo) -->
-                <div id="competition-game-container" class="hidden">
-                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div id="competition-challenge-area" class="lg:col-span-2 space-y-4">
-                            <!-- O conteúdo do desafio será injetado aqui, similar ao #challenge-container -->
-                        </div>
-                        <div id="competition-leaderboard-area" class="lg:col-span-1 bg-black/20 p-4 rounded-lg">
-                            <h3 class="text-xl font-bold mb-4 text-center">Classificação da Sala</h3>
-                            <div id="competition-leaderboard-list" class="space-y-3"></div>
-                        </div>
-                     </div>
-                </div>
-
-
-                
-                 <!-- Barra de XP -->
-                <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
-                    <div class="max-w-4xl mx-auto">
-                        <div class="flex justify-between items-center mb-1">
-                            <span id="level-name" class="text-sm font-bold"></span>
-                            <span id="xp-text" class="text-xs text-gray-300"></span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-4">
-                            <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <div id="modal-container"></div>
-    <!-- Toast Notification -->
-    <div id="toast-container" class="fixed bottom-24 right-4 z-50"></div>
-
-
-    <script type="module">
-        // --- SDKs DO FIREBASE ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        
-        // --- CONFIGURAÇÃO DO FIREBASE ---
-        const firebaseConfig = {
-          apiKey: "AIzaSyAbUkp2kVA4GXD2qZz_zOQRyR7skqQUwFg",
-          authDomain: "projects-debbb.firebaseapp.com",
-          projectId: "projects-debbb",
-          storageBucket: "projects-debbb.appspot.com",
-          messagingSenderId: "1016788358282",
-          appId: "1:1016788358282:web:491d260dfac9bc19f88973",
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- VARIÁVEIS GLOBAIS ---
-        let currentUser = null;
-        let currentUserData = {};
-        let currentChallenge = null;
-        let allChallenges = [];
-        let allLevels = [];
-        let allAchievements = [];
-        let allThemes = [];
-        let unlockedAchievements = new Map();
-        let unlockedThemes = new Map();
-        let completedChallenges = new Map();
-        let activeChallengeData = {};
-        let challengeTimerInterval = null;
-        let selectedCategory = null;
-        let invitationListener = null;
-        let roomListener = null;
-
-
-        // --- ELEMENTOS DO DOM ---
-        const authContainer = document.getElementById('auth-container');
-        const gameContainer = document.getElementById('game-container');
-        const soloModeContainer = document.getElementById('solo-mode-container');
-        const competitionContainer = document.getElementById('competition-container');
-        const messageBox = document.getElementById('message-box');
-        const userScoreEl = document.getElementById('user-score');
-        const modalContainer = document.getElementById('modal-container');
-        
-        // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            if (invitationListener) invitationListener(); // Unsubscribe from old listener
-            if (roomListener) roomListener();
-
-            if (user) {
-                await loadGameData(user);
-                authContainer.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                document.getElementById('user-email').textContent = `Logado como: ${currentUserData.name || user.email}`;
-                listenForInvitations(user.uid);
-            } else {
-                document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
-                authContainer.classList.remove('hidden');
-                gameContainer.classList.add('hidden');
-            }
-        });
-        
-        <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -594,75 +189,113 @@
                     </div>
                 </div>
                 
-                <!-- Seleção de Categoria -->
-                <div id="start-challenge-container" class="space-y-4 text-center py-8">
-                    <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
-                    <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                        <!-- Categorias serão inseridas aqui -->
-                    </div>
-                     <div class="flex flex-col items-center justify-center gap-4 mt-6">
-                        <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                            Sortear Desafio
-                        </button>
-                        <div id="choice-button-container" class="w-full max-w-xs hidden">
-                            <div class="relative py-2">
+                <!-- Tela Principal (Solo e Competitivo) -->
+                <div id="main-view-container">
+                    <!-- Seleção de Categoria (Modo Solo) -->
+                    <div id="start-challenge-container" class="space-y-4 text-center py-8">
+                        <h2 class="text-xl font-semibold">Selecione uma Categoria</h2>
+                        <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                            <!-- Categorias serão inseridas aqui -->
+                        </div>
+                         <div class="flex flex-col items-center justify-center gap-4 mt-6">
+                             <button id="start-button" class="w-full max-w-xs button-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                                 Sortear Desafio
+                             </button>
+                             <div id="choice-button-container" class="w-full max-w-xs hidden">
+                                 <div class="relative py-2">
+                                     <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
+                                     <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
+                                 </div>
+                                 <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                     Escolher Desafio (<span id="choice-token-count">0</span>)
+                                 </button>
+                             </div>
+                             <!-- Botão para Modo Competitivo -->
+                            <div class="relative py-2 w-full max-w-xs">
                                 <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-600"></div></div>
                                 <div class="relative flex justify-center"><span class="bg-gray-800/80 px-2 text-sm text-gray-400 rounded-full">Ou</span></div>
                             </div>
-                            <button id="choice-button" class="w-full bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                Escolher Desafio (<span id="choice-token-count">0</span>)
+                            <button id="show-competitive-mode-btn" class="w-full max-w-xs bg-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-purple-700">
+                                Modo Competitivo
                             </button>
                         </div>
-                   </div>
-                  <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                       <p id="start-message" class="text-gray-400 mt-4 text-sm"></p>
+                    </div>
+
+                    <!-- Área do Desafio (Modo Solo) -->
+                    <div id="challenge-container" class="hidden space-y-4">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
+                                 <p id="timer-display" class="font-bold text-2xl"></p>
+                                 <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
+                                    (<span id="abandon-token-count">0</span>)
+                                </button>
+                                <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                                    (<span id="reroll-token-count">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                        <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
+                            <div id="loader" class="loader hidden"></div>
+                            <p id="placeholder-text" class="text-gray-400 text-center"></p>
+                            <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-black/20 p-3 rounded-lg text-center">
+                                <p class="text-sm text-gray-400">Material Fornecido:</p>
+                                <p id="material-info" class="font-bold text-lg"></p>
+                            </div>
+                            <div class="bg-black/20 p-3 rounded-lg text-center">
+                                <p class="text-sm text-gray-400">Pontuação:</p>
+                                <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                            </div>
+                        </div>
+
+                        <!-- Formulário de Resposta -->
+                        <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
+                            <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
+                            <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
+                        </form>
+                        <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+                        <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                    </div>
                 </div>
 
-                <!-- Área do Desafio -->
-                <div id="challenge-container" class="hidden space-y-4">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div id="timer-container" class="hidden text-left bg-black/20 px-4 py-2 rounded-lg flex items-center gap-3">
-                             <p id="timer-display" class="font-bold text-2xl"></p>
-                             <p id="timer-bonus" class="text-sm text-cyan-400"></p>
+                <!-- Container do Modo Competitivo -->
+                <div id="competitive-container" class="hidden">
+                    <!-- Navegador de Lobbies -->
+                    <div id="lobby-browser">
+                        <div class="flex justify-between items-center mb-4">
+                             <h2 class="text-xl font-semibold">Salas Competitivas</h2>
+                             <button id="back-to-solo-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Voltar</button>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button id="abandon-button" class="hidden flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition" title="Abandonar Desafio">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 01-1-1V6z" clip-rule="evenodd" /></svg>
-                                (<span id="abandon-token-count">0</span>)
-                            </button>
-                            <button id="reroll-button" class="hidden flex items-center gap-2 bg-orange-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-700 transition" title="Trocar Desafio">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                                (<span id="reroll-token-count">0</span>)
-                            </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button id="create-lobby-btn" class="bg-green-600 text-white p-4 rounded-lg text-center hover:bg-green-700">Criar Nova Sala</button>
+                            <div class="bg-black/20 p-4 rounded-lg">
+                                <input type="text" id="join-lobby-id" class="w-full bg-white/20 text-white p-2 rounded-lg" placeholder="ID da Sala">
+                                <button id="join-lobby-btn" class="w-full mt-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Entrar na Sala</button>
+                            </div>
                         </div>
-                    </div>
-                    <div id="challenge-display" class="w-full min-h-[300px] bg-black/20 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center p-4">
-                        <div id="loader" class="loader hidden"></div>
-                        <p id="placeholder-text" class="text-gray-400 text-center"></p>
-                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-[400px] rounded-md object-contain zoomable">
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-black/20 p-3 rounded-lg text-center">
-                            <p class="text-sm text-gray-400">Material Fornecido:</p>
-                            <p id="material-info" class="font-bold text-lg"></p>
-                        </div>
-                        <div class="bg-black/20 p-3 rounded-lg text-center">
-                            <p class="text-sm text-gray-400">Pontuação:</p>
-                            <p id="score-info" class="font-bold text-yellow-400 text-lg"></p>
+                        <h3 class="font-semibold mt-6 mb-2">Salas Abertas</h3>
+                        <div id="lobbies-list" class="space-y-2 max-h-64 overflow-y-auto">
+                            <!-- Lista de salas abertas -->
                         </div>
                     </div>
 
-                    <!-- Formulário de Resposta -->
-                    <form id="answer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div class="md:col-span-1"><label for="mass-input" class="text-sm font-medium text-gray-300">Massa (g)</label><input type="number" step="any" id="mass-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 15700"></div>
-                        <div class="md:col-span-1"><label for="volume-input" class="text-sm font-medium text-gray-300">Volume (cm³)</label><input type="number" step="any" id="volume-input" required class="mt-1 w-full p-3 bg-white/20 text-white border border-gray-600 rounded-lg" placeholder="Ex: 1987"></div>
-                        <div class="md:col-span-1"><button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Verificar</button></div>
-                    </form>
-                    <div id="answer-feedback" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
-                    <button id="next-challenge-button" class="hidden w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mx-auto">Próximo Desafio</button>
+                    <!-- Visualização do Lobby -->
+                    <div id="lobby-view" class="hidden">
+                        <!-- Conteúdo dinâmico do lobby (espera, jogo, resultados) -->
+                    </div>
                 </div>
                 
-                 <!-- Barra de XP -->
+                <!-- Barra de XP -->
                 <div id="xp-bar-container" class="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm p-3 border-t border-white/20">
                     <div class="max-w-4xl mx-auto">
                         <div class="flex justify-between items-center mb-1">
@@ -673,6 +306,13 @@
                             <div id="xp-progress" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Mini Ranking Competitivo -->
+                <div id="mini-ranking-container" class="hidden fixed top-24 right-4 bg-black/50 backdrop-blur-md p-4 rounded-lg w-64 border border-white/20 z-10">
+                    <h3 class="font-bold text-center mb-2">Placar da Partida</h3>
+                    <div id="mini-ranking-list" class="space-y-2"></div>
+                    <div id="match-timer" class="mt-4 text-center font-bold text-xl"></div>
                 </div>
 
             </div>
@@ -689,7 +329,7 @@
         // --- SDKs DO FIREBASE ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, runTransaction, query, orderBy, addDoc, limit, updateDoc, where, Timestamp, onSnapshot, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         
         // --- CONFIGURAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -719,6 +359,12 @@
         let challengeTimerInterval = null;
         let selectedCategory = null;
 
+        // --- VARIÁVEIS DO MODO COMPETITIVO ---
+        let currentLobbyId = null;
+        let lobbyListener = null;
+        let lobbiesListener = null; // Para a lista de salas
+        let matchTimerInterval = null;
+
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -739,6 +385,8 @@
                 document.documentElement.style.cssText = ''; // Limpa temas ao deslogar
                 authContainer.classList.remove('hidden');
                 gameContainer.classList.add('hidden');
+                if (lobbyListener) lobbyListener(); // Desconecta do lobby se deslogar
+                if (lobbiesListener) lobbiesListener();
             }
         });
 
@@ -919,7 +567,12 @@
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
             } catch (error) { showMessage('Email ou senha inválidos.', true); }
         });
-        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+        document.getElementById('logout-button').addEventListener('click', async () => {
+             if (currentLobbyId) {
+                await leaveLobby(currentLobbyId);
+             }
+             signOut(auth);
+        });
         document.getElementById('forgot-password').addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -956,6 +609,8 @@
             loader.classList.remove('hidden');
             placeholderText.classList.add('hidden');
             challengeImage.classList.add('hidden');
+            answerForm.reset();
+            answerFeedback.classList.add('hidden');
 
             materialInfo.textContent = challenge.material;
             scoreInfo.textContent = `${challenge.score} pts`;
@@ -970,7 +625,7 @@
                 placeholderText.classList.remove('hidden');
             }
 
-            // Timer Logic
+            // Timer Logic (Solo)
             clearInterval(challengeTimerInterval);
             const timerContainer = document.getElementById('timer-container');
             const timerDisplay = document.getElementById('timer-display');
@@ -1035,7 +690,15 @@
 
         answerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser || !currentChallenge) return;
+            if (currentLobbyId) {
+                await submitCompetitiveAnswer();
+            } else {
+                await submitSoloAnswer();
+            }
+        });
+
+        async function submitSoloAnswer() {
+             if (!currentUser || !currentChallenge) return;
 
             const userMass = parseFloat(document.getElementById('mass-input').value);
             const userVolume = parseFloat(document.getElementById('volume-input').value);
@@ -1135,7 +798,7 @@
                 challengeId: currentChallenge.id, challengeName: currentChallenge.name,
                 userAnswer: { mass: userMass, volume: userVolume }, isCorrect, timestamp: serverTimestamp()
             });
-        });
+        }
         
         function resetToStartScreen() {
             challengeContainer.classList.add('hidden');
@@ -1674,36 +1337,36 @@
 
         async function checkAchievements() {
              const userStats = {
-                xp: currentUserData.xp || 0,
-                pointsSpent: currentUserData.pointsSpent || 0,
-                completedTotal: completedChallenges.size,
-                completedByCategory: (() => {
-                    const counts = {};
-                    completedChallenges.forEach(c => {
-                        counts[c.category] = (counts[c.category] || 0) + 1;
-                    });
-                    return counts;
-                })()
-             };
-             
-              for (const achievement of allAchievements) {
-                   if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
+                 xp: currentUserData.xp || 0,
+                 pointsSpent: currentUserData.pointsSpent || 0,
+                 completedTotal: completedChallenges.size,
+                 completedByCategory: (() => {
+                     const counts = {};
+                     completedChallenges.forEach(c => {
+                         counts[c.category] = (counts[c.category] || 0) + 1;
+                     });
+                     return counts;
+                 })()
+              };
+              
+               for (const achievement of allAchievements) {
+                    if (unlockedAchievements.has(achievement.id) || achievement.condition.type === 'exclusive') continue;
 
-                   let isUnlocked = false;
-                   const { type, value, category } = achievement.condition;
+                    let isUnlocked = false;
+                    const { type, value, category } = achievement.condition;
 
-                   if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
-                   if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
-                   if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
-                   if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
-                   
-                   if (isUnlocked) {
-                       const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
-                       await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
-                       unlockedAchievements.set(achievement.id, {});
-                       showToast(`Conquista Desbloqueada: ${achievement.name}`);
-                   }
-              }
+                    if (type === 'xp' && userStats.xp >= value) isUnlocked = true;
+                    if (type === 'challenges_completed' && userStats.completedTotal >= value) isUnlocked = true;
+                    if (type === 'category_completed' && (userStats.completedByCategory[category] || 0) >= value) isUnlocked = true;
+                    if (type === 'points_spent' && userStats.pointsSpent >= value) isUnlocked = true;
+                    
+                    if (isUnlocked) {
+                        const unlockedRef = doc(db, "users", currentUser.uid, "unlockedAchievements", achievement.id);
+                        await setDoc(unlockedRef, { unlockedAt: serverTimestamp() });
+                        unlockedAchievements.set(achievement.id, {});
+                        showToast(`Conquista Desbloqueada: ${achievement.name}`);
+                    }
+               }
         }
         
         async function checkForLevelUpRewards(newLevel) {
@@ -1769,7 +1432,7 @@
                 <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
                     <div class="modal-content w-full ${maxWidth} bg-gray-800 border border-gray-600 rounded-2xl shadow-xl p-6 transform scale-95 transition-transform duration-300">
                         <div class="flex justify-between items-center mb-4">
-                            ${titleHtml}
+                            ${typeof titleHtml === 'string' ? `<h2 class="text-xl font-bold text-white">${titleHtml}</h2>` : titleHtml}
                             <button onclick="document.getElementById('${id}').remove()" class="text-gray-400 hover:text-white text-2xl -mr-2 ml-4">&times;</button>
                         </div>
                         <div class="max-h-[75vh] overflow-auto">${content}</div>
@@ -1955,11 +1618,362 @@
             }
         }
 
-    </script>
-</body>
-</html>
-        
-    </script>
-</body>
-</html>
+        // --- MODO COMPETITIVO ---
+        const mainViewContainer = document.getElementById('main-view-container');
+        const competitiveContainer = document.getElementById('competitive-container');
 
+        document.getElementById('show-competitive-mode-btn').addEventListener('click', () => {
+            mainViewContainer.classList.add('hidden');
+            competitiveContainer.classList.remove('hidden');
+            listenToLobbies();
+        });
+
+        document.getElementById('back-to-solo-btn').addEventListener('click', () => {
+            mainViewContainer.classList.remove('hidden');
+            competitiveContainer.classList.add('hidden');
+            if (lobbiesListener) lobbiesListener(); // Para de ouvir a lista de salas
+        });
+
+        function listenToLobbies() {
+            const lobbiesRef = collection(db, "lobbies");
+            const q = query(lobbiesRef, where("status", "==", "waiting"));
+
+            if (lobbiesListener) lobbiesListener(); // Garante que não haja listeners duplicados
+
+            lobbiesListener = onSnapshot(q, (snapshot) => {
+                const listEl = document.getElementById('lobbies-list');
+                listEl.innerHTML = '';
+                if (snapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400">Nenhuma sala aberta. Crie uma!</p>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const lobby = doc.data();
+                    const lobbyEl = document.createElement('div');
+                    lobbyEl.className = 'bg-gray-700 p-3 rounded-lg flex justify-between items-center';
+                    lobbyEl.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${lobby.hostName}'s Room</p>
+                            <p class="text-xs text-gray-400">${lobby.players.length} jogador(es)</p>
+                        </div>
+                        <button data-id="${doc.id}" class="join-lobby-list-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Entrar</button>
+                    `;
+                    listEl.appendChild(lobbyEl);
+                });
+                document.querySelectorAll('.join-lobby-list-btn').forEach(btn => btn.addEventListener('click', (e) => joinLobby(e.target.dataset.id)))
+            });
+        }
+
+        async function createLobby() {
+            const lobbyRef = doc(collection(db, "lobbies"));
+            const lobbyData = {
+                hostId: currentUser.uid,
+                hostName: currentUserData.name,
+                players: [{ uid: currentUser.uid, name: currentUserData.name, score: 0 }],
+                status: 'waiting', // waiting, in_progress, finished
+                settings: {
+                    category: 'Parafusos',
+                    timeLimitMinutes: 5,
+                },
+                currentChallengeId: null,
+                challengeHistory: [],
+                createdAt: serverTimestamp(),
+            };
+            await setDoc(lobbyRef, lobbyData);
+            await joinLobby(lobbyRef.id);
+        }
+        document.getElementById('create-lobby-btn').addEventListener('click', createLobby);
+        document.getElementById('join-lobby-btn').addEventListener('click', () => {
+            const id = document.getElementById('join-lobby-id').value;
+            if(id) joinLobby(id);
+        });
+
+        async function joinLobby(lobbyId) {
+             const lobbyRef = doc(db, "lobbies", lobbyId);
+             const lobbyDoc = await getDoc(lobbyRef);
+             if (!lobbyDoc.exists() || lobbyDoc.data().status !== 'waiting') {
+                return createAlertModal("Erro", "Sala não encontrada ou já iniciada.");
+             }
+            
+             await updateDoc(lobbyRef, {
+                players: arrayUnion({ uid: currentUser.uid, name: currentUserData.name, score: 0 })
+             });
+
+            currentLobbyId = lobbyId;
+            document.getElementById('lobby-browser').classList.add('hidden');
+            document.getElementById('lobby-view').classList.remove('hidden');
+
+            if (lobbiesListener) lobbiesListener();
+            
+            lobbyListener = onSnapshot(lobbyRef, (doc) => {
+                if (doc.exists()) {
+                    renderLobby(doc.data());
+                } else {
+                    // Sala foi deletada
+                    leaveLobby();
+                }
+            });
+        }
+
+        async function leaveLobby() {
+            if (!currentLobbyId) return;
+            
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            const lobbyDoc = await getDoc(lobbyRef);
+
+            if(lobbyDoc.exists()) {
+                const lobbyData = lobbyDoc.data();
+                if (lobbyData.hostId === currentUser.uid) {
+                    await deleteDoc(lobbyRef);
+                } else {
+                     await updateDoc(lobbyRef, {
+                        players: arrayRemove({ uid: currentUser.uid, name: currentUserData.name, score: 0 })
+                    });
+                }
+            }
+
+            if (lobbyListener) lobbyListener();
+            lobbyListener = null;
+            currentLobbyId = null;
+
+            document.getElementById('lobby-browser').classList.remove('hidden');
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('mini-ranking-container').classList.add('hidden');
+            clearInterval(matchTimerInterval);
+            resetToStartScreen(); // Volta para a tela principal
+            competitiveContainer.classList.add('hidden');
+            mainViewContainer.classList.remove('hidden');
+
+            listenToLobbies();
+        }
+        
+        function renderLobby(lobbyData) {
+            const lobbyView = document.getElementById('lobby-view');
+            const isHost = lobbyData.hostId === currentUser.uid;
+
+            if (lobbyData.status === 'waiting') {
+                const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
+                    .map(cat => `<option value="${cat}" ${lobbyData.settings.category === cat ? 'selected' : ''}>${cat}</option>`).join('');
+
+                lobbyView.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Sala de ${lobbyData.hostName}</h2>
+                        <button id="leave-lobby-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Sair</button>
+                    </div>
+                    <div class="bg-black/20 p-2 rounded-lg text-center mb-4">
+                        ID da Sala: <span class="font-bold tracking-widest">${currentLobbyId}</span>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Configurações (só para o host) -->
+                        <div class="bg-black/30 p-4 rounded-lg">
+                             <h3 class="font-semibold mb-2">Configurações</h3>
+                             <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm">Categoria</label>
+                                    <select id="lobby-category-select" class="w-full bg-gray-700 p-2 rounded mt-1" ${!isHost ? 'disabled' : ''}>
+                                        ${categoriesOptions}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm">Tempo (minutos)</label>
+                                    <input type="number" id="lobby-time-input" value="${lobbyData.settings.timeLimitMinutes}" min="1" max="60" class="w-full bg-gray-700 p-2 rounded mt-1" ${!isHost ? 'disabled' : ''}>
+                                </div>
+                             </div>
+                             ${isHost ? `<button id="start-lobby-btn" class="w-full mt-6 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Iniciar Jogo</button>` : '<p class="text-center text-gray-400 mt-6">Aguardando o líder iniciar...</p>'}
+                        </div>
+                        <!-- Jogadores na sala -->
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <h3 class="font-semibold mb-2">Jogadores (${lobbyData.players.length})</h3>
+                            <div id="lobby-players-list" class="space-y-2">
+                                ${lobbyData.players.map(p => `<div class="bg-gray-700 p-2 rounded">${p.name} ${p.uid === lobbyData.hostId ? ' (Líder)' : ''}</div>`).join('')}
+                            </div>
+                        </div>
+                     </div>
+                `;
+                document.getElementById('leave-lobby-btn').addEventListener('click', leaveLobby);
+                if (isHost) {
+                    document.getElementById('start-lobby-btn').addEventListener('click', startLobby);
+                    document.getElementById('lobby-category-select').addEventListener('change', (e) => updateLobbySettings({ category: e.target.value }));
+                    document.getElementById('lobby-time-input').addEventListener('change', (e) => updateLobbySettings({ timeLimitMinutes: parseInt(e.target.value) }));
+                }
+
+            } else if (lobbyData.status === 'in_progress') {
+                lobbyView.innerHTML = ''; // Limpa a view do lobby
+                mainViewContainer.classList.remove('hidden'); // Mostra a view principal do jogo
+                competitiveContainer.classList.add('hidden');
+
+                const challenge = allChallenges.find(c => c.id === lobbyData.currentChallengeId);
+                if(challenge) {
+                    currentChallenge = challenge;
+                    displayChallenge(challenge, null); // startTime é null aqui para desativar o timer individual
+                    document.getElementById('abandon-button').classList.add('hidden');
+                    document.getElementById('reroll-button').classList.add('hidden');
+
+                    const myAnswer = lobbyData.playerAnswers?.[currentUser.uid];
+                    if (myAnswer) {
+                        answerForm.classList.add('hidden');
+                        answerFeedback.textContent = 'Correto! Aguardando o próximo desafio...';
+                        answerFeedback.className = 'p-3 rounded-lg text-center text-sm font-medium bg-green-500/50 text-green-100';
+                        answerFeedback.classList.remove('hidden');
+
+                        if(isHost) {
+                            nextChallengeButton.classList.remove('hidden');
+                            nextChallengeButton.textContent = 'Próximo Desafio';
+                            nextChallengeButton.onclick = () => selectNextCompetitiveChallenge(lobbyData);
+                        }
+                    } else {
+                        answerForm.classList.remove('hidden');
+                        nextChallengeButton.classList.add('hidden');
+                    }
+                }
+                
+                // Renderiza o mini-ranking
+                const rankingContainer = document.getElementById('mini-ranking-container');
+                const rankingList = document.getElementById('mini-ranking-list');
+                rankingContainer.classList.remove('hidden');
+                rankingList.innerHTML = lobbyData.players
+                    .sort((a,b) => b.score - a.score)
+                    .map(p => `
+                        <div class="flex justify-between items-center text-sm ${p.uid === currentUser.uid ? 'font-bold text-cyan-300' : ''}">
+                            <span>${p.name}</span>
+                            <span>${p.score} pts</span>
+                        </div>
+                    `).join('');
+
+                // Lógica do timer da partida
+                clearInterval(matchTimerInterval);
+                const matchTimerEl = document.getElementById('match-timer');
+                matchTimerInterval = setInterval(() => {
+                    const now = new Date();
+                    const elapsed = Math.floor((now - lobbyData.startTime.toDate()) / 1000);
+                    const remaining = (lobbyData.settings.timeLimitMinutes * 60) - elapsed;
+                    if(remaining <= 0) {
+                        clearInterval(matchTimerInterval);
+                        matchTimerEl.textContent = "Fim de Jogo!";
+                        if(isHost) finishLobby();
+                    } else {
+                         const minutes = Math.floor(remaining / 60);
+                         const seconds = remaining % 60;
+                         matchTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+            } else if (lobbyData.status === 'finished') {
+                const finalRanking = lobbyData.players.sort((a,b) => b.score - a.score);
+                const winner = finalRanking[0];
+                 const content = `
+                    <p class="text-center text-lg mb-4">O vencedor é <span class="font-bold text-yellow-400">${winner.name}</span>!</p>
+                    <div class="space-y-2">
+                     ${finalRanking.map((p, index) => `
+                        <div class="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                            <span class="font-bold">${index + 1}. ${p.name}</span>
+                            <span class="text-cyan-400 font-semibold">${p.score} pts</span>
+                        </div>
+                     `).join('')}
+                    </div>
+                    <button id="close-results-btn" class="w-full mt-6 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700">Voltar</button>
+                 `;
+                createModal('lobby-results', 'Resultados Finais', content, 'max-w-md');
+                document.getElementById('close-results-btn').addEventListener('click', () => {
+                     document.getElementById('lobby-results').remove();
+                     if(isHost) deleteDoc(doc(db, "lobbies", currentLobbyId));
+                     leaveLobby();
+                });
+            }
+        }
+        
+        async function updateLobbySettings(settings) {
+            await updateDoc(doc(db, "lobbies", currentLobbyId), {
+                [`settings.${Object.keys(settings)[0]}`] : Object.values(settings)[0]
+            });
+        }
+        
+        async function startLobby() {
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+            const lobbyDoc = await getDoc(lobbyRef);
+            const lobbyData = lobbyDoc.data();
+            
+            const availableChallenges = allChallenges.filter(c => c.category === lobbyData.settings.category);
+            if (availableChallenges.length === 0) {
+                return createAlertModal("Erro", "Não há desafios disponíveis para esta categoria.");
+            }
+            const firstChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+
+            await updateDoc(lobbyRef, {
+                status: 'in_progress',
+                startTime: serverTimestamp(),
+                currentChallengeId: firstChallenge.id,
+                challengeHistory: [firstChallenge.id],
+                playerAnswers: {}
+            });
+        }
+
+        async function submitCompetitiveAnswer() {
+            const userMass = parseFloat(document.getElementById('mass-input').value);
+            const userVolume = parseFloat(document.getElementById('volume-input').value);
+            
+            const correctData = currentChallenge;
+            const correctMass = parseFloat(correctData.mass);
+            const correctVolume = parseFloat(correctData.volume);
+            const tolerance = parseFloat(correctData.tolerance || 5);
+
+            const isCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100) && Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
+
+            if (isCorrect) {
+                const lobbyRef = doc(db, "lobbies", currentLobbyId);
+                const finalScore = parseInt(currentChallenge.score || 0);
+
+                await runTransaction(db, async (transaction) => {
+                    const lobbyDoc = await transaction.get(lobbyRef);
+                    const lobbyData = lobbyDoc.data();
+                    const players = lobbyData.players;
+                    const playerIndex = players.findIndex(p => p.uid === currentUser.uid);
+
+                    if (playerIndex !== -1 && !lobbyData.playerAnswers[currentUser.uid]) {
+                        players[playerIndex].score += finalScore;
+                        transaction.update(lobbyRef, { 
+                            players: players,
+                            [`playerAnswers.${currentUser.uid}`]: serverTimestamp()
+                        });
+
+                        // Também atualiza o XP e Score global do usuário
+                        const userRef = doc(db, "users", currentUser.uid);
+                        const userDoc = await transaction.get(userRef);
+                        const userData = userDoc.data();
+                        transaction.update(userRef, {
+                            score: (userData.score || 0) + finalScore,
+                            xp: (userData.xp || 0) + finalScore
+                        });
+                    }
+                });
+
+                 currentUserData.score += finalScore;
+                 currentUserData.xp += finalScore;
+                 updateXpBar();
+                 updateConsumablesUI();
+            } else {
+                answerFeedback.textContent = "Resposta Incorreta.";
+                answerFeedback.className = `p-3 rounded-lg text-center text-sm font-medium bg-red-500/50 text-red-100`;
+                answerFeedback.classList.remove('hidden');
+            }
+        }
+        
+        async function selectNextCompetitiveChallenge(lobbyData) {
+            const available = allChallenges.filter(c => c.category === lobbyData.settings.category && !lobbyData.challengeHistory.includes(c.id));
+            if (available.length === 0) {
+                return finishLobby();
+            }
+            const nextChallenge = available[Math.floor(Math.random() * available.length)];
+            await updateDoc(doc(db, "lobbies", currentLobbyId), {
+                currentChallengeId: nextChallenge.id,
+                challengeHistory: arrayUnion(nextChallenge.id),
+                playerAnswers: {}
+            });
+        }
+        
+        async function finishLobby() {
+            await updateDoc(doc(db, "lobbies", currentLobbyId), { status: 'finished' });
+        }
+
+    </script>
+</body>
+</html>
