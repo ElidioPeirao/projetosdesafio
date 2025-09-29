@@ -221,6 +221,7 @@
 
         function updateUIVisibility() {
             const isAdmin = currentUser.role === 'admin';
+            const isModerator = currentUser.role === 'moderator';
             
             // Define a visibilidade dos botões
             document.getElementById('manage-shop-btn').style.display = isAdmin ? 'block' : 'none';
@@ -230,16 +231,29 @@
             document.getElementById('manage-settings-btn').style.display = isAdmin ? 'block' : 'none';
             
             // Adiciona o novo botão de aprovações para o admin
-            const existingBtn = document.getElementById('pending-changes-btn');
-            if (isAdmin && !existingBtn) {
+            const existingApprovalBtn = document.getElementById('pending-changes-btn');
+            if (isAdmin && !existingApprovalBtn) {
                 const approvalBtn = document.createElement('button');
                 approvalBtn.id = 'pending-changes-btn';
                 approvalBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-bold py-6 rounded-lg text-lg transition';
                 approvalBtn.textContent = 'Aprovações';
                 approvalBtn.addEventListener('click', () => showSection(showPendingChangesManagement));
                 mainMenu.appendChild(approvalBtn);
-            } else if (!isAdmin && existingBtn) {
-                existingBtn.remove();
+            } else if (!isAdmin && existingApprovalBtn) {
+                existingApprovalBtn.remove();
+            }
+
+            // Adiciona botão de revisão para moderador
+            const existingReviewBtn = document.getElementById('review-needed-btn');
+            if (isModerator && !existingReviewBtn) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.id = 'review-needed-btn';
+                reviewBtn.className = 'bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-6 rounded-lg text-lg transition relative';
+                reviewBtn.textContent = 'Revisões';
+                reviewBtn.addEventListener('click', () => showSection(showReviewNeededManagement));
+                mainMenu.appendChild(reviewBtn);
+            } else if (!isModerator && existingReviewBtn) {
+                existingReviewBtn.remove();
             }
         }
         
@@ -440,6 +454,10 @@
                     <div>
                         <label for="challenge-url" class="block text-sm font-medium text-gray-300 mb-1">URL do Desafio (Google Drive)</label>
                         <input type="text" id="challenge-url" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Link completo do Arquivo...">
+                        <div id="image-preview-container" class="mt-2 hidden">
+                            <p class="text-xs text-gray-400 mb-1">Pré-visualização:</p>
+                            <img id="challenge-image-preview" src="" alt="Pré-visualização do Desafio" class="rounded-lg max-h-48 w-auto mx-auto bg-gray-900/50 p-1">
+                        </div>
                     </div>
                     <div>
                         <label for="challenge-name" class="block text-sm font-medium text-gray-300 mb-1">Nome do Desafio</label>
@@ -488,6 +506,22 @@
                 </form>
             `, 'max-w-xl');
 
+            const urlInput = document.getElementById('challenge-url');
+            const previewContainer = document.getElementById('image-preview-container');
+            const previewImg = document.getElementById('challenge-image-preview');
+
+            function updateChallengeImagePreview() {
+                const url = urlInput.value;
+                const fileId = url.match(/\/d\/(.*?)(?:\/|$)/)?.[1];
+                if (fileId) {
+                    previewImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+                    previewContainer.classList.remove('hidden');
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            }
+            urlInput.addEventListener('input', updateChallengeImagePreview);
+
             if (pendingChange) {
                 const data = pendingChange.data;
                 document.getElementById('pending-change-id-hidden').value = pendingChangeId;
@@ -511,6 +545,7 @@
                     });
                 }
             }
+            updateChallengeImagePreview(); // Call once to show existing image
             document.getElementById('add-challenge-form').addEventListener('submit', saveChallenge);
         }
 
@@ -542,9 +577,15 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
-                await updateDoc(changeDocRef, { data: data });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada.</p>', 'max-w-sm');
-                showPendingChangesManagement();
+                await updateDoc(changeDocRef, { 
+                    data: data, 
+                    status: 'pending', 
+                    reviewNotes: null, 
+                    reviewedBy: null,
+                    timestamp: serverTimestamp() 
+                });
+                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                showReviewNeededManagement();
             } else if (currentUser.role === 'admin') {
                 await setDoc(doc(db, "challenges", newId), data);
                 createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Desafio salvo com sucesso.</p>', 'max-w-sm');
@@ -754,9 +795,15 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
-                await updateDoc(changeDocRef, { data: data });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada.</p>', 'max-w-sm');
-                showPendingChangesManagement();
+                await updateDoc(changeDocRef, { 
+                    data: data, 
+                    status: 'pending', 
+                    reviewNotes: null, 
+                    reviewedBy: null,
+                    timestamp: serverTimestamp() 
+                });
+                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                showReviewNeededManagement();
             } else if (currentUser.role === 'admin') {
                 const targetId = levelId || doc(collection(db, "levels")).id;
                 await setDoc(doc(db, "levels", targetId), data);
@@ -933,9 +980,15 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
-                await updateDoc(changeDocRef, { data: data });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada.</p>', 'max-w-sm');
-                showPendingChangesManagement();
+                await updateDoc(changeDocRef, { 
+                    data: data,
+                    status: 'pending',
+                    reviewNotes: null,
+                    reviewedBy: null,
+                    timestamp: serverTimestamp()
+                });
+                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                showReviewNeededManagement();
             } else if (currentUser.role === 'admin') {
                 const targetId = achievementId || doc(collection(db, "achievements")).id;
                 await setDoc(doc(db, "achievements", targetId), data);
@@ -1275,13 +1328,53 @@
             });
         }
 
-        // --- GERENCIAMENTO DE APROVAÇÕES (ADMIN) ---
+        // --- GERENCIAMENTO DE APROVAÇÕES E REVISÕES ---
+        async function showReviewNeededManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Itens a Precisar de Revisão</h2><div id="review-list" class="max-h-[70vh] overflow-y-auto space-y-4 pr-2"></div>`;
+            
+            const listEl = document.getElementById('review-list');
+            listEl.innerHTML = '<p class="text-gray-400">A carregar...</p>';
+            
+            const q = query(collection(db, "pendingChanges"), 
+                where("status", "==", "review_needed"),
+                where("proposedBy", "==", currentUser.data.email)
+            );
+            const snapshot = await getDocs(q);
+            
+            listEl.innerHTML = snapshot.empty ? '<p class="text-gray-400">Não há itens a precisar da sua revisão.</p>' : '';
+            
+            snapshot.docs.forEach(docChange => {
+                const change = docChange.data();
+                const div = document.createElement('div');
+                div.className = 'bg-gray-800 border border-yellow-500/50 p-4 rounded-lg flex flex-col gap-3';
+                
+                const actionText = change.action === 'create' ? 'criação' : 'atualização';
+                const typeText = { challenge: 'Desafio', level: 'Nível', achievement: 'Conquista'}[change.type] || 'Item';
+                let description = `Proposta de ${actionText} de ${typeText}: <strong class="text-indigo-300">${change.data.name}</strong>`;
+                let reviewNotes = `<div class="mt-2 p-3 bg-yellow-900/50 rounded-md"><p class="text-sm font-semibold text-yellow-300">Nota do Admin (${change.reviewedBy}):</p><p class="text-sm text-yellow-200">${change.reviewNotes}</p></div>`;
+                
+                div.innerHTML = `
+                    <div>
+                        <p class="text-white text-sm">${description}</p>
+                        ${reviewNotes}
+                    </div>
+                    <div class="self-end">
+                        <button data-id="${docChange.id}" class="edit-review-btn bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Editar e Reenviar</button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+            
+            document.querySelectorAll('.edit-review-btn').forEach(btn => btn.addEventListener('click', handleEdit));
+        }
+
         async function showPendingChangesManagement() {
             dynamicContent.classList.remove('hidden');
             dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Aprovações Pendentes</h2><div id="pending-list" class="max-h-[70vh] overflow-y-auto space-y-2 pr-2"></div>`;
             
             const listEl = document.getElementById('pending-list');
-            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            listEl.innerHTML = '<p class="text-gray-400">A carregar...</p>';
             
             const q = query(collection(db, "pendingChanges"), where("status", "==", "pending"));
             const snapshot = await getDocs(q);
@@ -1301,18 +1394,59 @@
                 
                 div.innerHTML = `
                     <div><p class="text-white text-sm">${description}</p></div>
-                    <div class="flex-shrink-0">
-                        <button data-id="${docChange.id}" class="edit-change-btn bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700 mr-2">Editar</button>
-                        <button data-id="${docChange.id}" class="approve-change-btn bg-green-600 text-white px-3 py-1 text-xs rounded hover:bg-green-700 mr-2">Aprovar</button>
+                    <div class="flex-shrink-0 flex gap-2">
+                        <button data-id="${docChange.id}" class="review-change-btn bg-yellow-600 text-white px-3 py-1 text-xs rounded hover:bg-yellow-700">Revisão</button>
+                        <button data-id="${docChange.id}" class="edit-change-btn bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Editar</button>
+                        <button data-id="${docChange.id}" class="approve-change-btn bg-green-600 text-white px-3 py-1 text-xs rounded hover:bg-green-700">Aprovar</button>
                         <button data-id="${docChange.id}" class="reject-change-btn bg-red-600 text-white px-3 py-1 text-xs rounded hover:bg-red-700">Rejeitar</button>
                     </div>
                 `;
                 listEl.appendChild(div);
             });
             
+            document.querySelectorAll('.review-change-btn').forEach(btn => btn.addEventListener('click', confirmReviewRequest));
             document.querySelectorAll('.edit-change-btn').forEach(btn => btn.addEventListener('click', handleEdit));
             document.querySelectorAll('.approve-change-btn').forEach(btn => btn.addEventListener('click', handleApproval));
             document.querySelectorAll('.reject-change-btn').forEach(btn => btn.addEventListener('click', handleRejection));
+        }
+
+        function confirmReviewRequest(e) {
+            const changeId = e.target.dataset.id;
+            const modalContent = `
+                <p class="text-gray-300 mb-4">Por favor, escreva uma breve nota para o moderador explicando o que precisa ser corrigido.</p>
+                <textarea id="review-notes-input" class="w-full p-2 bg-gray-900 text-white border border-gray-600 rounded-lg" rows="3" placeholder="Ex: A pontuação parece muito alta..."></textarea>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button onclick="document.getElementById('review-request-modal').remove()" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Cancelar</button>
+                    <button id="confirm-review-request-btn" class="bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700">Enviar para Revisão</button>
+                </div>
+            `;
+            createModal('review-request-modal', 'Pedir Revisão', modalContent, 'max-w-md');
+
+            document.getElementById('confirm-review-request-btn').addEventListener('click', () => {
+                const notes = document.getElementById('review-notes-input').value;
+                if (!notes.trim()) {
+                    alert('Por favor, adicione uma nota de revisão.');
+                    return;
+                }
+                handleReviewRequest(changeId, notes);
+                document.getElementById('review-request-modal').remove();
+            });
+        }
+
+        async function handleReviewRequest(changeId, notes) {
+            const changeDocRef = doc(db, "pendingChanges", changeId);
+            try {
+                await updateDoc(changeDocRef, { 
+                    status: 'review_needed', 
+                    reviewNotes: notes, 
+                    reviewedBy: currentUser.data.email 
+                });
+                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">A proposta foi enviada de volta para revisão.</p>', 'max-w-sm');
+                showPendingChangesManagement();
+            } catch (error) {
+                console.error("Erro ao pedir revisão:", error);
+                createModal('error-modal', 'Erro', '<p class="text-gray-300">Ocorreu um erro. Verifique a consola.</p>', 'max-w-sm');
+            }
         }
 
         async function handleEdit(e) {
