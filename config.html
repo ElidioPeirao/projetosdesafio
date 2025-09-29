@@ -243,6 +243,19 @@
                 existingApprovalBtn.remove();
             }
 
+            // Adiciona botão de "Em Aprovação" para moderadores
+            const existingInApprovalBtn = document.getElementById('in-approval-btn');
+            if (isModerator && !existingInApprovalBtn) {
+                const inApprovalBtn = document.createElement('button');
+                inApprovalBtn.id = 'in-approval-btn';
+                inApprovalBtn.className = 'bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-6 rounded-lg text-lg transition relative';
+                inApprovalBtn.textContent = 'Em Aprovação';
+                inApprovalBtn.addEventListener('click', () => showSection(showInApprovalManagement));
+                mainMenu.appendChild(inApprovalBtn);
+            } else if (!isModerator && existingInApprovalBtn) {
+                existingInApprovalBtn.remove();
+            }
+
             // Adiciona botão de revisão para moderador
             const existingReviewBtn = document.getElementById('review-needed-btn');
             if (isModerator && !existingReviewBtn) {
@@ -254,6 +267,15 @@
                 mainMenu.appendChild(reviewBtn);
             } else if (!isModerator && existingReviewBtn) {
                 existingReviewBtn.remove();
+            }
+
+            // Adjust grid columns based on role
+            if (isAdmin) {
+                mainMenu.classList.remove('md:grid-cols-5');
+                mainMenu.classList.add('md:grid-cols-4');
+            } else if (isModerator) {
+                mainMenu.classList.remove('md:grid-cols-4');
+                mainMenu.classList.add('md:grid-cols-5');
             }
         }
         
@@ -577,6 +599,9 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
+                const changeDocSnap = await getDoc(changeDocRef);
+                const wasInReview = changeDocSnap.exists() && changeDocSnap.data().status === 'review_needed';
+
                 await updateDoc(changeDocRef, { 
                     data: data, 
                     status: 'pending', 
@@ -584,8 +609,14 @@
                     reviewedBy: null,
                     timestamp: serverTimestamp() 
                 });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
-                showReviewNeededManagement();
+
+                if (wasInReview) {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                    showReviewNeededManagement();
+                } else {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada e aguarda aprovação.</p>', 'max-w-sm');
+                    showInApprovalManagement();
+                }
             } else if (currentUser.role === 'admin') {
                 await setDoc(doc(db, "challenges", newId), data);
                 createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Desafio salvo com sucesso.</p>', 'max-w-sm');
@@ -795,6 +826,8 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
+                const changeDocSnap = await getDoc(changeDocRef);
+                const wasInReview = changeDocSnap.exists() && changeDocSnap.data().status === 'review_needed';
                 await updateDoc(changeDocRef, { 
                     data: data, 
                     status: 'pending', 
@@ -802,8 +835,14 @@
                     reviewedBy: null,
                     timestamp: serverTimestamp() 
                 });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
-                showReviewNeededManagement();
+                
+                if (wasInReview) {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                    showReviewNeededManagement();
+                } else {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada e aguarda aprovação.</p>', 'max-w-sm');
+                    showInApprovalManagement();
+                }
             } else if (currentUser.role === 'admin') {
                 const targetId = levelId || doc(collection(db, "levels")).id;
                 await setDoc(doc(db, "levels", targetId), data);
@@ -980,6 +1019,8 @@
 
             if (pendingChangeId) {
                 const changeDocRef = doc(db, "pendingChanges", pendingChangeId);
+                const changeDocSnap = await getDoc(changeDocRef);
+                const wasInReview = changeDocSnap.exists() && changeDocSnap.data().status === 'review_needed';
                 await updateDoc(changeDocRef, { 
                     data: data,
                     status: 'pending',
@@ -987,8 +1028,14 @@
                     reviewedBy: null,
                     timestamp: serverTimestamp()
                 });
-                createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
-                showReviewNeededManagement();
+                
+                if (wasInReview) {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta reenviada para aprovação.</p>', 'max-w-sm');
+                    showReviewNeededManagement();
+                } else {
+                    createModal('success-modal', 'Sucesso', '<p class="text-gray-300">Proposta de alteração foi atualizada e aguarda aprovação.</p>', 'max-w-sm');
+                    showInApprovalManagement();
+                }
             } else if (currentUser.role === 'admin') {
                 const targetId = achievementId || doc(collection(db, "achievements")).id;
                 await setDoc(doc(db, "achievements", targetId), data);
@@ -1329,6 +1376,49 @@
         }
 
         // --- GERENCIAMENTO DE APROVAÇÕES E REVISÕES ---
+        async function showInApprovalManagement() {
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Itens Aguardando Aprovação</h2><div id="in-approval-list" class="max-h-[70vh] overflow-y-auto space-y-4 pr-2"></div>`;
+            
+            const listEl = document.getElementById('in-approval-list');
+            listEl.innerHTML = '<p class="text-gray-400">A carregar...</p>';
+            
+            const q = query(collection(db, "pendingChanges"), where("status", "==", "pending"));
+            const snapshot = await getDocs(q);
+            
+            const pendingDocs = snapshot.docs;
+            pendingDocs.sort((a, b) => (b.data().timestamp?.toDate() || 0) - (a.data().timestamp?.toDate() || 0));
+
+            if (pendingDocs.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400">Não há itens aguardando aprovação no momento.</p>';
+                return;
+            }
+
+            listEl.innerHTML = '';
+            
+            pendingDocs.forEach(docChange => {
+                const change = docChange.data();
+                const div = document.createElement('div');
+                div.className = 'bg-gray-700 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3';
+                
+                const actionText = change.action === 'create' ? 'criação' : 'atualização';
+                const typeText = { challenge: 'Desafio', level: 'Nível', achievement: 'Conquista'}[change.type] || 'Item';
+                let description = `Proposta de ${actionText} de ${typeText}: <strong class="text-indigo-300">${change.data.name}</strong><br><em class="text-xs text-gray-400">Por: ${change.proposedBy}</em>`;
+                
+                div.innerHTML = `
+                    <div>
+                        <p class="text-white text-sm">${description}</p>
+                    </div>
+                    <div class="self-end sm:self-center">
+                        <button data-id="${docChange.id}" class="edit-pending-btn bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Editar</button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+            
+            document.querySelectorAll('.edit-pending-btn').forEach(btn => btn.addEventListener('click', handleEdit));
+        }
+
         async function showReviewNeededManagement() {
             dynamicContent.classList.remove('hidden');
             dynamicContent.innerHTML = `<h2 class="text-2xl font-semibold text-white mb-4">Itens a Precisar de Revisão</h2><div id="review-list" class="max-h-[70vh] overflow-y-auto space-y-4 pr-2"></div>`;
@@ -1503,44 +1593,331 @@
             }
         }
 
-        // --- AS FUNÇÕES RESTANTES (TEMAS, CÓDIGOS, CONFIGURAÇÕES) SÃO SOMENTE PARA ADMINS E NÃO PRECISAM DO FLUXO DE APROVAÇÃO, ENTÃO PODEM PERMANECER COMO ESTAVAM ---
-        // --- GERENCIAMENTO DE TEMAS ---
+        // --- GERENCIAMENTO DE TEMAS (Admin)---
         async function showThemesManagement() {
-            // Código original
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Temas da Interface</h2>
+                    <button id="add-new-theme-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Adicionar Tema</button>
+                </div>
+                <div id="themes-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>`;
+            document.getElementById('add-new-theme-btn').addEventListener('click', () => openThemeModal());
+            await loadThemes();
         }
+
         async function loadThemes() {
-            // Código original
+            const listEl = document.getElementById('themes-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const querySnapshot = await getDocs(collection(db, "themes"));
+            listEl.innerHTML = querySnapshot.empty ? '<p class="text-gray-400">Nenhum tema cadastrado.</p>' : '';
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'bg-gray-700 p-3 rounded flex justify-between items-center';
+                const obtainMethodText = data.obtainMethod === 'shop' 
+                    ? `<span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full ml-2">${data.price} pts</span>`
+                    : `<span class="text-xs bg-cyan-500 text-white px-2 py-1 rounded-full ml-2">Nível: ${allLevelsData.find(l => l.id === data.levelId)?.name || 'N/A'}</span>`;
+                
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-8 rounded border border-gray-500 flex" style="background:${data.colors.bg};">
+                           <span class="w-1/3 h-full" style="background:${data.colors.primary};"></span>
+                           <span class="w-1/3 h-full" style="background:${data.colors.cardBg};"></span>
+                           <span class="w-1/3 h-full" style="background:${data.colors.text};"></span>
+                        </div>
+                        <div>
+                           <span class="text-white font-semibold">${data.name}</span>
+                           ${obtainMethodText}
+                        </div>
+                    </div>
+                    <div>
+                         <button data-id="${doc.id}" class="delete-theme-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>
+                    </div>`;
+                listEl.appendChild(div);
+            });
+            document.querySelectorAll('.delete-theme-btn').forEach(btn => btn.addEventListener('click', (e) => deleteDoc(doc(db, "themes", e.target.dataset.id)).then(loadThemes)));
         }
+
         async function openThemeModal() {
-            // Código original
+            const levelOptions = allLevelsData.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            createModal('theme-modal', 'Gerenciar Tema', `
+                <form id="add-theme-form" class="space-y-4">
+                    <input type="text" id="theme-name" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Nome do Tema">
+                    <input type="text" id="theme-description" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Descrição (ex: Um tema escuro e elegante)">
+                     <div class="border-t border-gray-600 pt-4">
+                          <label class="text-sm font-medium text-gray-300">Método de Obtenção</label>
+                          <select id="theme-obtain-method" class="w-full mt-2 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                               <option value="shop">Loja</option>
+                               <option value="level">Recompensa de Nível</option>
+                          </select>
+                     </div>
+                    <div id="theme-shop-fields">
+                          <input type="number" id="theme-price" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Preço na Loja">
+                    </div>
+                    <div id="theme-level-fields" class="hidden">
+                             <select id="theme-level-id" class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                               <option value="">Selecione o nível</option>
+                               ${levelOptions}
+                             </select>
+                    </div>
+                    <div class="border-t border-gray-600 pt-4">
+                             <label class="text-sm font-medium text-gray-300">Cores do Tema</label>
+                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                                  <div class="flex flex-col items-center"><label>Fundo</label><input type="color" id="theme-color-bg" value="#0d1b2a" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                                  <div class="flex flex-col items-center"><label>Texto</label><input type="color" id="theme-color-text" value="#FFFFFF" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                                  <div class="flex flex-col items-center"><label>Primária</label><input type="color" id="theme-color-primary" value="#6366f1" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                                  <div class="flex flex-col items-center"><label>Card</label><input type="color" id="theme-color-cardBg" value="#1a2634" class="w-full h-10 p-1 bg-gray-700 border border-gray-600 rounded-lg"></div>
+                             </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Tema</button>
+                </form>
+            `, 'max-w-2xl');
+            
+            const obtainMethodSelect = document.getElementById('theme-obtain-method');
+            const shopFields = document.getElementById('theme-shop-fields');
+            const levelFields = document.getElementById('theme-level-fields');
+            
+            const toggleObtainFields = () => {
+                const method = obtainMethodSelect.value;
+                shopFields.classList.toggle('hidden', method !== 'shop');
+                levelFields.classList.toggle('hidden', method !== 'level');
+            };
+            obtainMethodSelect.addEventListener('change', toggleObtainFields);
+            toggleObtainFields();
+
+            document.getElementById('add-theme-form').addEventListener('submit', saveTheme);
         }
+
         async function saveTheme(e) {
-            // Código original
+            e.preventDefault();
+            const obtainMethod = document.getElementById('theme-obtain-method').value;
+            const data = {
+                name: document.getElementById('theme-name').value,
+                description: document.getElementById('theme-description').value,
+                obtainMethod,
+                price: obtainMethod === 'shop' ? parseInt(document.getElementById('theme-price').value) || 0 : null,
+                levelId: obtainMethod === 'level' ? document.getElementById('theme-level-id').value : null,
+                colors: {
+                    bg: document.getElementById('theme-color-bg').value,
+                    text: document.getElementById('theme-color-text').value,
+                    primary: document.getElementById('theme-color-primary').value,
+                    cardBg: document.getElementById('theme-color-cardBg').value,
+                }
+            };
+            
+            if (obtainMethod === 'level' && !data.levelId) {
+                return alert('Por favor, selecione o nível para a recompensa de tema.');
+            }
+
+            await addDoc(collection(db, "themes"), data);
+            document.getElementById('theme-modal').remove();
+            await loadThemes();
         }
 
         // --- GERENCIAMENTO DE CÓDIGOS ---
         async function showCodesManagement() {
-            // Código original
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-white">Códigos de Bônus</h2>
+                    <button id="add-new-code-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Criar Código</button>
+                </div>
+                <div id="codes-list" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>`;
+            document.getElementById('add-new-code-btn').addEventListener('click', () => openCodeModal());
+            await loadCodes();
         }
+
         async function loadCodes() {
-            // Código original
+            const listEl = document.getElementById('codes-list');
+            listEl.innerHTML = '<p class="text-gray-400">Carregando...</p>';
+            const q = query(collection(db, "specialCodes"), orderBy("expiresAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            listEl.innerHTML = querySnapshot.empty ? '<p class="text-gray-400">Nenhum código criado.</p>' : '';
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                const isExpired = data.expiresAt.toDate() < new Date();
+                const usesText = data.totalUses === -1 ? 'Ilimitado' : `${data.usesLeft}/${data.totalUses}`;
+                div.className = `bg-gray-700 p-3 rounded flex justify-between items-center ${isExpired ? 'opacity-50' : ''}`;
+                
+                let effectText = '';
+                if (data.effectType === 'SCORE_MULTIPLIER') {
+                    effectText = `Pontos x${data.effectValue} por ${data.durationMinutes} min`;
+                } else if (data.effectType === 'PAUSE_TIMER') {
+                    effectText = `Pausa o tempo por ${data.effectValue} min`;
+                }
+
+                div.innerHTML = `
+                    <div>
+                        <p class="font-mono text-lg text-yellow-400">${data.code}</p>
+                        <p class="text-sm text-gray-300">Efeito: ${effectText}</p>
+                        <p class="text-xs text-gray-400">Usos: ${usesText} | Expira em: ${data.expiresAt.toDate().toLocaleDateString()}</p>
+                    </div>
+                    <button data-id="${doc.id}" class="delete-code-btn bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700">Excluir</button>`;
+                listEl.appendChild(div);
+            });
+            document.querySelectorAll('.delete-code-btn').forEach(btn => btn.addEventListener('click', (e) => deleteDoc(doc(db, "specialCodes", e.target.dataset.id)).then(loadCodes)));
         }
-        async function openCodeModal() {
-            // Código original
+
+        function openCodeModal() {
+            createModal('code-modal', 'Criar Novo Código', `
+                <form id="add-code-form" class="space-y-4">
+                    <input type="text" id="code-string" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg font-mono tracking-widest" placeholder="CÓDIGO (ex: BONUSXP5)">
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-300">Tipo de Efeito</label>
+                        <select id="code-effect-type" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                            <option value="SCORE_MULTIPLIER">Multiplicador de Pontos</option>
+                            <option value="PAUSE_TIMER">Pausar Tempo do Desafio</option>
+                        </select>
+                    </div>
+
+                    <div id="effect-fields-score-multiplier">
+                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                   <label class="text-sm font-medium text-gray-300">Multiplicador de Pontos</label>
+                                   <input type="number" step="0.1" id="code-score-multiplier-value" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 2 para 2x">
+                              </div>
+                              <div>
+                                   <label class="text-sm font-medium text-gray-300">Duração (minutos)</label>
+                                   <input type="number" id="code-score-multiplier-duration" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 60">
+                              </div>
+                         </div>
+                    </div>
+                    
+                    <div id="effect-fields-pause-timer" class="hidden">
+                        <div>
+                            <label class="text-sm font-medium text-gray-300">Pausar por (minutos)</label>
+                            <input type="number" id="code-pause-duration" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Ex: 5">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label class="text-sm font-medium text-gray-300">Usos Totais (-1 para ilimitado)</label>
+                            <input type="number" id="code-uses" required class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" value="-1">
+                          </div>
+                          <div>
+                            <label class="text-sm font-medium text-gray-300">Data de Expiração</label>
+                            <input type="date" id="code-expires" required class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                          </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Salvar Código</button>
+                </form>
+            `, 'max-w-lg');
+
+            const effectTypeSelect = document.getElementById('code-effect-type');
+            const scoreFields = document.getElementById('effect-fields-score-multiplier');
+            const pauseFields = document.getElementById('effect-fields-pause-timer');
+
+            function toggleEffectFields() {
+                if (effectTypeSelect.value === 'SCORE_MULTIPLIER') {
+                    scoreFields.classList.remove('hidden');
+                    pauseFields.classList.add('hidden');
+                } else {
+                    scoreFields.classList.add('hidden');
+                    pauseFields.classList.remove('hidden');
+                }
+            }
+            effectTypeSelect.addEventListener('change', toggleEffectFields);
+            toggleEffectFields();
+
+            document.getElementById('add-code-form').addEventListener('submit', saveCode);
         }
+
         async function saveCode(e) {
-            // Código original
+            e.preventDefault();
+            const codeString = document.getElementById('code-string').value.toUpperCase();
+            const uses = parseInt(document.getElementById('code-uses').value);
+            const expirationDate = new Date(document.getElementById('code-expires').value);
+            expirationDate.setHours(23, 59, 59);
+
+            const effectType = document.getElementById('code-effect-type').value;
+            let effectValue, durationMinutes;
+
+            if (effectType === 'SCORE_MULTIPLIER') {
+                effectValue = parseFloat(document.getElementById('code-score-multiplier-value').value);
+                durationMinutes = parseInt(document.getElementById('code-score-multiplier-duration').value);
+            } else if (effectType === 'PAUSE_TIMER') {
+                effectValue = parseInt(document.getElementById('code-pause-duration').value);
+                durationMinutes = 0; // Not applicable
+            }
+
+            const data = {
+                code: codeString,
+                effectType,
+                effectValue,
+                durationMinutes,
+                totalUses: uses,
+                usesLeft: uses,
+                createdAt: serverTimestamp(),
+                expiresAt: Timestamp.fromDate(expirationDate)
+            };
+            
+            await setDoc(doc(db, "specialCodes", codeString), data);
+            document.getElementById('code-modal').remove();
+            await loadCodes();
         }
 
         // --- GERENCIAMENTO DE CONFIGURAÇÕES GERAIS ---
         async function showSettingsManagement() {
-            // Código original
+            dynamicContent.classList.remove('hidden');
+            dynamicContent.innerHTML = `
+                <h2 class="text-2xl font-semibold text-white mb-4">Configurações Gerais</h2>
+                <div class="border-t border-red-500/30 pt-4 mt-4">
+                    <h4 class="text-lg font-semibold text-red-400 mb-2">Zona de Perigo</h4>
+                    <div class="p-4 bg-black/20 rounded-lg">
+                        <p class="text-sm text-gray-300 mb-4">A ação abaixo é extremamente destrutiva e irá apagar TODOS os dados de usuários e progresso. Não pode ser desfeita.</p>
+                        <button id="reset-all-data-btn" class="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-6 rounded-lg">Resetar Toda a Aplicação</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('reset-all-data-btn').addEventListener('click', confirmFullReset);
         }
+
         function confirmFullReset() {
-            // Código original
+            const confirmationPhrase = "APAGAR TUDO";
+            createModal('confirm-full-reset-modal', 'REDEFINIÇÃO TOTAL DO SISTEMA', `
+                <p class="text-red-400 font-bold mb-4">ATENÇÃO: AÇÃO IRREVERSÍVEL</p>
+                <p class="text-gray-300 mb-4">Você está prestes a apagar TODOS os dados de usuários, tentativas, compras e conquistas. O sistema voltará ao estado inicial.</p>
+                <p class="text-gray-300 mb-4">Para confirmar, digite <strong class="text-yellow-400">${confirmationPhrase}</strong> no campo abaixo:</p>
+                <input type="text" id="full-reset-confirmation-input" class="w-full p-2 bg-gray-900 text-white border border-gray-600 rounded-lg mb-6">
+                <div class="flex justify-end gap-4">
+                    <button onclick="document.getElementById('confirm-full-reset-modal').remove()" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">Cancelar</button>
+                    <button id="confirm-full-reset-btn" class="bg-red-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-900 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>Confirmar Redefinição Total</button>
+                </div>
+            `, 'max-w-lg');
+            
+            const input = document.getElementById('full-reset-confirmation-input');
+            const confirmBtn = document.getElementById('confirm-full-reset-btn');
+
+            input.addEventListener('input', () => {
+                confirmBtn.disabled = input.value !== confirmationPhrase;
+            });
+
+            confirmBtn.addEventListener('click', async () => {
+                confirmBtn.textContent = 'Apagando...';
+                confirmBtn.disabled = true;
+                await resetEntireSystem();
+                document.getElementById('confirm-full-reset-modal').remove();
+            });
         }
+
         async function resetEntireSystem() {
-            // Código original
+            try {
+                // Ao apagar a coleção 'users', todas as subcoleções (como conquistas e itens) são apagadas automaticamente pelo Firestore.
+                const collectionsToWipe = ['users', 'attempts', 'purchaseNotifications', 'pendingChanges'];
+                for (const coll of collectionsToWipe) {
+                    const snapshot = await getDocs(collection(db, coll));
+                    await Promise.all(snapshot.docs.map(d => deleteDoc(d.ref)));
+                }
+                createModal('success-modal', 'Sistema Redefinido', `<p class="text-gray-300">Todos os dados de progresso e usuários foram apagados com sucesso.</p>`, 'max-w-sm');
+                await showDashboard();
+            } catch (error) {
+                console.error("Erro na redefinição total do sistema: ", error);
+                createModal('error-modal', 'Erro', `<p class="text-gray-300">Ocorreu um erro na redefinição total. Verifique o console.</p>`, 'max-w-sm');
+            }
         }
     </script>
 </body>
