@@ -16,14 +16,15 @@
     <!-- Estilos Customizados -->
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-darker: #020617;
+            /* Tema Padrão: Azul Escuro Profundo */
+            --bg-dark: #0A192F;
+            --bg-darker: #020C1B;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
             --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --danger-gradient: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
-            --glass-bg: rgba(30, 41, 59, 0.65);
+            --glass-bg: rgba(10, 25, 47, 0.65);
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
@@ -66,8 +67,8 @@
             transition: all 0.3s ease;
         }
         .input-elegant:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
             outline: none;
         }
         .input-elegant::placeholder { color: #64748b; }
@@ -81,7 +82,7 @@
         }
         .btn-gradient:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.6);
         }
         .btn-gradient:active:not(:disabled) {
             transform: translateY(0);
@@ -110,7 +111,7 @@
         /* Loader */
         .loader {
             border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #8b5cf6;
+            border-top: 3px solid #6366f1;
             border-radius: 50%; width: 40px; height: 40px;
             animation: spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
         }
@@ -136,7 +137,7 @@
         .category-btn.selected {
             background: var(--primary-gradient);
             border-color: transparent;
-            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.5);
             transform: scale(1.05);
             font-weight: bold;
         }
@@ -157,31 +158,22 @@
         /* Modal Animations */
         .modal-overlay { transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         .modal-content { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        /* Blueprint Effect (Transforma imagens de fundo branco em CAD) */
-        .blueprint-mode {
-            filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.2);
-            mix-blend-mode: screen;
-        }
-        
-        /* Layout Adjustments para o fundo de desenho */
-        .cad-background {
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-        }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden flex flex-col min-h-screen">
+
+    <!-- Container de Notificações de Duelos Recebidos -->
+    <div id="duel-alerts-container" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] flex flex-col gap-3 w-full max-w-md px-4"></div>
 
     <!-- Container de Autenticação -->
     <main id="auth-container" class="relative flex-1 flex items-center justify-center p-4 z-10 w-full">
         <div class="glass-card w-full max-w-md rounded-3xl p-8 space-y-8">
             <div class="flex justify-center mb-2">
-                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200x60/0f172a/8b5cf6?text=LOGO';">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200x60/0a192f/6366f1?text=LOGO';">
             </div>
             
             <div class="flex p-1 bg-gray-900/50 rounded-xl">
-                <button id="tab-login" class="flex-1 py-2.5 text-center font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 shadow-sm transition-all duration-300">Login</button>
+                <button id="tab-login" class="flex-1 py-2.5 text-center font-semibold rounded-lg bg-blue-500/20 text-blue-300 shadow-sm transition-all duration-300">Login</button>
                 <button id="tab-register" class="flex-1 py-2.5 text-center font-semibold rounded-lg text-gray-400 hover:text-white transition-all duration-300">Cadastro</button>
             </div>
             
@@ -197,7 +189,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <label for="login-password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Senha</label>
-                            <a href="#" id="forgot-password" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition">Esqueceu?</a>
+                            <a href="#" id="forgot-password" class="text-xs font-medium text-blue-400 hover:text-blue-300 transition">Esqueceu?</a>
                         </div>
                         <div class="relative">
                             <input type="password" id="login-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="••••••••">
@@ -241,12 +233,12 @@
         <header class="sticky top-0 w-full glass-card rounded-none border-t-0 border-l-0 border-r-0 z-40 px-4 py-3 shadow-md">
             <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-lg shadow-lg">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg">
                         <span id="user-initial">DP</span>
                     </div>
                     <div class="leading-tight">
                         <h1 class="font-title text-lg font-bold tracking-wide">Desafio Projetos</h1>
-                        <p id="user-email" class="text-xs text-indigo-300 font-medium"></p>
+                        <p id="user-email" class="text-xs text-blue-300 font-medium"></p>
                     </div>
                 </div>
                 
@@ -276,13 +268,13 @@
                         </button>
                         <div id="menu-dropdown" class="hidden absolute right-0 mt-3 w-56 glass-card rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10">
                             <div class="p-2 space-y-1">
-                                <a href="#" id="profile-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg> Meu Perfil</a>
+                                <a href="#" id="profile-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg> Meu Perfil</a>
                                 <a href="#" id="ranking-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> Ranking</a>
                                 <a href="#" id="shop-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg> Loja</a>
-                                <a href="#" id="completed-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg> Completos</a>
+                                <a href="#" id="completed-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg> Completos</a>
                                 <a href="#" id="redeem-code-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-purple-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg> Ativar Código</a>
                                 <a href="#" id="friends-button-menu" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition">
-                                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-pink-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg> Amigos</span>
+                                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-pink-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg> Amigos / Duelos</span>
                                     <span id="friend-request-badge" class="hidden bg-pink-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md"></span>
                                 </a>
                                 <div class="h-px bg-white/10 my-1"></div>
@@ -304,7 +296,7 @@
                         <!-- Seleção de Categoria (Modo Solo) -->
                         <div id="start-challenge-container" class="space-y-8 text-center py-4">
                             <div>
-                                <h2 class="font-title text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-purple-300">Selecione uma Categoria</h2>
+                                <h2 class="font-title text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-300">Selecione uma Categoria</h2>
                                 <p class="text-gray-400 mt-2 font-medium">Escolha seu domínio e teste seus conhecimentos mecânicos.</p>
                             </div>
                             
@@ -326,19 +318,19 @@
 
                                 <div class="w-full max-w-sm h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-2"></div>
 
-                                <button id="show-competitive-mode-btn" class="w-full max-w-sm bg-indigo-900/40 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-800/50 hover:text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
+                                <button id="show-competitive-mode-btn" class="w-full max-w-sm bg-blue-900/40 border border-blue-500/30 text-blue-300 hover:bg-blue-800/50 hover:text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3.004 3.004 0 013.75-2.906z" /></svg>
                                     Entrar no Modo Competitivo
                                 </button>
                             </div>
-                            <p id="start-message" class="text-indigo-400 mt-4 text-sm font-medium"></p>
+                            <p id="start-message" class="text-blue-400 mt-4 text-sm font-medium"></p>
                         </div>
 
                         <!-- Área do Desafio (Modo Solo) -->
                         <div id="challenge-container" class="hidden space-y-6">
                             <div class="flex justify-between items-center flex-wrap gap-4 bg-gray-900/40 p-4 rounded-2xl border border-white/5 shadow-inner">
                                 <div class="flex items-center gap-3">
-                                    <div class="bg-indigo-500/20 text-indigo-300 p-2.5 rounded-xl shadow-lg">
+                                    <div class="bg-blue-500/20 text-blue-300 p-2.5 rounded-xl shadow-lg">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </div>
                                     <div id="timer-container" class="hidden flex flex-col">
@@ -359,17 +351,16 @@
                             </div>
 
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <!-- Blueprint Area (Refinada sem fundo branco) -->
-                                <div class="lg:col-span-2 cad-background rounded-2xl flex flex-col overflow-hidden border border-slate-700/50 shadow-2xl relative">
-                                    <div class="bg-slate-900/80 px-4 py-2 border-b border-white/5 flex justify-between items-center absolute top-0 w-full z-10 backdrop-blur-sm">
-                                        <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Tela de Projeto CAD</span>
+                                <!-- Blueprint Area (Fundo Branco para mesclar com imagem original) -->
+                                <div class="lg:col-span-2 bg-white rounded-2xl flex flex-col overflow-hidden border border-slate-700/50 shadow-2xl relative">
+                                    <div class="bg-slate-900/90 px-4 py-2 border-b border-white/5 flex justify-between items-center absolute top-0 w-full z-10 shadow-md">
+                                        <span class="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Tela de Projeto CAD</span>
                                         <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
                                     </div>
                                     <div id="challenge-display" class="relative w-full h-[400px] flex items-center justify-center p-6 pt-12">
                                         <div id="loader" class="loader hidden"></div>
                                         <p id="placeholder-text" class="text-gray-500 font-medium text-center"></p>
-                                        <!-- A classe blueprint-mode transforma imagem branca com linhas pretas em transparente com linhas azuis claro! -->
-                                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-full rounded-lg object-contain zoomable drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] blueprint-mode transition-all duration-500 hover:scale-[1.02]">
+                                        <img id="challenge-image" src="" alt="Desenho do desafio" class="hidden max-w-full max-h-full rounded-lg object-contain zoomable transition-all duration-500 hover:scale-[1.02]">
                                     </div>
                                 </div>
 
@@ -377,9 +368,9 @@
                                 <div class="lg:col-span-1 space-y-5 flex flex-col">
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center border-t border-white/10 shadow-lg relative overflow-hidden group">
-                                            <div class="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                                            <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
                                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 z-10">Material</p>
-                                            <p id="material-info" class="font-title font-bold text-lg text-indigo-300 leading-tight z-10"></p>
+                                            <p id="material-info" class="font-title font-bold text-lg text-blue-300 leading-tight z-10"></p>
                                         </div>
                                         <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center border-t border-white/10 shadow-lg relative overflow-hidden group">
                                             <div class="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
@@ -392,18 +383,18 @@
                                         <div>
                                             <label for="mass-input" class="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">Massa Estimada (g)</label>
                                             <div class="relative">
-                                                <input type="number" step="any" id="mass-input" required class="w-full pl-4 pr-10 py-3.5 input-elegant rounded-xl font-mono text-lg text-white shadow-inner focus:ring-2 focus:ring-indigo-500/50" placeholder="0.00">
-                                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 font-bold text-lg">g</span>
+                                                <input type="number" step="any" id="mass-input" required class="w-full pl-4 pr-10 py-3.5 input-elegant rounded-xl font-mono text-lg text-white shadow-inner focus:ring-2 focus:ring-blue-500/50" placeholder="0.00">
+                                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-bold text-lg">g</span>
                                             </div>
                                         </div>
                                         <div>
                                             <label for="volume-input" class="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">Volume Estimado (cm³)</label>
                                             <div class="relative">
-                                                <input type="number" step="any" id="volume-input" required class="w-full pl-4 pr-12 py-3.5 input-elegant rounded-xl font-mono text-lg text-white shadow-inner focus:ring-2 focus:ring-indigo-500/50" placeholder="0.00">
-                                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 font-bold text-lg">cm³</span>
+                                                <input type="number" step="any" id="volume-input" required class="w-full pl-4 pr-12 py-3.5 input-elegant rounded-xl font-mono text-lg text-white shadow-inner focus:ring-2 focus:ring-blue-500/50" placeholder="0.00">
+                                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-bold text-lg">cm³</span>
                                             </div>
                                         </div>
-                                        <button type="submit" class="mt-auto w-full btn-gradient text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] text-lg tracking-wide">Verificar Parâmetros</button>
+                                        <button type="submit" class="mt-auto w-full btn-gradient text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.4)] text-lg tracking-wide">Verificar Parâmetros</button>
                                     </form>
 
                                     <div id="answer-feedback" class="hidden p-4 rounded-xl text-center text-sm font-bold shadow-lg border"></div>
@@ -452,7 +443,7 @@
                                         <div class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
                                         <h3 class="font-bold text-white tracking-wide">Salas Abertas</h3>
                                     </div>
-                                    <div id="lobbies-list" class="flex-1 overflow-y-auto space-y-3 pr-2">
+                                    <div id="lobbies-list" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                                         <!-- Lista de salas -->
                                         <p class="text-center text-gray-500 mt-10">Buscando oponentes...</p>
                                     </div>
@@ -471,15 +462,15 @@
                 
         <!-- Barra de XP agora é um FOOTER (Não corta mais a tela!) -->
         <footer id="xp-bar-container" class="w-full bg-gray-900/90 backdrop-blur-xl p-4 border-t border-white/10 z-30 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] mt-auto relative">
-            <div class="absolute inset-0 bg-gradient-to-t from-indigo-500/5 to-transparent pointer-events-none"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent pointer-events-none"></div>
             <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-4 relative z-10">
                 <div class="flex-1 w-full flex items-center gap-4">
-                    <div class="hidden md:flex bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 p-2.5 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                    <div class="hidden md:flex bg-blue-500/20 border border-blue-500/30 text-blue-300 p-2.5 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd" /></svg>
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-end mb-2">
-                            <span id="level-name" class="font-title font-bold text-sm text-indigo-100 tracking-wide uppercase drop-shadow-md"></span>
+                            <span id="level-name" class="font-title font-bold text-sm text-blue-100 tracking-wide uppercase drop-shadow-md"></span>
                             <span id="xp-text" class="text-xs font-mono font-bold text-cyan-300 bg-cyan-900/40 border border-cyan-500/30 px-2.5 py-1 rounded-lg shadow-inner"></span>
                         </div>
                         <div class="w-full bg-gray-950 rounded-full h-3 shadow-inner overflow-hidden border border-white/10">
@@ -494,7 +485,7 @@
         <div id="mini-ranking-container" class="hidden fixed top-24 right-4 glass-card p-5 rounded-2xl w-72 z-20 border-t border-white/20 shadow-2xl">
             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        <h3 class="font-bold text-white">Placar Live</h3>
+                        <h3 id="ranking-title" class="font-bold text-white">Placar Live</h3>
                     </div>
                     <div id="mini-ranking-list" class="space-y-2 mb-4"></div>
                     <div class="bg-black/30 rounded-xl p-3 text-center border border-white/5">
@@ -557,7 +548,8 @@
         // --- VARIÁVEIS DE UI/UX ---
         let friendsListener = null;
         let friendRequestsListener = null;
-
+        let incomingDuelsListener = null;
+        let outboundDuelsListener = null;
 
         // --- ELEMENTOS DO DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -592,6 +584,8 @@
                 if (lobbiesListener) lobbiesListener();
                 if (friendsListener) friendsListener();
                 if (friendRequestsListener) friendRequestsListener();
+                if (incomingDuelsListener) incomingDuelsListener();
+                if (outboundDuelsListener) outboundDuelsListener();
             }
         });
 
@@ -643,6 +637,7 @@
             
             populateCategories();
             listenToFriendData(user.uid);
+            listenToDuels(user.uid);
 
             if (activeChallengeData.id) {
                 const challenge = allChallenges.find(c => c.id === activeChallengeData.id);
@@ -652,6 +647,178 @@
                 }
             }
         }
+
+        // --- SISTEMA DE DUELOS E APOSTAS ---
+        function listenToDuels(uid) {
+            if (incomingDuelsListener) incomingDuelsListener();
+            if (outboundDuelsListener) outboundDuelsListener();
+
+            // Ouve convites de duelo recebidos
+            incomingDuelsListener = onSnapshot(query(collection(db, "duels"), where("targetId", "==", uid), where("status", "==", "pending")), (snapshot) => {
+                const container = document.getElementById('duel-alerts-container');
+                container.innerHTML = '';
+                snapshot.forEach(docSnap => {
+                    const duel = { id: docSnap.id, ...docSnap.data() };
+                    container.innerHTML += `
+                        <div class="glass-card bg-indigo-900/90 border border-indigo-500/50 p-4 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.4)] flex flex-col gap-3 animate-pulse">
+                            <div>
+                                <h4 class="font-bold text-white flex items-center gap-2">⚔️ DESAFIO DE DUELO!</h4>
+                                <p class="text-sm text-indigo-200 mt-1"><strong class="text-white">${duel.challengerName}</strong> desafiou você na categoria <strong>${duel.category}</strong> apostando <strong class="text-yellow-400 text-base">${duel.betAmount} PTS</strong>!</p>
+                            </div>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="acceptDuel('${duel.id}')" class="flex-1 btn-success text-white text-sm font-bold py-2.5 rounded-lg shadow-lg">Entrar e Apostar</button>
+                                <button onclick="rejectDuel('${duel.id}')" class="flex-1 btn-danger text-white text-sm font-bold py-2.5 rounded-lg shadow-lg">Correr</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            // Ouve status dos duelos enviados
+            outboundDuelsListener = onSnapshot(query(collection(db, "duels"), where("challengerId", "==", uid)), (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    const duel = { id: change.doc.id, ...change.doc.data() };
+                    if (change.type === "modified") {
+                        if (duel.status === 'accepted' && duel.lobbyId) {
+                            createAlertModal("Duelo Aceito!", "Seu oponente aceitou a aposta. Preparando arena...", async () => {
+                                await deleteDoc(doc(db, "duels", duel.id));
+                                // Subtrai localmente para atualizar a UI, já foi deduzido no BD na transação do aceitador
+                                currentUserData.score -= duel.betAmount;
+                                updateConsumablesUI();
+                                joinLobby(duel.lobbyId, true);
+                            });
+                        } else if (duel.status === 'rejected') {
+                            createAlertModal("Desafio Recusado", `${duel.targetName} correu do duelo e não aceitou a aposta.`, async () => {
+                                await deleteDoc(doc(db, "duels", duel.id));
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        window.openDuelModal = (friendId, friendName) => {
+            if ((currentUserData.score || 0) <= 0) {
+                return createAlertModal("Saldo Insuficiente", "Você precisa de pontos para poder apostar num duelo.");
+            }
+            
+            const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
+                .map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                
+            const content = `
+                <div class="space-y-5">
+                    <p class="text-sm text-gray-300">Desafiando <strong class="text-white">${friendName}</strong> para um duelo técnico 1x1. Quem perder ou abandonar, perde a aposta.</p>
+                    <div class="glass-panel border-white/5 p-4 rounded-xl">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Pontos em Jogo (Sua Aposta)</label>
+                        <input type="number" id="duel-bet-input" max="${currentUserData.score}" min="1" value="10" class="w-full input-elegant p-3.5 rounded-xl font-mono text-2xl text-yellow-400 text-center shadow-inner">
+                        <p class="text-xs text-gray-400 text-center mt-2">Saldo disponível: <span class="font-bold text-white">${currentUserData.score} PTS</span></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Especialidade (Categoria)</label>
+                        <select id="duel-category-select" class="w-full input-elegant p-3.5 rounded-xl font-semibold">
+                            ${categoriesOptions}
+                        </select>
+                    </div>
+                    <button id="send-duel-btn" class="w-full btn-gradient text-white font-bold py-4 rounded-xl shadow-lg mt-2 text-lg">Disparar Desafio ⚔️</button>
+                </div>
+            `;
+            createModal('duel-modal', 'Configurar Duelo', content, 'max-w-md');
+            
+            document.getElementById('send-duel-btn').addEventListener('click', async () => {
+                const bet = parseInt(document.getElementById('duel-bet-input').value);
+                const cat = document.getElementById('duel-category-select').value;
+                
+                if (isNaN(bet) || bet <= 0 || bet > (currentUserData.score || 0)) {
+                    return createAlertModal("Erro", "Valor de aposta inválido ou superior ao seu saldo.");
+                }
+                
+                await setDoc(doc(collection(db, "duels")), {
+                    challengerId: currentUser.uid,
+                    challengerName: currentUserData.name,
+                    targetId: friendId,
+                    targetName: friendName,
+                    betAmount: bet,
+                    category: cat,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+                
+                document.getElementById('duel-modal')?.remove();
+                createAlertModal("Aposta Registrada", `Desafio enviado. Se ${friendName} aceitar, ${bet} PTS serão deduzidos do seu saldo e a partida começará.`);
+            });
+        }
+
+        window.acceptDuel = async (duelId) => {
+            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da tela
+            const modal = document.getElementById('friends-modal');
+            if(modal) modal.remove(); // Fecha o modal de amigos caso esteja aberto
+
+            const duelRef = doc(db, "duels", duelId);
+            let newLobbyId = null;
+            let currentBet = 0;
+            
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const duelDoc = await transaction.get(duelRef);
+                    if (!duelDoc.exists()) throw "Desafio não encontrado ou expirado.";
+                    const duel = duelDoc.data();
+                    if (duel.status !== 'pending') throw "Desafio já respondido.";
+                    currentBet = duel.betAmount;
+
+                    const challengerRef = doc(db, "users", duel.challengerId);
+                    const targetRef = doc(db, "users", currentUser.uid);
+
+                    const challengerDoc = await transaction.get(challengerRef);
+                    const targetDoc = await transaction.get(targetRef);
+
+                    if ((challengerDoc.data().score || 0) < duel.betAmount) throw "O oponente não tem mais o saldo para cobrir a aposta.";
+                    if ((targetDoc.data().score || 0) < duel.betAmount) throw "Você não tem pontos suficientes no saldo para bancar esta aposta.";
+
+                    // Escrow: Tira os pontos de ambos
+                    transaction.update(challengerRef, { score: (challengerDoc.data().score || 0) - duel.betAmount });
+                    transaction.update(targetRef, { score: (targetDoc.data().score || 0) - duel.betAmount });
+
+                    // Cria Arena do Duelo
+                    const lobbyRef = doc(collection(db, "lobbies"));
+                    newLobbyId = lobbyRef.id;
+                    const lobbyData = {
+                        hostId: duel.challengerId, 
+                        hostName: duel.challengerName,
+                        players: [
+                            { uid: duel.challengerId, name: duel.challengerName, score: 0 },
+                            { uid: currentUser.uid, name: currentUserData.name, score: 0 }
+                        ],
+                        status: 'waiting',
+                        settings: { category: duel.category, timeLimitMinutes: 5, isPrivate: true, password: null },
+                        currentChallengeId: null,
+                        challengeHistory: [],
+                        createdAt: serverTimestamp(),
+                        isDuel: true,
+                        betAmount: duel.betAmount,
+                        pot: duel.betAmount * 2
+                    };
+                    transaction.set(lobbyRef, lobbyData);
+
+                    // Altera Duelo
+                    transaction.update(duelRef, { status: 'accepted', lobbyId: newLobbyId });
+                });
+
+                currentUserData.score -= currentBet;
+                updateConsumablesUI();
+                joinLobby(newLobbyId, true);
+
+            } catch (error) {
+                createAlertModal("Falha no Duelo", String(error));
+                await deleteDoc(duelRef); // Limpa o convite ruim
+            }
+        }
+
+        window.rejectDuel = async (duelId) => {
+            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da tela
+            const duelRef = doc(db, "duels", duelId);
+            await updateDoc(duelRef, { status: 'rejected' });
+        }
+
 
         function updateConsumablesUI() {
             userScoreEl.textContent = currentUserData.score || 0;
@@ -705,7 +872,7 @@
                 const button = document.createElement('button');
                 button.className = 'category-btn p-4 rounded-2xl font-bold flex flex-col items-center justify-center gap-2 shadow-lg';
                 button.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                     <span>${cat}</span>
                 `;
                 button.dataset.category = cat;
@@ -733,7 +900,7 @@
             document.getElementById('form-login').classList.toggle('hidden', !isLogin);
             document.getElementById('form-register').classList.toggle('hidden', isLogin);
             
-            const activeClass = ['bg-indigo-500/20', 'text-indigo-300', 'shadow-sm'];
+            const activeClass = ['bg-blue-500/20', 'text-blue-300', 'shadow-sm'];
             const inactiveClass = ['text-gray-400', 'hover:text-white', 'bg-transparent'];
             
             if(isLogin) {
@@ -773,7 +940,7 @@
                     consumables: { reroll: 0, choice: 0, abandon: 0 },
                     profile: { title: null, badgeUrl: null, activeTheme: null },
                     activeBonus: null,
-                    stats: { totalAttempts: 0, correctAttempts: 0 },
+                    stats: { totalAttempts: 0, correctAttempts: 0, abandons: 0 },
                     hasCompletedTutorial: true
                 });
                 showMessage('Cadastro realizado com sucesso! Faça o login.');
@@ -788,12 +955,25 @@
         });
         document.getElementById('logout-button').addEventListener('click', async (e) => {
              e.preventDefault();
+             document.getElementById('menu-dropdown').classList.add('hidden'); // Esconder menu visualmente
+             
+             // Dispara a desconexão da sala atual, mas não bloqueia a execução do Logout
              if (currentLobbyId) {
-                await leaveLobby();
+                leaveLobby().catch(console.error);
              }
+             
              if (friendsListener) friendsListener();
              if (friendRequestsListener) friendRequestsListener();
-             signOut(auth);
+             if (incomingDuelsListener) incomingDuelsListener();
+             if (outboundDuelsListener) outboundDuelsListener();
+             
+             try {
+                 await signOut(auth);
+                 window.location.reload(); // Recarrega a página para limpar inteiramente o cache da sessão
+             } catch (error) {
+                 console.error(error);
+                 window.location.reload(); 
+             }
         });
         document.getElementById('forgot-password').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -987,7 +1167,7 @@
                     const userData = userDoc.data();
                     const newScore = (userData.score || 0) + finalScore;
                     const newXp = (userData.xp || 0) + finalScore;
-                    const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                    const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
                     newStats.totalAttempts++;
                     newStats.correctAttempts++;
 
@@ -1032,7 +1212,7 @@
                 await runTransaction(db, async (transaction) => {
                      const userDoc = await transaction.get(userDocRef);
                      const userData = userDoc.data();
-                     const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0 };
+                     const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
                      newStats.totalAttempts++;
                      transaction.update(userDocRef, { stats: newStats });
                 });
@@ -1105,21 +1285,23 @@
             
             const titulo = hasTokens ? "Retirada Estratégica" : "Desistir (Penalidade)";
             const mensagem = hasTokens 
-                ? "Utilizar 1 token de abandono para sair sem registrar falha?" 
-                : "Sem tokens. Se sair agora, o sistema registrará uma Falha de Inspeção no seu histórico. Deseja mesmo sair?";
+                ? "Utilizar 1 token de abandono para sair sem registrar falha na sua eficiência? (O abandono ainda será registrado no seu perfil público)" 
+                : "Sem tokens. Se sair agora, o sistema registrará uma Falha de Inspeção E um Abandono no seu histórico. Deseja mesmo sair?";
 
             createConfirmationModal(titulo, mensagem, async () => {
                  const userDocRef = doc(db, "users", currentUser.uid);
                  await runTransaction(db, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
                     const currentConsumables = userDoc.data().consumables || { abandon: 0 };
-                    const currentStats = userDoc.data().stats || { totalAttempts: 0, correctAttempts: 0 };
+                    const currentStats = userDoc.data().stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
 
                     if (hasTokens) {
                         currentConsumables.abandon--;
                     } else {
                         currentStats.totalAttempts++;
                     }
+                    
+                    currentStats.abandons = (currentStats.abandons || 0) + 1;
 
                     transaction.update(userDocRef, { 
                         consumables: currentConsumables,
@@ -1134,6 +1316,8 @@
                 } else {
                     currentUserData.stats.totalAttempts++;
                 }
+                
+                currentUserData.stats.abandons = (currentUserData.stats.abandons || 0) + 1;
 
                 resetToStartScreen();
                 updateConsumablesUI();
@@ -1155,8 +1339,8 @@
             let content = '<div class="grid grid-cols-2 md:grid-cols-3 gap-5 p-2">';
             availableChallenges.forEach(c => {
                 content += `
-                    <div data-id="${c.id}" class="choice-item-btn bg-gray-900 border border-white/10 rounded-2xl overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:border-indigo-500 shadow-lg group">
-                        <div class="h-32 p-2 bg-gradient-to-t from-transparent to-black/20 flex items-center justify-center">
+                    <div data-id="${c.id}" class="choice-item-btn bg-gray-900 border border-white/10 rounded-2xl overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:border-blue-500 shadow-lg group">
+                        <div class="h-32 p-2 bg-white flex items-center justify-center">
                             <img src="https://lh3.googleusercontent.com/d/${c.id}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         </div>
                         <div class="p-3 bg-gray-800/80 border-t border-white/5">
@@ -1221,7 +1405,7 @@
             const itemsSnapshot = await getDocs(query(collection(db, "shopItems")));
             if (!itemsSnapshot.empty) {
                 const consumablesHeader = document.createElement('h3');
-                consumablesHeader.className = 'font-title text-lg font-bold text-indigo-300 border-b border-white/10 pb-2 mb-3';
+                consumablesHeader.className = 'font-title text-lg font-bold text-blue-300 border-b border-white/10 pb-2 mb-3';
                 consumablesHeader.textContent = 'Consumíveis Operacionais';
                 listEl.appendChild(consumablesHeader);
         
@@ -1237,7 +1421,7 @@
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto bg-gray-900/50 p-2 sm:p-0 sm:bg-transparent rounded-lg">
                             <p class="text-yellow-400 font-bold text-lg px-2">${item.price} <span class="text-xs text-yellow-600">PTS</span></p>
-                            <button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn btn-glass bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-semibold shadow-md disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed transition" ${!canAfford ? 'disabled' : ''}>Adquirir</button>
+                            <button data-id="${item.id}" data-price="${item.price}" data-type="${item.type}" data-name="${item.name}" class="buy-item-btn btn-glass bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg font-semibold shadow-md disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed transition" ${!canAfford ? 'disabled' : ''}>Adquirir</button>
                         </div>`;
                     listEl.appendChild(div);
                 });
@@ -1282,7 +1466,7 @@
             } else {
                 completedChallenges.forEach((data, id) => {
                     content += `
-                        <div class="aspect-square bg-gray-900 border border-white/10 rounded-2xl overflow-hidden cursor-pointer transform hover:scale-105 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)] transition-all p-2 flex flex-col items-center justify-center group" onclick="window.showDetailsModal('${id}')">
+                        <div class="aspect-square bg-white border border-white/10 rounded-2xl overflow-hidden cursor-pointer transform hover:scale-105 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)] transition-all p-2 flex flex-col items-center justify-center group" onclick="window.showDetailsModal('${id}')">
                             <img src="https://lh3.googleusercontent.com/d/${id}" class="w-full h-full object-contain group-hover:opacity-80 transition-opacity">
                         </div>`;
                 });
@@ -1347,7 +1531,7 @@
             const isCurrentUser = userDoc.id === currentUser.uid;
             
             let bgClass = 'glass-panel hover:bg-slate-800/80';
-            if(isCurrentUser) bgClass = 'bg-indigo-900/40 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]';
+            if(isCurrentUser) bgClass = 'bg-blue-900/40 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]';
 
             let rankBadge = `<span class="font-bold text-lg w-10 text-center text-gray-500">#${rank}</span>`;
             if(rank === 1) rankBadge = `<div class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-500/20 border border-yellow-500 text-yellow-400 font-bold shadow-[0_0_10px_rgba(234,179,8,0.3)]">1</div>`;
@@ -1365,7 +1549,7 @@
                     ${rankBadge}
                     <div>
                         <p class="font-bold tracking-wide" style="color: ${nameColor};">${user.name || user.email}</p>
-                        <p class="text-xs text-indigo-300/70 font-medium">${user.profile?.title || 'Engenheiro Júnior'}</p>
+                        <p class="text-xs text-blue-300/70 font-medium">${user.profile?.title || 'Engenheiro Júnior'}</p>
                     </div>
                 </div>
                 <div class="text-right">
@@ -1486,12 +1670,12 @@
             const badgeOptions = unlockedBadges.map(b => `
                 <label class="cursor-pointer">
                     <input type="radio" name="badge-select" value="${b}" class="sr-only peer">
-                    <img src="${b}" class="w-16 h-16 rounded-full object-cover border-4 border-transparent peer-checked:border-indigo-500 hover:scale-110 transition-transform bg-gray-800">
+                    <img src="${b}" class="w-16 h-16 rounded-full object-cover border-4 border-transparent peer-checked:border-blue-500 hover:scale-110 transition-transform bg-gray-800">
                 </label>
             `).join('');
 
             const allAchievementsHtml = allAchievements.map(achieve => `
-                <div class="glass-panel p-3 rounded-xl flex items-center gap-4 ${!unlockedAchievements.has(achieve.id) ? 'achievement-locked' : 'border-indigo-500/30'}">
+                <div class="glass-panel p-3 rounded-xl flex items-center gap-4 ${!unlockedAchievements.has(achieve.id) ? 'achievement-locked' : 'border-blue-500/30'}">
                     <div class="w-12 h-12 rounded-lg bg-gray-800 flex-shrink-0 flex items-center justify-center p-1">
                         <img src="${achieve.iconUrl}" class="max-w-full max-h-full object-contain" onerror="this.src='https://placehold.co/48?text=🏆'">
                     </div>
@@ -1507,14 +1691,14 @@
                 .map(theme => `
                 <label class="cursor-pointer relative">
                     <input type="radio" name="theme-select" value="${theme.id}" class="sr-only peer">
-                    <div class="w-full p-5 rounded-2xl border-2 border-transparent peer-checked:border-indigo-500 hover:border-gray-500 transition-all shadow-md" style="background:${theme.colors.bg}; color:${theme.colors.text};">
+                    <div class="w-full p-5 rounded-2xl border-2 border-transparent peer-checked:border-blue-500 hover:border-gray-500 transition-all shadow-md" style="background:${theme.colors.bg}; color:${theme.colors.text};">
                         <h4 class="font-bold text-lg">${theme.name}</h4>
                         <p class="text-xs opacity-80">${theme.description}</p>
                     </div>
                 </label>
             `).join('');
 
-            const stats = currentUserData.stats || { totalAttempts: 0, correctAttempts: 0 };
+            const stats = currentUserData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
             const accuracy = stats.totalAttempts > 0 ? ((stats.correctAttempts / stats.totalAttempts) * 100).toFixed(1) : "0.0";
             
             let favoriteCategory = "-";
@@ -1528,7 +1712,7 @@
             
             const content = `
                 <div class="bg-gray-900/50 p-1.5 rounded-2xl flex flex-wrap gap-1 mb-6">
-                    <button data-tab="equip" class="tab-btn flex-1 bg-indigo-500/20 text-indigo-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition">Insígnias</button>
+                    <button data-tab="equip" class="tab-btn flex-1 bg-blue-500/20 text-blue-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition">Insígnias</button>
                     <button data-tab="stats" class="tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition">Dados</button>
                     <button data-tab="themes" class="tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition">Interface</button>
                     <button data-tab="achievements" class="tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition">Conquistas</button>
@@ -1537,7 +1721,7 @@
                 <div id="tab-content-equip" class="tab-content space-y-6 animate-slide-in-out" style="animation-name: slide-in; animation-duration: 0.3s;">
                     <div class="glass-panel p-5 rounded-2xl">
                         <label for="title-select" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Titulação Ativa</label>
-                        <select id="title-select" class="w-full p-3 input-elegant rounded-xl text-indigo-300 font-medium">
+                        <select id="title-select" class="w-full p-3 input-elegant rounded-xl text-blue-300 font-medium">
                             <option value="">Sem Titulação</option>
                             ${titleOptions}
                         </select>
@@ -1547,7 +1731,7 @@
                         <div class="flex flex-wrap gap-4">
                             <label class="cursor-pointer">
                                 <input type="radio" name="badge-select" value="" class="sr-only peer">
-                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center text-gray-500 font-bold border-4 border-transparent peer-checked:border-indigo-500 hover:scale-110 transition">X</div>
+                                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center text-gray-500 font-bold border-4 border-transparent peer-checked:border-blue-500 hover:scale-110 transition">X</div>
                             </label>
                             ${badgeOptions}
                         </div>
@@ -1556,18 +1740,22 @@
                 </div>
 
                 <div id="tab-content-stats" class="tab-content hidden space-y-6">
-                     <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col justify-center">
-                            <p class="font-mono text-4xl font-bold text-blue-400 drop-shadow-md">${completedChallenges.size}</p>
-                            <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">Aprovações</p>
+                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center">
+                            <p class="font-mono text-3xl font-bold text-blue-400 drop-shadow-md">${completedChallenges.size}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-2">Aprovações</p>
                         </div>
-                        <div class="glass-panel p-6 rounded-2xl flex flex-col justify-center">
-                            <p class="font-mono text-4xl font-bold ${accuracy >= 70 ? 'text-emerald-400' : 'text-amber-400'} drop-shadow-md">${accuracy}%</p>
-                            <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">Eficiência</p>
+                        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center">
+                            <p class="font-mono text-3xl font-bold ${accuracy >= 70 ? 'text-emerald-400' : 'text-amber-400'} drop-shadow-md">${accuracy}%</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-2">Eficiência</p>
                         </div>
-                        <div class="col-span-2 glass-panel p-6 rounded-2xl flex flex-col justify-center">
-                            <p class="font-title text-2xl font-bold text-purple-400 drop-shadow-md">${favoriteCategory}</p>
-                            <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">Especialidade</p>
+                        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center">
+                            <p class="font-mono text-3xl font-bold text-red-400 drop-shadow-md">${stats.abandons || 0}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-2">Abandonos</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center">
+                            <p class="font-title text-xl font-bold text-purple-400 drop-shadow-md truncate px-1" title="${favoriteCategory}">${favoriteCategory}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-2">Especialidade</p>
                         </div>
                      </div>
                 </div>
@@ -1576,7 +1764,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <label class="cursor-pointer relative">
                             <input type="radio" name="theme-select" value="" class="sr-only peer">
-                            <div class="w-full p-5 rounded-2xl border-2 border-transparent peer-checked:border-indigo-500 hover:border-gray-500 transition-all shadow-md bg-slate-900 text-white">
+                            <div class="w-full p-5 rounded-2xl border-2 border-transparent peer-checked:border-blue-500 hover:border-gray-500 transition-all shadow-md bg-slate-900 text-white">
                                 <h4 class="font-bold text-lg">Padrão Sistema</h4>
                                 <p class="text-xs text-slate-400">A visualização original do desafio.</p>
                             </div>
@@ -1606,7 +1794,7 @@
                 tabs.forEach(t => {
                     t.className = 'tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition';
                 });
-                e.target.className = 'tab-btn flex-1 bg-indigo-500/20 text-indigo-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition';
+                e.target.className = 'tab-btn flex-1 bg-blue-500/20 text-blue-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition';
                 
                 document.querySelectorAll('.tab-content').forEach(c => {
                     c.classList.add('hidden');
@@ -1690,14 +1878,15 @@
 
             const content = `
                 <div class="glass-panel p-6 rounded-2xl flex flex-col items-center sm:flex-row sm:items-start gap-6 mb-6">
-                    <img src="${userData.profile?.badgeUrl || 'https://placehold.co/100x100/1e293b/6366f1?text=DP'}" class="w-28 h-28 rounded-2xl object-cover shadow-[0_0_20px_rgba(99,102,241,0.3)] bg-gray-800">
+                    <img src="${userData.profile?.badgeUrl || 'https://placehold.co/100x100/1e293b/3b82f6?text=DP'}" class="w-28 h-28 rounded-2xl object-cover shadow-[0_0_20px_rgba(59,130,246,0.3)] bg-gray-800">
                     <div class="flex-1 text-center sm:text-left w-full">
                         <h3 class="font-title text-3xl font-bold tracking-wide" style="color: ${nameColor};">${userData.name}</h3>
-                        <p class="text-indigo-400 font-medium tracking-wider text-sm uppercase mt-1">${userData.profile?.title || 'Engenheiro Júnior'}</p>
+                        <p class="text-blue-400 font-medium tracking-wider text-sm uppercase mt-1">${userData.profile?.title || 'Engenheiro Júnior'}</p>
                         
                         <div class="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
                             <span class="bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 text-xs px-3 py-1 rounded-lg font-mono">XP: ${userData.xp || 0}</span>
                             <span class="bg-purple-900/40 border border-purple-500/30 text-purple-300 text-xs px-3 py-1 rounded-lg font-mono">Nível: ${level ? level.name : '1'}</span>
+                            <span class="bg-red-900/40 border border-red-500/30 text-red-300 text-xs px-3 py-1 rounded-lg font-mono">Abandonos: ${userData.stats?.abandons || 0}</span>
                         </div>
                         ${friendButtonHtml}
                     </div>
@@ -1801,7 +1990,7 @@
             const toastId = `toast-${Date.now()}`;
             const toastHtml = `
                 <div id="${toastId}" class="bg-gray-800/90 backdrop-blur-xl border border-white/10 shadow-2xl text-white text-sm font-medium px-5 py-3 rounded-2xl flex items-center gap-3 transform translate-x-full animate-slide-in-out">
-                    <div class="h-2 w-2 rounded-full bg-indigo-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-blue-500"></div>
                     ${message}
                 </div>`;
             document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHtml);
@@ -1852,7 +2041,7 @@
              const content = `
                 <p class="text-gray-300 text-lg mb-8 leading-relaxed">${message}</p>
                 <div class="flex justify-end gap-3">
-                    <button id="alert-ok-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition">Ciente</button>
+                    <button id="alert-ok-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition">Ciente</button>
                 </div>
              `;
              createModal(modalId, titleHtml, content, 'max-w-md');
@@ -1935,7 +2124,7 @@
                 <p class="text-gray-400 text-sm mb-6">Insira um código de autorização válido para descriptografar bônus no sistema.</p>
                 <form id="redeem-code-form" class="space-y-5">
                     <input type="text" id="code-input" required class="w-full p-4 bg-gray-900 border border-white/10 focus:border-purple-500 rounded-xl font-mono tracking-[0.2em] text-center text-xl text-white shadow-inner uppercase placeholder:text-gray-600" placeholder="XXXX-XXXX">
-                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition">Decodificar</button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition">Decodificar</button>
                 </form>
             `, 'max-w-md');
             document.getElementById('redeem-code-form').addEventListener('submit', redeemCode);
@@ -2040,7 +2229,7 @@
 
         function listenToLobbies() {
             const lobbiesRef = collection(db, "lobbies");
-            const q = query(lobbiesRef, where("status", "==", "waiting"));
+            const q = query(lobbiesRef, where("status", "==", "waiting"), where("isDuel", "==", false));
 
             if (lobbiesListener) lobbiesListener();
 
@@ -2054,17 +2243,17 @@
                 snapshot.forEach(doc => {
                     const lobby = doc.data();
                     const lobbyEl = document.createElement('div');
-                    lobbyEl.className = 'glass-panel p-3 rounded-xl flex justify-between items-center group hover:border-indigo-500/50 transition';
+                    lobbyEl.className = 'glass-panel p-3 rounded-xl flex justify-between items-center group hover:border-blue-500/50 transition';
                     const lockIcon = lobby.settings.isPrivate ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block ml-1 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a3 3 0 00-3 3v1H6a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V8a2 2 0 00-2-2h-1V5a3 3 0 00-3-3zm-1 4V5a1 1 0 112 0v1H9z" clip-rule="evenodd" /></svg>` : '';
                     lobbyEl.innerHTML = `
                         <div>
-                            <p class="font-bold text-white text-sm group-hover:text-indigo-300 transition">${lobby.hostName} ${lockIcon}</p>
+                            <p class="font-bold text-white text-sm group-hover:text-blue-300 transition">${lobby.hostName} ${lockIcon}</p>
                             <div class="flex items-center gap-2 mt-0.5">
                                 <span class="text-[10px] uppercase font-bold text-gray-500 bg-gray-800 px-1.5 rounded">${lobby.settings.category}</span>
                                 <span class="text-xs text-gray-400">${lobby.players.length} op.</span>
                             </div>
                         </div>
-                        <button data-id="${doc.id}" class="join-lobby-list-btn bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600 hover:text-white font-semibold px-4 py-1.5 text-sm rounded-lg transition">Engajar</button>
+                        <button data-id="${doc.id}" class="join-lobby-list-btn bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white font-semibold px-4 py-1.5 text-sm rounded-lg transition">Engajar</button>
                     `;
                     listEl.appendChild(lobbyEl);
                 });
@@ -2079,7 +2268,7 @@
             const content = `
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Categoria de Duelo</label>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Categoria da Arena</label>
                         <select id="create-lobby-category" class="w-full input-elegant p-3 rounded-xl">
                             ${categoriesOptions}
                         </select>
@@ -2105,7 +2294,7 @@
                         <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Senha da Arena</label>
                         <input type="password" id="create-lobby-password" class="w-full input-elegant p-3 rounded-xl font-mono" placeholder="••••">
                     </div>
-                    <button id="confirm-create-lobby-btn" class="w-full mt-2 btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg">Inicializar Arena</button>
+                    <button id="confirm-create-lobby-btn" class="w-full mt-2 btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg">Inicializar Arena Livre</button>
                 </div>
             `;
             createModal('create-lobby-modal', 'Criar Arena Competitiva', content, 'max-w-md');
@@ -2145,6 +2334,7 @@
                 currentChallengeId: null,
                 challengeHistory: [],
                 createdAt: serverTimestamp(),
+                isDuel: false
             };
             await setDoc(lobbyRef, lobbyData);
             document.getElementById('create-lobby-modal')?.remove();
@@ -2169,7 +2359,7 @@
                 return createAlertModal("Acesso Negado", "A batalha nesta arena já começou.");
              }
 
-             if (lobbyData.settings.isPrivate && !skipPasswordCheck) {
+             if (lobbyData.settings.isPrivate && !skipPasswordCheck && !lobbyData.isDuel) {
                 return promptForLobbyPassword(lobbyId, lobbyData);
              }
             
@@ -2185,7 +2375,12 @@
              });
 
             currentLobbyId = lobbyId;
-            switchView(competitiveContainer.querySelector('#lobby-browser'), competitiveContainer.querySelector('#lobby-view'));
+            
+            // FORÇAR A EXIBIÇÃO DA TELA DA ARENA INDEPENDENTE DE ONDE O USUÁRIO ESTIVER
+            document.getElementById('main-view-container').classList.add('hidden', 'view-hidden');
+            document.getElementById('competitive-container').classList.remove('hidden', 'view-hidden');
+            document.getElementById('lobby-browser').classList.add('hidden', 'view-hidden');
+            document.getElementById('lobby-view').classList.remove('hidden', 'view-hidden');
 
             if (lobbiesListener) lobbiesListener();
             
@@ -2193,7 +2388,7 @@
                 if (doc.exists()) {
                     renderLobby(doc.data());
                 } else {
-                    createAlertModal("Conexão Cortada", "O líder encerrou a sessão da arena.", () => leaveLobby(true));
+                    createAlertModal("Conexão Cortada", "A sala foi encerrada pelo anfitrião ou pelo sistema.", () => leaveLobby(true));
                 }
             });
         }
@@ -2243,34 +2438,100 @@
                  const lobbyDoc = await getDoc(lobbyRef);
                  if (lobbyDoc.exists()) {
                     const lobbyData = lobbyDoc.data();
-                    if (lobbyData.hostId === currentUser.uid) {
-                        await deleteDoc(lobbyRef);
+                    
+                    if (lobbyData.isDuel && lobbyData.status !== 'finished') {
+                        if (lobbyData.status === 'waiting') {
+                            // Cancelado antes de começar, devolve pontos pra todo mundo
+                            for (const p of lobbyData.players) {
+                                await runTransaction(db, async (t) => {
+                                    const uRef = doc(db, "users", p.uid);
+                                    const uDoc = await t.get(uRef);
+                                    if(uDoc.exists()) t.update(uRef, { score: (uDoc.data().score || 0) + lobbyData.betAmount });
+                                });
+                            }
+                            if(lobbyData.hostId === currentUser.uid) await deleteDoc(lobbyRef); // Deleta a sala
+                            currentUserData.score += lobbyData.betAmount; // Restaura visualmente pro cara que cancelou
+                        } else if (lobbyData.status === 'in_progress') {
+                            // Correu no meio do jogo: oponente leva o pote (WO)
+                            const otherPlayer = lobbyData.players.find(p => p.uid !== currentUser.uid);
+                            if (otherPlayer) {
+                                await runTransaction(db, async (transaction) => {
+                                    const otherRef = doc(db, "users", otherPlayer.uid);
+                                    const oDoc = await transaction.get(otherRef);
+                                    if (oDoc.exists()) {
+                                        transaction.update(otherRef, { score: (oDoc.data().score || 0) + lobbyData.pot });
+                                    }
+                                });
+                            }
+                            // Adiciona a falha nas estatísticas
+                            const userRef = doc(db, "users", currentUser.uid);
+                            await runTransaction(db, async (t) => {
+                                 const uDoc = await t.get(userRef);
+                                 const stats = uDoc.data().stats || { totalAttempts:0, correctAttempts:0, abandons:0 };
+                                 stats.abandons = (stats.abandons || 0) + 1;
+                                 stats.totalAttempts++;
+                                 t.update(userRef, { stats: stats });
+                            });
+                            currentUserData.stats.abandons = (currentUserData.stats.abandons || 0) + 1;
+                            currentUserData.stats.totalAttempts = (currentUserData.stats.totalAttempts || 0) + 1;
+                            
+                            await deleteDoc(lobbyRef); // Fecha o lobby já que foi WO
+                        }
                     } else {
-                        await runTransaction(db, async (transaction) => {
-                            const freshLobbyDoc = await transaction.get(lobbyRef);
-                            if (!freshLobbyDoc.exists()) return;
-                            const currentPlayers = freshLobbyDoc.data().players;
-                            const newPlayers = currentPlayers.filter(p => p.uid !== currentUser.uid);
-                            transaction.update(lobbyRef, { players: newPlayers });
-                        });
+                        // Lobby normal
+                        if (lobbyData.status === 'in_progress') {
+                            const userRef = doc(db, "users", currentUser.uid);
+                            await runTransaction(db, async (transaction) => {
+                                const userDoc = await transaction.get(userRef);
+                                const userData = userDoc.data();
+                                const currentStats = userData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
+                                currentStats.abandons = (currentStats.abandons || 0) + 1;
+                                currentStats.totalAttempts++; 
+                                transaction.update(userRef, { stats: currentStats });
+                            });
+                            currentUserData.stats.abandons = (currentUserData.stats.abandons || 0) + 1;
+                            currentUserData.stats.totalAttempts = (currentUserData.stats.totalAttempts || 0) + 1;
+                        }
+
+                        if (lobbyData.hostId === currentUser.uid) {
+                            await deleteDoc(lobbyRef);
+                        } else {
+                            await runTransaction(db, async (transaction) => {
+                                const freshLobbyDoc = await transaction.get(lobbyRef);
+                                if (!freshLobbyDoc.exists()) return;
+                                const currentPlayers = freshLobbyDoc.data().players;
+                                const newPlayers = currentPlayers.filter(p => p.uid !== currentUser.uid);
+                                transaction.update(lobbyRef, { players: newPlayers });
+                            });
+                        }
                     }
                 }
             }
 
             currentLobbyId = null;
             resetToStartScreen();
+            updateConsumablesUI();
             
             competitiveContainer.classList.add('hidden', 'view-hidden');
             mainViewContainer.classList.remove('hidden', 'view-hidden');
         }
         
         abandonCompetitionBtn.addEventListener('click', () => {
-            createConfirmationModal("Desistir do Duelo", "O sistema reportará o seu abandono. Deseja mesmo sair da partida?", () => leaveLobby());
+            const isDuel = document.getElementById('match-timer').dataset.isDuel === 'true'; // hackzinho pra saber se é duelo
+            const msg = isDuel 
+                ? "Abandonar agora fará você perder todo o dinheiro da aposta e ceder a vitória ao oponente. Deseja mesmo correr?" 
+                : "O sistema reportará o seu abandono na sua ficha pública de eficiência. Deseja mesmo sair da partida?";
+            createConfirmationModal("Desistir do Confronto", msg, () => leaveLobby());
         });
         
         function renderLobby(lobbyData) {
             const lobbyView = document.getElementById('lobby-view');
             const isHost = lobbyData.hostId === currentUser.uid;
+
+            // Define layout de Duelo vs Arena Livre
+            const titleTheme = lobbyData.isDuel ? 'text-amber-400' : 'text-blue-400';
+            const arenaTypeStr = lobbyData.isDuel ? 'DUELO 1x1' : 'Arena Livre';
+            const duelBadge = lobbyData.isDuel ? `<div class="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1 rounded-lg text-sm font-bold shadow-[0_0_10px_rgba(251,191,36,0.3)]">⚔️ POTE: ${lobbyData.pot} PTS</div>` : '';
 
             if (lobbyData.status === 'waiting') {
                 const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
@@ -2278,29 +2539,32 @@
 
                 lobbyView.innerHTML = `
                     <div class="glass-panel p-6 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
                         
                         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
                             <div>
-                                <h2 class="font-title text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Arena de ${lobbyData.hostName}</h2>
-                                <p class="text-sm font-mono text-gray-500 mt-1">ID: <span class="text-indigo-400 font-bold">${currentLobbyId}</span></p>
+                                <div class="flex items-center gap-3">
+                                    <h2 class="font-title text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Arena de ${lobbyData.hostName}</h2>
+                                    ${duelBadge}
+                                </div>
+                                <p class="text-sm font-mono text-gray-500 mt-1">ID: <span class="${titleTheme} font-bold">${currentLobbyId}</span></p>
                             </div>
                             <button id="leave-lobby-btn" class="btn-danger text-white font-semibold py-2 px-5 rounded-xl shadow">Desconectar</button>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="bg-gray-900/60 p-5 rounded-2xl border border-white/5">
-                                 <h3 class="font-title text-lg font-bold text-white mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg> Parâmetros</h3>
+                                 <h3 class="font-title text-lg font-bold text-white mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg> Parâmetros (${arenaTypeStr})</h3>
                                  <div class="space-y-4">
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Dominío Base</label>
-                                        <select id="lobby-category-select" class="w-full input-elegant p-3 rounded-xl" ${!isHost ? 'disabled' : ''}>
+                                        <select id="lobby-category-select" class="w-full input-elegant p-3 rounded-xl" ${!isHost || lobbyData.isDuel ? 'disabled' : ''}>
                                             ${categoriesOptions}
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Contagem Limite (min)</label>
-                                        <input type="number" id="lobby-time-input" value="${lobbyData.settings.timeLimitMinutes}" min="1" max="60" class="w-full input-elegant p-3 rounded-xl font-mono text-center" ${!isHost ? 'disabled' : ''}>
+                                        <input type="number" id="lobby-time-input" value="${lobbyData.settings.timeLimitMinutes}" min="1" max="60" class="w-full input-elegant p-3 rounded-xl font-mono text-center" ${!isHost || lobbyData.isDuel ? 'disabled' : ''}>
                                     </div>
                                  </div>
                                  ${isHost ? `<button id="start-lobby-btn" class="w-full mt-6 btn-success text-white font-bold py-3.5 rounded-xl shadow-lg text-lg uppercase tracking-wider">Acionar Jogo</button>` : '<div class="mt-6 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 p-3 rounded-xl text-center text-sm font-medium animate-pulse">Aguardando liberação do líder...</div>'}
@@ -2370,18 +2634,22 @@
                 
                 const rankingContainer = document.getElementById('mini-ranking-container');
                 const rankingList = document.getElementById('mini-ranking-list');
+                document.getElementById('ranking-title').textContent = lobbyData.isDuel ? '⚔️ DUELO EM ANDAMENTO' : 'Placar Live';
+
                 rankingContainer.classList.remove('hidden');
                 rankingList.innerHTML = lobbyData.players
                     .sort((a,b) => b.score - a.score)
                     .map(p => `
-                        <div class="flex justify-between items-center text-sm px-2 py-1.5 rounded-lg ${p.uid === currentUser.uid ? 'bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30' : 'text-gray-300 font-medium'}">
+                        <div class="flex justify-between items-center text-sm px-2 py-1.5 rounded-lg ${p.uid === currentUser.uid ? 'bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30' : 'text-gray-300 font-medium'}">
                             <span class="truncate pr-2">${p.name}</span>
-                            <span class="font-mono text-cyan-400 shrink-0">${p.score}</span>
+                            <span class="font-mono text-cyan-400 shrink-0">${p.score} pts</span>
                         </div>
                     `).join('');
 
                 clearInterval(matchTimerInterval);
                 const matchTimerEl = document.getElementById('match-timer');
+                matchTimerEl.dataset.isDuel = lobbyData.isDuel;
+                
                 matchTimerInterval = setInterval(() => {
                     const now = new Date();
                     const elapsed = Math.floor((now - lobbyData.startTime.toDate()) / 1000);
@@ -2399,22 +2667,48 @@
             } else if (lobbyData.status === 'finished') {
                 const finalRanking = lobbyData.players.sort((a,b) => b.score - a.score);
                 const winner = finalRanking[0];
-                 const content = `
+                const tie = finalRanking.length > 1 && finalRanking[0].score === finalRanking[1].score;
+
+                let headerHtml = `
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-yellow-500/20 border border-yellow-500 mb-4 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                    </div>
+                    <h3 class="font-title text-2xl font-bold text-white">Ocupação Concluída!</h3>
+                    <p class="text-gray-400 mt-2">Destaque: <span class="font-bold text-yellow-400 text-lg">${winner.name}</span></p>
+                `;
+
+                if (lobbyData.isDuel) {
+                    if (tie) {
+                        headerHtml = `
+                            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-500/20 border border-gray-500 mb-4 shadow-lg">
+                                <span class="text-3xl">⚖️</span>
+                            </div>
+                            <h3 class="font-title text-2xl font-bold text-white">Empate Técnico!</h3>
+                            <p class="text-gray-400 mt-2">Apostas de <span class="font-bold text-yellow-400">${lobbyData.betAmount} PTS</span> devolvidas a ambos.</p>
+                        `;
+                    } else {
+                        headerHtml = `
+                            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/20 border border-amber-500 mb-4 shadow-[0_0_20px_rgba(251,191,36,0.6)]">
+                                <span class="text-4xl">💰</span>
+                            </div>
+                            <h3 class="font-title text-2xl font-bold text-white">Vencedor do Duelo!</h3>
+                            <p class="text-gray-300 mt-2"><strong class="text-amber-400 text-xl">${winner.name}</strong> obliterou o oponente e faturou o pote de <strong class="text-amber-400 text-xl">${lobbyData.pot} PTS</strong>!</p>
+                        `;
+                    }
+                }
+
+                const content = `
                     <div class="text-center mb-8">
-                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-yellow-500/20 border border-yellow-500 mb-4 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                        </div>
-                        <h3 class="font-title text-2xl font-bold text-white">Ocupação Concluída!</h3>
-                        <p class="text-gray-400 mt-2">Destaque da Arena: <span class="font-bold text-yellow-400 text-lg">${winner.name}</span></p>
+                        ${headerHtml}
                     </div>
                     <div class="bg-gray-900/60 rounded-2xl p-4 space-y-3 mb-6 border border-white/5">
                      ${finalRanking.map((p, index) => `
-                        <div class="flex justify-between items-center bg-gray-800 p-3 rounded-xl border border-white/5 ${index === 0 ? 'ring-1 ring-yellow-500/50 shadow-md' : ''}">
+                        <div class="flex justify-between items-center bg-gray-800 p-3 rounded-xl border border-white/5 ${index === 0 && !tie ? 'ring-1 ring-yellow-500/50 shadow-md' : ''}">
                             <div class="flex items-center gap-3">
                                 <span class="font-mono text-gray-500 font-bold w-4">${index + 1}</span>
                                 <span class="font-bold text-white">${p.name}</span>
                             </div>
-                            <span class="text-cyan-400 font-mono font-bold">${p.score} PTS</span>
+                            <span class="text-cyan-400 font-mono font-bold">${p.score} Acertos</span>
                         </div>
                      `).join('')}
                     </div>
@@ -2468,7 +2762,9 @@
 
             if (isCorrect) {
                 const lobbyRef = doc(db, "lobbies", currentLobbyId);
-                const finalScore = parseInt(currentChallenge.score || 0);
+                // No competitivo e duelo, acertos valem fixos (ex: 1 pt por acerto para desempatar) ou o score da peça
+                // Como não queremos quebrar a lógica de vitórias e apostas, vamos usar 1 para facilitar contagem.
+                const finalScore = 1; 
 
                 await runTransaction(db, async (transaction) => {
                     const lobbyDoc = await transaction.get(lobbyRef);
@@ -2482,25 +2778,41 @@
                             players: players,
                             [`playerAnswers.${currentUser.uid}`]: serverTimestamp()
                         });
-
+                        
+                        // Atualiza as estatísticas globais
                         const userRef = doc(db, "users", currentUser.uid);
                         const userDoc = await transaction.get(userRef);
                         const userData = userDoc.data();
+                        const currentStats = userData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
+                        currentStats.totalAttempts++;
+                        currentStats.correctAttempts++;
+
                         transaction.update(userRef, {
-                            score: (userData.score || 0) + finalScore,
-                            xp: (userData.xp || 0) + finalScore
+                            xp: (userData.xp || 0) + parseInt(currentChallenge.score || 0), // dá o XP normal
+                            stats: currentStats
                         });
                     }
                 });
 
-                 currentUserData.score += finalScore;
-                 currentUserData.xp += finalScore;
+                 currentUserData.xp += parseInt(currentChallenge.score || 0);
+                 currentUserData.stats.totalAttempts++;
+                 currentUserData.stats.correctAttempts++;
                  updateXpBar();
                  updateConsumablesUI();
             } else {
                 answerFeedback.textContent = "Falha Técnica. Dados Incorretos.";
                 answerFeedback.className = `p-4 rounded-xl text-center text-sm font-bold bg-red-500/20 border border-red-500/40 text-red-400 shadow-inner`;
                 answerFeedback.classList.remove('hidden');
+                
+                // Add attempt failure
+                const userRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (t) => {
+                    const uDoc = await t.get(userRef);
+                    const stats = uDoc.data().stats || { totalAttempts:0, correctAttempts:0, abandons:0 };
+                    stats.totalAttempts++;
+                    t.update(userRef, { stats: stats });
+                });
+                currentUserData.stats.totalAttempts++;
             }
         }
         
@@ -2518,7 +2830,43 @@
         }
         
         async function finishLobby() {
-            await updateDoc(doc(db, "lobbies", currentLobbyId), { status: 'finished' });
+            const lobbyRef = doc(db, "lobbies", currentLobbyId);
+        
+            await runTransaction(db, async (transaction) => {
+                const lobbyDoc = await transaction.get(lobbyRef);
+                if(!lobbyDoc.exists()) return;
+                const lobbyData = lobbyDoc.data();
+                
+                if (lobbyData.status === 'finished') return; 
+                
+                transaction.update(lobbyRef, { status: 'finished' });
+
+                // Distribuir o pote do duelo!
+                if (lobbyData.isDuel) {
+                    const players = [...lobbyData.players].sort((a, b) => b.score - a.score);
+                    const p1 = players[0];
+                    const p2 = players[1];
+
+                    if (p1.score > p2.score) {
+                        // Vencedor leva tudo
+                        const winnerRef = doc(db, "users", p1.uid);
+                        const wDoc = await transaction.get(winnerRef);
+                        if(wDoc.exists()) {
+                             transaction.update(winnerRef, { score: (wDoc.data().score || 0) + lobbyData.pot });
+                        }
+                    } else if (p1.score === p2.score) {
+                        // Empate - devolve a aposta para os dois
+                        for(const p of players) {
+                            const uRef = doc(db, "users", p.uid);
+                            const uDoc = await transaction.get(uRef);
+                            if(uDoc.exists()) {
+                                 transaction.update(uRef, { score: (uDoc.data().score || 0) + lobbyData.betAmount });
+                            }
+                        }
+                    }
+                }
+            });
+            // O Listener de mudança de status para 'finished' vai cuidar de atualizar a UI.
         }
 
         // --- FUNÇÕES DE UI/UX ---
@@ -2529,10 +2877,9 @@
             setTimeout(() => {
                 from.classList.add('hidden');
                 to.classList.remove('hidden');
-                // Trigger reflow
                 void to.offsetWidth;
                 to.classList.remove('view-hidden');
-            }, 400); // tempo em sincronia com o CSS
+            }, 400); 
         }
 
         // --- SISTEMA DE AMIGOS ---
@@ -2553,12 +2900,12 @@
         async function openFriendsModal() {
             const content = `
                 <div class="bg-gray-900/50 p-1.5 rounded-2xl flex flex-wrap gap-1 mb-6">
-                    <button data-tab="list" class="friends-tab-btn flex-1 bg-indigo-500/20 text-indigo-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition">Rede</button>
+                    <button data-tab="list" class="friends-tab-btn flex-1 bg-blue-500/20 text-blue-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition">Rede Aliança</button>
                     <button data-tab="requests" class="friends-tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition relative">
-                        Convites
+                        Convites Pendentes
                         <span id="friend-request-count" class="hidden absolute top-1 right-2 bg-pink-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center"></span>
                     </button>
-                    <button data-tab="add" class="friends-tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition">Conectar</button>
+                    <button data-tab="add" class="friends-tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition">Novo Operador</button>
                 </div>
                 
                 <div id="tab-content-list" class="friends-tab-content space-y-3 animate-slide-in-out" style="animation-name: slide-in; animation-duration: 0.3s;"></div>
@@ -2567,18 +2914,18 @@
                 
                 <div id="tab-content-add" class="friends-tab-content hidden space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="email" id="add-friend-email" placeholder="Email do Operador" class="w-full flex-1 p-3.5 input-elegant rounded-xl">
-                        <button id="search-friend-btn" class="btn-gradient text-white font-bold py-3.5 px-6 rounded-xl shadow-lg whitespace-nowrap">Rastrear</button>
+                        <input type="email" id="add-friend-email" placeholder="Email de Registro" class="w-full flex-1 p-3.5 input-elegant rounded-xl">
+                        <button id="search-friend-btn" class="btn-gradient text-white font-bold py-3.5 px-6 rounded-xl shadow-lg whitespace-nowrap">Rastrear Sinal</button>
                     </div>
                     <div id="friend-search-results" class="mt-4 space-y-3"></div>
                 </div>
             `;
-            createModal('friends-modal', 'Central de Alianças', content, 'max-w-lg');
+            createModal('friends-modal', 'Central de Operações', content, 'max-w-2xl');
             
             const tabs = document.querySelectorAll('.friends-tab-btn');
             tabs.forEach(tab => tab.addEventListener('click', (e) => {
                 tabs.forEach(t => { t.className = 'friends-tab-btn flex-1 hover:bg-white/5 text-gray-400 text-sm font-semibold py-2 px-3 rounded-xl transition relative' });
-                e.target.className = 'friends-tab-btn flex-1 bg-indigo-500/20 text-indigo-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition relative';
+                e.target.className = 'friends-tab-btn flex-1 bg-blue-500/20 text-blue-300 shadow text-sm font-semibold py-2 px-3 rounded-xl transition relative';
                 
                 document.querySelectorAll('.friends-tab-content').forEach(c => {
                     c.classList.add('hidden');
@@ -2603,26 +2950,30 @@
             if (friendsListener) friendsListener();
             friendsListener = onSnapshot(friendsRef, (snapshot) => {
                 if (snapshot.empty) {
-                    container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum aliado conectado à sua rede.</div>';
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500 border border-dashed border-gray-600 rounded-xl">Nenhum aliado conectado à sua rede.</div>';
                     return;
                 }
                 container.innerHTML = '';
                 snapshot.forEach(doc => {
                     const friend = { id: doc.id, ...doc.data() };
                     const div = document.createElement('div');
-                    div.className = 'glass-panel p-3.5 rounded-xl flex justify-between items-center hover:bg-gray-800 transition group';
+                    div.className = 'glass-panel p-3.5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 hover:bg-gray-800 transition group';
                     div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-indigo-900/50 flex items-center justify-center font-bold text-indigo-300 border border-indigo-500/30">
+                        <div class="flex items-center gap-3 w-full sm:w-auto cursor-pointer" onclick="window.openPublicProfileModal('${friend.id}')">
+                            <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center font-bold text-blue-300 border border-blue-500/30">
                                 ${friend.friendName.substring(0,2).toUpperCase()}
                             </div>
-                            <span class="font-bold text-white group-hover:text-indigo-300 transition">${friend.friendName}</span>
+                            <span class="font-bold text-white group-hover:text-blue-300 transition text-lg">${friend.friendName}</span>
                         </div>
-                        <button data-id="${friend.id}" class="remove-friend-btn btn-danger text-white px-3 py-1.5 text-xs font-semibold rounded-lg opacity-80 hover:opacity-100 transition shadow">Remover</button>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button data-id="${friend.id}" data-name="${friend.friendName}" class="duel-friend-btn flex-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 px-4 py-2 text-sm font-bold rounded-lg hover:bg-amber-500 hover:text-gray-900 transition shadow">⚔️ Desafiar</button>
+                            <button data-id="${friend.id}" class="remove-friend-btn bg-gray-700 hover:bg-red-600 text-gray-300 hover:text-white px-3 py-2 text-sm font-semibold rounded-lg transition">Remover</button>
+                        </div>
                     `;
                     container.appendChild(div);
                 });
                 document.querySelectorAll('.remove-friend-btn').forEach(btn => btn.addEventListener('click', (e) => removeFriend(e.target.dataset.id)));
+                document.querySelectorAll('.duel-friend-btn').forEach(btn => btn.addEventListener('click', (e) => window.openDuelModal(e.target.dataset.id, e.target.dataset.name)));
             });
         }
         
@@ -2636,7 +2987,7 @@
                 countEl.textContent = snapshot.size;
                 countEl.classList.toggle('hidden', snapshot.empty);
                 if (snapshot.empty) {
-                    container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma transmissão pendente.</div>';
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500 border border-dashed border-gray-600 rounded-xl">Nenhuma transmissão pendente.</div>';
                     return;
                 }
                 container.innerHTML = '';
@@ -2645,13 +2996,13 @@
                     const div = document.createElement('div');
                     div.className = 'glass-panel p-4 rounded-xl flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-pink-500/20';
                     div.innerHTML = `
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="window.openPublicProfileModal('${req.requesterId}')">
                             <div class="w-10 h-10 rounded-full bg-pink-900/30 flex items-center justify-center font-bold text-pink-400 border border-pink-500/30">
                                 ${req.requesterName.substring(0,2).toUpperCase()}
                             </div>
-                            <span class="font-bold text-white">${req.requesterName}</span>
+                            <span class="font-bold text-white hover:text-pink-300">${req.requesterName}</span>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 w-full sm:w-auto">
                             <button data-id="${req.requesterId}" data-name="${req.requesterName}" data-doc-id="${req.id}" class="accept-request-btn flex-1 btn-success text-white px-4 py-2 text-xs font-bold rounded-lg shadow">Confirmar</button>
                             <button data-id="${req.id}" class="decline-request-btn flex-1 btn-danger text-white px-4 py-2 text-xs font-bold rounded-lg shadow">Recusar</button>
                         </div>
@@ -2681,13 +3032,13 @@
                 if(doc.id === currentUser.uid) return;
                 const user = {id: doc.id, ...doc.data()};
                 const div = document.createElement('div');
-                div.className = 'glass-panel p-4 rounded-xl flex justify-between items-center border-indigo-500/30';
+                div.className = 'glass-panel p-4 rounded-xl flex justify-between items-center border-blue-500/30';
                 div.innerHTML = `
-                    <div>
-                        <span class="font-bold text-white block">${user.name}</span>
+                    <div class="cursor-pointer hover:opacity-80" onclick="window.openPublicProfileModal('${user.id}')">
+                        <span class="font-bold text-white block text-lg">${user.name}</span>
                         <span class="text-xs text-gray-400 font-mono">${user.email}</span>
                     </div>
-                    <button data-id="${user.id}" data-name="${user.name}" class="add-friend-btn btn-gradient text-white px-4 py-2 text-xs font-bold rounded-lg shadow">Conectar</button>
+                    <button data-id="${user.id}" data-name="${user.name}" class="add-friend-btn btn-gradient text-white px-5 py-2 text-sm font-bold rounded-lg shadow">Conectar</button>
                 `;
                 resultsContainer.appendChild(div);
             });
