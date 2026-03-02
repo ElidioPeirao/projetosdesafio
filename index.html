@@ -2051,10 +2051,13 @@
                 }
 
             } else if (lobbyData.status === 'in_progress') {
-                lobbyView.classList.add('hidden'); // Esconde a view do lobby
-                competitiveContainer.classList.add('hidden'); // Esconde o container competitivo
-                mainViewContainer.classList.remove('hidden'); // Mostra a view principal do jogo
-                switchView(mainViewContainer.querySelector('#start-challenge-container'), mainViewContainer.querySelector('#challenge-container'));
+// --- CORREÇÃO 1: Remover o view-hidden para a tela voltar a aparecer ---
+lobbyView.classList.add('hidden'); 
+competitiveContainer.classList.add('hidden', 'view-hidden'); 
+mainViewContainer.classList.remove('hidden', 'view-hidden'); 
+
+switchView(document.getElementById('start-challenge-container'), document.getElementById('challenge-container'));
+// ------------------------------------------------------------------------
 
                 const challenge = allChallenges.find(c => c.id === lobbyData.currentChallengeId);
                 if(challenge) {
@@ -2078,6 +2081,8 @@
                     } else {
                         answerForm.classList.remove('hidden');
                         nextChallengeButton.classList.add('hidden');
+                        answerFeedback.classList.add('hidden');
+                        answerForm.reset();
                     }
                 }
                 
