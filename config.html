@@ -923,7 +923,7 @@
                                 <option value="challenges_completed">Total de Desafios Completos</option>
                                 <option value="category_completed">Desafios Completos em Categoria</option>
                                 <option value="points_spent">Pontos Gastos na Loja</option>
-                                <option value="exclusive">Exclusiva (Admin)</option>
+                                <option value="exclusive">Exclusiva (Admin/Código)</option>
                             </select>
                             <input type="number" id="achievement-condition-value" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg" placeholder="Valor (ex: 1000)">
                         </div>
@@ -1746,6 +1746,9 @@
                     effectText = `Pontos x${data.effectValue} por ${data.durationMinutes} min`;
                 } else if (data.effectType === 'PAUSE_TIMER') {
                     effectText = `Pausa o tempo por ${data.effectValue} min`;
+                } else if (data.effectType === 'GRANT_ACHIEVEMENT') {
+                    const ach = allAchievementsData.find(a => a.id === data.effectValue);
+                    effectText = `Conquista: ${ach ? ach.name : '(Desconhecida)'}`;
                 }
 
                 div.innerHTML = `
@@ -1761,6 +1764,9 @@
         }
 
         function openCodeModal() {
+            // Gera as opções de conquistas disponíveis para o menu dropdown
+            const achievementOptions = allAchievementsData.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+
             createModal('code-modal', 'Criar Novo Código', `
                 <form id="add-code-form" class="space-y-4">
                     <input type="text" id="code-string" required class="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg font-mono tracking-widest" placeholder="CÓDIGO (ex: BONUSXP5)">
@@ -1770,6 +1776,7 @@
                         <select id="code-effect-type" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
                             <option value="SCORE_MULTIPLIER">Multiplicador de Pontos</option>
                             <option value="PAUSE_TIMER">Pausar Tempo do Desafio</option>
+                            <option value="GRANT_ACHIEVEMENT">Conceder Conquista</option>
                         </select>
                     </div>
 
@@ -1793,6 +1800,16 @@
                         </div>
                     </div>
 
+                    <div id="effect-fields-grant-achievement" class="hidden">
+                        <div>
+                            <label class="text-sm font-medium text-gray-300">Conquista a Conceder</label>
+                            <select id="code-achievement-id" class="w-full mt-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg">
+                                <option value="">Selecione uma conquista...</option>
+                                ${achievementOptions}
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label class="text-sm font-medium text-gray-300">Usos Totais (-1 para ilimitado)</label>
@@ -1810,16 +1827,22 @@
             const effectTypeSelect = document.getElementById('code-effect-type');
             const scoreFields = document.getElementById('effect-fields-score-multiplier');
             const pauseFields = document.getElementById('effect-fields-pause-timer');
+            const achievementFields = document.getElementById('effect-fields-grant-achievement');
 
             function toggleEffectFields() {
+                scoreFields.classList.add('hidden');
+                pauseFields.classList.add('hidden');
+                achievementFields.classList.add('hidden');
+
                 if (effectTypeSelect.value === 'SCORE_MULTIPLIER') {
                     scoreFields.classList.remove('hidden');
-                    pauseFields.classList.add('hidden');
-                } else {
-                    scoreFields.classList.add('hidden');
+                } else if (effectTypeSelect.value === 'PAUSE_TIMER') {
                     pauseFields.classList.remove('hidden');
+                } else if (effectTypeSelect.value === 'GRANT_ACHIEVEMENT') {
+                    achievementFields.classList.remove('hidden');
                 }
             }
+            
             effectTypeSelect.addEventListener('change', toggleEffectFields);
             toggleEffectFields();
 
@@ -1841,6 +1864,12 @@
                 durationMinutes = parseInt(document.getElementById('code-score-multiplier-duration').value);
             } else if (effectType === 'PAUSE_TIMER') {
                 effectValue = parseInt(document.getElementById('code-pause-duration').value);
+                durationMinutes = 0; // Not applicable
+            } else if (effectType === 'GRANT_ACHIEVEMENT') {
+                effectValue = document.getElementById('code-achievement-id').value;
+                if (!effectValue) {
+                    return alert('Por favor, selecione uma conquista para este código.');
+                }
                 durationMinutes = 0; // Not applicable
             }
 
@@ -1922,4 +1951,3 @@
     </script>
 </body>
 </html>
-
