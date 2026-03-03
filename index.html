@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Estilos Customizados -->
+    <!-- Estilos Personalizados -->
     <style>
         :root {
             /* Tema Padrão: Azul Escuro Profundo */
@@ -33,7 +33,7 @@
             background: radial-gradient(circle at top right, var(--bg-dark), var(--bg-darker));
             color: var(--text-main);
             min-height: 100vh;
-            /* Subtle Grid Background */
+            /* Fundo Grelha Subtil */
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
@@ -59,7 +59,7 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* Form Inputs */
+        /* Entradas de Formulário */
         .input-elegant {
             background: rgba(2, 6, 23, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,7 +73,7 @@
         }
         .input-elegant::placeholder { color: #64748b; }
 
-        /* Buttons */
+        /* Botões */
         .btn-gradient {
             background: var(--primary-gradient);
             transition: all 0.3s ease;
@@ -103,7 +103,7 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* Number Input Spinners Removal */
+        /* Remoção de Setas em Inputs Numéricos */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -117,13 +117,13 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Scrollbar */
+        /* Barra de Deslocamento */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
-        /* Categories */
+        /* Categorias */
         .category-btn {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(255,255,255,0.05);
@@ -142,12 +142,12 @@
             font-weight: bold;
         }
 
-        /* XP Glow */
+        /* Brilho XP */
         .glow-bar {
             box-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
         }
 
-        /* Utils */
+        /* Úteis */
         .zoomable { cursor: zoom-in; transition: transform 0.3s; }
         .zoomable:hover { transform: scale(1.02); }
         .achievement-locked { filter: grayscale(100%); opacity: 0.4; }
@@ -155,41 +155,41 @@
         .view-container { transition: opacity 0.4s ease, transform 0.4s ease; }
         .view-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; }
         
-        /* Modal Animations */
+        /* Animações Modais */
         .modal-overlay { transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         .modal-content { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden flex flex-col min-h-screen">
 
-    <!-- Container de Notificações de Duelos Recebidos -->
+    <!-- Container de Alertas de Duelos Recebidos -->
     <div id="duel-alerts-container" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] flex flex-col gap-3 w-full max-w-md px-4"></div>
 
     <!-- Container de Autenticação -->
     <main id="auth-container" class="relative flex-1 flex items-center justify-center p-4 z-10 w-full">
         <div class="glass-card w-full max-w-md rounded-3xl p-8 space-y-8">
             <div class="flex justify-center mb-2">
-                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logo" class="w-48 h-auto drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200x60/0a192f/6366f1?text=LOGO';">
+                <img src="https://i.imgur.com/VLCCzbc.png" alt="Logótipo" class="w-48 h-auto drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200x60/0a192f/6366f1?text=LOGO';">
             </div>
             
             <div class="flex p-1 bg-gray-900/50 rounded-xl">
-                <button id="tab-login" class="flex-1 py-2.5 text-center font-semibold rounded-lg bg-blue-500/20 text-blue-300 shadow-sm transition-all duration-300">Login</button>
-                <button id="tab-register" class="flex-1 py-2.5 text-center font-semibold rounded-lg text-gray-400 hover:text-white transition-all duration-300">Cadastro</button>
+                <button id="tab-login" class="flex-1 py-2.5 text-center font-semibold rounded-lg bg-blue-500/20 text-blue-300 shadow-sm transition-all duration-300">Iniciar Sessão</button>
+                <button id="tab-register" class="flex-1 py-2.5 text-center font-semibold rounded-lg text-gray-400 hover:text-white transition-all duration-300">Registar</button>
             </div>
             
             <div id="message-box" class="hidden p-4 rounded-xl text-center text-sm font-medium border"></div>
             
-            <!-- Formulário de Login -->
+            <!-- Formulário de Início de Sessão -->
             <div id="form-login">
                 <form id="login-form" class="space-y-5">
                     <div>
-                        <label for="login-email" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Email</label>
+                        <label for="login-email" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">E-mail</label>
                         <input type="email" id="login-email" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="seu@email.com">
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
-                            <label for="login-password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Senha</label>
-                            <a href="#" id="forgot-password" class="text-xs font-medium text-blue-400 hover:text-blue-300 transition">Esqueceu?</a>
+                            <label for="login-password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Palavra-passe</label>
+                            <a href="#" id="forgot-password" class="text-xs font-medium text-blue-400 hover:text-blue-300 transition">Esqueceu-se?</a>
                         </div>
                         <div class="relative">
                             <input type="password" id="login-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="••••••••">
@@ -202,23 +202,23 @@
                 </form>
             </div>
             
-            <!-- Formulário de Cadastro -->
+            <!-- Formulário de Registo -->
             <div id="form-register" class="hidden">
                  <form id="register-form" class="space-y-4">
                     <div>
                         <input type="text" id="register-name" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Nome Completo">
                     </div>
                     <div>
-                        <input type="email" id="register-email" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Email">
+                        <input type="email" id="register-email" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="E-mail">
                     </div>
                     <div class="relative">
-                        <input type="password" id="register-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Senha">
+                        <input type="password" id="register-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Palavra-passe">
                         <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-white transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                         </button>
                     </div>
                     <div class="relative">
-                        <input type="password" id="register-confirm-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Confirmar Senha">
+                        <input type="password" id="register-confirm-password" required class="w-full p-3.5 input-elegant rounded-xl" placeholder="Confirmar Palavra-passe">
                     </div>
                     <button type="submit" class="w-full btn-gradient text-white font-bold py-3.5 rounded-xl mt-2 text-lg">Criar Conta</button>
                 </form>
@@ -226,10 +226,10 @@
         </div>
     </main>
 
-    <!-- Container do Jogo (Oculto por padrão) -->
+    <!-- Container do Jogo (Oculto por predefinição) -->
     <div id="game-container" class="hidden w-full flex-1 flex-col">
         
-        <!-- Header Top Navbar -->
+        <!-- Barra de Navegação Superior -->
         <header class="sticky top-0 w-full glass-card rounded-none border-t-0 border-l-0 border-r-0 z-40 px-4 py-3 shadow-md">
             <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
                 <div class="flex items-center gap-3">
@@ -243,42 +243,42 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <!-- Indicator Bônus -->
+                    <!-- Indicador de Bónus -->
                     <div id="active-bonus-indicator" class="hidden bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-3 py-1.5 rounded-full text-xs font-bold animate-pulse flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd" /></svg>
-                        <span id="active-bonus-text">Bônus</span>
+                        <span id="active-bonus-text">Bónus</span>
                     </div>
                     
-                    <!-- Score Pill -->
+                    <!-- Pontuação -->
                     <div class="bg-gray-900/60 border border-white/5 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-inner">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                         <span class="text-white font-bold" id="user-score">0</span>
                     </div>
 
-                    <!-- Botão Abandonar (Fixo no top) -->
+                    <!-- Botão Abandonar (Fixo no topo) -->
                     <button id="abandon-competition-btn" class="hidden items-center justify-center btn-danger text-white font-semibold py-1.5 px-3 rounded-lg text-sm shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
                         Abandonar Jogo
                     </button>
 
-                    <!-- Menu Dropdown -->
+                    <!-- Menu Pendente -->
                     <div class="relative">
                         <button id="menu-toggle-button" class="btn-glass flex items-center justify-center text-white font-medium py-1.5 px-3 rounded-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
                         <div id="menu-dropdown" class="hidden absolute right-0 mt-3 w-56 glass-card rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10">
                             <div class="p-2 space-y-1">
-                                <a href="#" id="profile-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg> Meu Perfil</a>
-                                <a href="#" id="ranking-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> Ranking</a>
+                                <a href="#" id="profile-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg> O Meu Perfil</a>
+                                <a href="#" id="ranking-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> Classificação</a>
                                 <a href="#" id="shop-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H4.72l-.38-1.522A1 1 0 003 1z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg> Loja</a>
-                                <a href="#" id="completed-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg> Completos</a>
-                                <a href="#" id="redeem-code-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-purple-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg> Ativar Código</a>
+                                <a href="#" id="completed-button-menu" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg> Concluídos</a>
+                                <a href="#" id="redeem-code-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-purple-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" /></svg> Resgatar Código</a>
                                 <a href="#" id="friends-button-menu" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white rounded-xl transition">
                                     <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3 text-pink-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg> Amigos / Duelos</span>
                                     <span id="friend-request-badge" class="hidden bg-pink-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md"></span>
                                 </a>
                                 <div class="h-px bg-white/10 my-1"></div>
-                                <a href="#" id="logout-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg> Sair da Conta</a>
+                                <a href="#" id="logout-button" class="flex items-center px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-xl transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg> Terminar Sessão</a>
                             </div>
                         </div>
                     </div>
@@ -297,7 +297,7 @@
                         <div id="start-challenge-container" class="space-y-8 text-center py-4">
                             <div>
                                 <h2 class="font-title text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-300">Selecione uma Categoria</h2>
-                                <p class="text-gray-400 mt-2 font-medium">Escolha seu domínio e teste seus conhecimentos mecânicos.</p>
+                                <p class="text-gray-400 mt-2 font-medium">Escolha o seu domínio e teste os seus conhecimentos mecânicos.</p>
                             </div>
                             
                             <div id="category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-3xl mx-auto">
@@ -321,6 +321,14 @@
                                 <button id="show-competitive-mode-btn" class="w-full max-w-sm bg-blue-900/40 border border-blue-500/30 text-blue-300 hover:bg-blue-800/50 hover:text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3.004 3.004 0 013.75-2.906z" /></svg>
                                     Entrar no Modo Competitivo
+                                </button>
+                                
+                                <div class="w-full max-w-sm h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-2"></div>
+
+                                <!-- NOVO: Botão Eprojects Academy -->
+                                <button id="show-academy-btn" class="w-full max-w-sm bg-purple-900/40 border border-purple-500/30 text-purple-300 hover:bg-purple-800/50 hover:text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 8.56l-1.422.61C1.335 9.41 1 9.9 1 10.45v3.1A2.45 2.45 0 003.45 16h2.1a2.45 2.45 0 002.45-2.45v-3.1c0-.55-.335-1.04-.888-1.28l-1.422-.61A.999.999 0 015.25 8.05l-1.94.831zM11.69 11.16L17 8.887v4.613a2.45 2.45 0 01-2.45 2.45h-5.1a2.45 2.45 0 01-2.45-2.45v-4.613l2.84 1.22c.28.12.598.12.879 0z"/></svg>
+                                    Eprojects Academy
                                 </button>
                             </div>
                             <p id="start-message" class="text-blue-400 mt-4 text-sm font-medium"></p>
@@ -351,10 +359,10 @@
                             </div>
 
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <!-- Blueprint Area (Fundo Branco para mesclar com imagem original) -->
+                                <!-- Área do Blueprint (Fundo Branco para misturar com a imagem original) -->
                                 <div class="lg:col-span-2 bg-white rounded-2xl flex flex-col overflow-hidden border border-slate-700/50 shadow-2xl relative">
                                     <div class="bg-slate-900/90 px-4 py-2 border-b border-white/5 flex justify-between items-center absolute top-0 w-full z-10 shadow-md">
-                                        <span class="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Tela de Projeto CAD</span>
+                                        <span class="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Ecrã de Projeto CAD</span>
                                         <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
                                     </div>
                                     <div id="challenge-display" class="relative w-full h-[400px] flex items-center justify-center p-6 pt-12">
@@ -364,7 +372,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Interaction Area -->
+                                <!-- Área de Interação -->
                                 <div class="lg:col-span-1 space-y-5 flex flex-col">
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="glass-panel p-4 rounded-2xl flex flex-col justify-center border-t border-white/10 shadow-lg relative overflow-hidden group">
@@ -405,6 +413,102 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- NOVO: Eprojects Academy - Lista de Módulos -->
+                        <div id="academy-list-container" class="view-hidden hidden space-y-6 w-full">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                <div>
+                                    <h2 class="font-title text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">Eprojects Academy</h2>
+                                    <p class="text-gray-400 mt-1">Estude os manuais técnicos e certifique-se nas peças de cada módulo.</p>
+                                </div>
+                                <button id="academy-back-to-home" class="btn-glass text-gray-300 font-medium py-2.5 px-5 rounded-xl flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                    Voltar ao Início
+                                </button>
+                            </div>
+                            
+                            <div id="admin-academy-controls" class="hidden mb-4 p-4 glass-panel rounded-xl border-purple-500/30 flex justify-between items-center">
+                                <span class="text-purple-300 font-bold text-sm">Painel de Instrutor</span>
+                                <button id="create-academy-module-btn" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-5 rounded-lg shadow-lg transition">Criar Novo Módulo</button>
+                            </div>
+
+                            <div id="academy-modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Cards Inseridos via JS -->
+                            </div>
+                        </div>
+
+                        <!-- NOVO: Eprojects Academy - Módulo Ativo -->
+                        <div id="academy-module-active-container" class="view-hidden hidden space-y-6 w-full h-[75vh] flex flex-col">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+                                <h2 id="active-module-title" class="font-title text-2xl font-bold text-white">Título do Módulo</h2>
+                                <button id="academy-back-to-list" class="btn-glass text-gray-300 font-medium py-2 px-4 rounded-xl flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                    Voltar aos Módulos
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1 min-h-0">
+                                <!-- Left: PDF -->
+                                <div class="lg:col-span-3 glass-panel rounded-2xl flex flex-col shadow-inner overflow-hidden relative border border-slate-700/50">
+                                    <div class="bg-slate-900/90 px-4 py-2 border-b border-white/5 flex justify-between items-center z-10 backdrop-blur-sm">
+                                        <span class="text-xs font-bold text-purple-300 uppercase tracking-widest flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg> Documentação PDF</span>
+                                    </div>
+                                    <iframe id="academy-pdf-frame" src="" class="w-full flex-1 bg-white border-none" allow="autoplay" allowfullscreen></iframe>
+                                </div>
+                                <!-- Right: Challenges / Active Form -->
+                                <div class="lg:col-span-2 glass-panel rounded-2xl flex flex-col shadow-inner overflow-hidden border border-slate-700/50 relative">
+                                    <div class="bg-slate-900/90 px-4 py-3 border-b border-white/5 flex justify-between items-center z-10 backdrop-blur-sm">
+                                        <span class="text-xs font-bold text-blue-300 uppercase tracking-widest flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> 
+                                            Projetos Práticos
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Lista de Peças (Visível por predefinição) -->
+                                    <div id="academy-challenges-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                                        <!-- Injetado via JS -->
+                                    </div>
+
+                                    <!-- Área de Resolução da Peça (Oculta por predefinição) -->
+                                    <div id="academy-active-challenge-area" class="hidden flex-1 flex-col p-5 space-y-5 overflow-y-auto custom-scrollbar bg-slate-800/30">
+                                        <div class="flex justify-between items-center pb-3 border-b border-white/10">
+                                            <h4 id="academy-challenge-name" class="font-title font-bold text-white text-xl"></h4>
+                                            <button id="academy-cancel-challenge-btn" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg transition">Voltar</button>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="glass-panel p-3 rounded-xl border border-white/5">
+                                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Material</p>
+                                                <p id="academy-material-info" class="font-bold text-blue-300"></p>
+                                            </div>
+                                            <div class="glass-panel p-3 rounded-xl border border-white/5">
+                                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Recompensa</p>
+                                                <p id="academy-score-info" class="font-bold text-yellow-400"></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <form id="academy-answer-form" class="flex flex-col gap-4 mt-2">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wide">Massa Estimada (g)</label>
+                                                <div class="relative">
+                                                    <input type="number" step="any" id="academy-mass-input" required class="w-full pl-4 pr-10 py-3 input-elegant rounded-xl font-mono text-white">
+                                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">g</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wide">Volume Estimado (cm³)</label>
+                                                <div class="relative">
+                                                    <input type="number" step="any" id="academy-volume-input" required class="w-full pl-4 pr-12 py-3 input-elegant rounded-xl font-mono text-white">
+                                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">cm³</span>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="w-full btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 tracking-wide">Confirmar Medições</button>
+                                        </form>
+                                        <div id="academy-answer-feedback" class="hidden p-4 rounded-xl text-center text-sm font-bold shadow-lg border"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Container do Modo Competitivo -->
@@ -460,7 +564,7 @@
               </div>
         </main>
                 
-        <!-- Barra de XP agora é um FOOTER (Não corta mais a tela!) -->
+        <!-- Barra de XP (Não corta a tela!) -->
         <footer id="xp-bar-container" class="w-full bg-gray-900/90 backdrop-blur-xl p-4 border-t border-white/10 z-30 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] mt-auto relative">
             <div class="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent pointer-events-none"></div>
             <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-4 relative z-10">
@@ -485,7 +589,7 @@
         <div id="mini-ranking-container" class="hidden fixed top-24 right-4 glass-card p-5 rounded-2xl w-72 z-20 border-t border-white/20 shadow-2xl">
             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        <h3 id="ranking-title" class="font-bold text-white">Placar Live</h3>
+                        <h3 id="ranking-title" class="font-bold text-white">Placar em Direto</h3>
                     </div>
                     <div id="mini-ranking-list" class="space-y-2 mb-4"></div>
                     <div class="bg-black/30 rounded-xl p-3 text-center border border-white/5">
@@ -498,10 +602,10 @@
         </div>
     </div>
 
-    <!-- Modals Container -->
+    <!-- Container de Modais -->
     <div id="modal-container"></div>
     
-    <!-- Toast Notification Container -->
+    <!-- Container de Notificações Pop-up -->
     <div id="toast-container" class="fixed bottom-24 right-4 z-50 pointer-events-none space-y-2 flex flex-col items-end"></div>
 
 
@@ -532,12 +636,17 @@
         let allLevels = [];
         let allAchievements = [];
         let allThemes = [];
+        let allAcademyModules = [];
         let unlockedAchievements = new Map();
         let unlockedThemes = new Map();
         let completedChallenges = new Map();
         let activeChallengeData = {};
         let challengeTimerInterval = null;
         let selectedCategory = null;
+        
+        let isAcademyMode = false;
+        let currentAcademyModule = null;
+        let currentAcademyChallenge = null;
 
         // --- VARIÁVEIS DO MODO COMPETITIVO ---
         let currentLobbyId = null;
@@ -545,7 +654,7 @@
         let lobbiesListener = null; 
         let matchTimerInterval = null;
 
-        // --- VARIÁVEIS DE UI/UX ---
+        // --- VARIÁVEIS DE IU/UX ---
         let friendsListener = null;
         let friendRequestsListener = null;
         let incomingDuelsListener = null;
@@ -561,7 +670,7 @@
         const competitiveContainer = document.getElementById('competitive-container');
         const abandonCompetitionBtn = document.getElementById('abandon-competition-btn');
         
-        // --- CONTROLE DE AUTENTICAÇÃO E VISIBILIDADE ---
+        // --- CONTROLO DE AUTENTICAÇÃO E VISIBILIDADE ---
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
@@ -590,19 +699,28 @@
         });
 
         async function loadGameData(user) {
+            const userDocRef = doc(db, "users", user.uid);
+            let userDocSnap;
+            try {
+                userDocSnap = await getDoc(userDocRef);
+            } catch (error) {
+                console.error("Erro ao obter o documento do utilizador:", error);
+                return; // Impede a execução posterior se falhar a obtenção do utilizador
+            }
+
             const levelsPromise = getDocs(query(collection(db, "levels"), orderBy("xpRequired", "asc")));
             const challengesPromise = getDocs(collection(db, "challenges"));
             const achievementsPromise = getDocs(collection(db, "achievements"));
             const themesPromise = getDocs(collection(db, "themes"));
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocPromise = getDoc(userDocRef);
+            const academyPromise = getDocs(collection(db, "academyModules"));
 
-            const [levelsSnapshot, challengesSnapshot, achievementsSnapshot, themesSnapshot, userDocSnap] = await Promise.all([levelsPromise, challengesPromise, achievementsPromise, themesPromise, userDocPromise]);
+            const [levelsSnapshot, challengesSnapshot, achievementsSnapshot, themesSnapshot, academySnapshot] = await Promise.all([levelsPromise, challengesPromise, achievementsPromise, themesPromise, academyPromise]);
 
             allLevels = levelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allAchievements = achievementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allThemes = themesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allAcademyModules = academySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
             if (userDocSnap.exists()) {
                 currentUserData = userDocSnap.data();
@@ -648,6 +766,326 @@
             }
         }
 
+        // --- EPROJECTS ACADEMY LOGIC ---
+        document.getElementById('show-academy-btn').addEventListener('click', () => {
+            isAcademyMode = true;
+            switchView(document.getElementById('start-challenge-container'), document.getElementById('academy-list-container'));
+            renderAcademyList();
+        });
+
+        document.getElementById('academy-back-to-home').addEventListener('click', () => {
+            isAcademyMode = false;
+            switchView(document.getElementById('academy-list-container'), document.getElementById('start-challenge-container'));
+        });
+
+        document.getElementById('academy-back-to-list').addEventListener('click', () => {
+            currentAcademyModule = null;
+            document.getElementById('academy-pdf-frame').src = ""; 
+            switchView(document.getElementById('academy-module-active-container'), document.getElementById('academy-list-container'));
+        });
+
+        function renderAcademyList() {
+            const listEl = document.getElementById('academy-modules-grid');
+            listEl.innerHTML = '';
+            
+            if (currentUserData.role === 'admin' || currentUserData.role === 'moderator') {
+                document.getElementById('admin-academy-controls').classList.remove('hidden');
+                document.getElementById('create-academy-module-btn').addEventListener('click', openCreateAcademyModuleModal);
+            }
+
+            if (allAcademyModules.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-400 col-span-full text-center py-8">Nenhum módulo disponível no momento.</p>';
+                return;
+            }
+
+            allAcademyModules.forEach(mod => {
+                const challengesList = mod.challenges || [];
+                const completedCount = challengesList.filter(c => completedChallenges.has(c.id)).length;
+                const totalCount = challengesList.length;
+                const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+                
+                const div = document.createElement('div');
+                div.className = 'glass-panel p-5 rounded-2xl flex flex-col gap-4 border-t border-white/10 shadow-lg hover:border-purple-500/50 transition-all cursor-pointer group';
+                div.innerHTML = `
+                    <div>
+                        <h3 class="font-title text-xl font-bold text-white group-hover:text-purple-300 transition">${mod.title}</h3>
+                        <p class="text-sm text-gray-400 mt-1 line-clamp-2">${mod.description}</p>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="flex justify-between text-xs font-bold text-gray-400 mb-1">
+                            <span>Progresso</span>
+                            <span class="${completedCount === totalCount && totalCount > 0 ? 'text-emerald-400' : 'text-purple-400'}">${completedCount}/${totalCount}</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-2 shadow-inner overflow-hidden border border-white/5">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                `;
+                div.addEventListener('click', () => openAcademyModule(mod.id));
+                listEl.appendChild(div);
+            });
+        }
+
+        function openCreateAcademyModuleModal() {
+            const content = `
+                <form id="create-academy-form" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Título do Módulo</label>
+                        <input type="text" id="academy-mod-title" required class="w-full p-3 input-elegant rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Descrição</label>
+                        <textarea id="academy-mod-desc" required class="w-full p-3 input-elegant rounded-xl resize-none h-20"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Link do PDF (Google Drive)</label>
+                        <input type="url" id="academy-mod-pdf" required class="w-full p-3 input-elegant rounded-xl" placeholder="https://drive.google.com/file/d/.../view">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Peças / Desafios do Módulo</label>
+                        <div id="academy-challenges-wrapper" class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar"></div>
+                        <button type="button" id="add-academy-row-btn" class="w-full bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold py-2 rounded-xl mt-3 border border-dashed border-gray-500 transition">+ Adicionar Peça</button>
+                    </div>
+                    <button type="submit" class="w-full btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 text-lg">Guardar Módulo</button>
+                </form>
+            `;
+            createModal('create-academy-modal', 'Novo Módulo Academy', content, 'max-w-2xl');
+
+            document.getElementById('add-academy-row-btn').addEventListener('click', () => {
+                const wrapper = document.getElementById('academy-challenges-wrapper');
+                const row = document.createElement('div');
+                row.className = 'academy-challenge-row bg-gray-900/80 p-4 rounded-xl border border-white/10 relative';
+                row.innerHTML = `
+                    <button type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-400 text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full bg-white/5" onclick="this.parentElement.remove()">X</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 pr-6">
+                        <input type="text" placeholder="Nome da Peça" required class="ac-name w-full input-elegant p-2 rounded-lg text-sm">
+                        <input type="text" placeholder="Material (ex: Aço)" required class="ac-mat w-full input-elegant p-2 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <input type="number" step="any" placeholder="Massa (g)" required class="ac-mass input-elegant p-2 rounded-lg text-sm">
+                        <input type="number" step="any" placeholder="Volume (cm³)" required class="ac-vol input-elegant p-2 rounded-lg text-sm">
+                        <input type="number" step="any" placeholder="Tolerância (%)" value="5" required class="ac-tol input-elegant p-2 rounded-lg text-sm">
+                        <input type="number" placeholder="Pontos" value="10" required class="ac-score input-elegant p-2 rounded-lg text-sm">
+                    </div>
+                `;
+                wrapper.appendChild(row);
+            });
+            
+            // Adicionar uma linha inicial
+            document.getElementById('add-academy-row-btn').click();
+
+            document.getElementById('create-academy-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const challenges = [];
+                const rows = document.querySelectorAll('.academy-challenge-row');
+                rows.forEach((row, index) => {
+                    challenges.push({
+                        id: 'acad_' + Date.now() + '_' + index,
+                        name: row.querySelector('.ac-name').value,
+                        material: row.querySelector('.ac-mat').value,
+                        mass: parseFloat(row.querySelector('.ac-mass').value),
+                        volume: parseFloat(row.querySelector('.ac-vol').value),
+                        tolerance: parseFloat(row.querySelector('.ac-tol').value),
+                        score: parseInt(row.querySelector('.ac-score').value)
+                    });
+                });
+                
+                const data = {
+                    title: document.getElementById('academy-mod-title').value,
+                    description: document.getElementById('academy-mod-desc').value,
+                    pdfUrl: document.getElementById('academy-mod-pdf').value,
+                    challenges: challenges,
+                    createdAt: serverTimestamp()
+                };
+
+                try {
+                    await addDoc(collection(db, "academyModules"), data);
+                    document.getElementById('create-academy-modal').remove();
+                    createAlertModal("Sucesso", "Módulo criado com sucesso!");
+                    
+                    // Reload modules
+                    const snap = await getDocs(collection(db, "academyModules"));
+                    allAcademyModules = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderAcademyList();
+                    
+                } catch(err) {
+                    createAlertModal("Erro", err.message);
+                }
+            });
+        }
+
+        function openAcademyModule(moduleId) {
+            const module = allAcademyModules.find(m => m.id === moduleId);
+            if (!module) return;
+            currentAcademyModule = module;
+            
+            document.getElementById('active-module-title').textContent = module.title;
+            
+            let pdfUrl = module.pdfUrl;
+            if (pdfUrl && pdfUrl.includes('drive.google.com') && pdfUrl.includes('/view')) {
+                pdfUrl = pdfUrl.replace('/view', '/preview');
+            }
+            document.getElementById('academy-pdf-frame').src = pdfUrl || '';
+            
+            renderAcademyChallengesList(module);
+            
+            switchView(document.getElementById('academy-list-container'), document.getElementById('academy-module-active-container'));
+        }
+
+        function renderAcademyChallengesList(module) {
+            const listEl = document.getElementById('academy-challenges-list');
+            listEl.innerHTML = '';
+            
+            // Garantir que estamos a mostrar a lista e a ocultar o formulário ativo
+            document.getElementById('academy-active-challenge-area').classList.add('hidden');
+            listEl.classList.remove('hidden');
+
+            const challengesList = module.challenges || [];
+
+            if (challengesList.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">Nenhuma peça registada neste módulo.</p>';
+                return;
+            }
+
+            challengesList.forEach((challenge, index) => {
+                if(typeof challenge === 'string') return; // Evitar falhas com versões anteriores do modelo de dados
+                
+                const isCompleted = completedChallenges.has(challenge.id);
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl border transition-all ${isCompleted ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-gray-800/60 border-white/10 hover:border-blue-500/50 cursor-pointer group'}`;
+                
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-inner ${isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-700 text-gray-400'}">
+                                ${index + 1}
+                            </div>
+                            <div>
+                                <p class="font-bold ${isCompleted ? 'text-emerald-300' : 'text-white group-hover:text-blue-300 transition'} text-sm">${challenge.name}</p>
+                                <p class="text-[10px] text-gray-500 uppercase">${challenge.score} PTS</p>
+                            </div>
+                        </div>
+                        ${isCompleted ? '<svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>' : '<span class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded">Iniciar</span>'}
+                    </div>
+                `;
+                
+                if (!isCompleted) {
+                    div.addEventListener('click', () => startAcademyChallenge(challenge));
+                }
+                
+                listEl.appendChild(div);
+            });
+        }
+        
+        function startAcademyChallenge(challenge) {
+            document.getElementById('academy-challenges-list').classList.add('hidden');
+            document.getElementById('academy-active-challenge-area').classList.remove('hidden');
+            
+            document.getElementById('academy-challenge-name').textContent = challenge.name;
+            document.getElementById('academy-material-info').textContent = challenge.material;
+            document.getElementById('academy-score-info').textContent = challenge.score + ' PTS';
+            
+            document.getElementById('academy-answer-form').reset();
+            document.getElementById('academy-answer-feedback').classList.add('hidden');
+            document.getElementById('academy-answer-form').classList.remove('hidden');
+
+            const cancelBtn = document.getElementById('academy-cancel-challenge-btn');
+            cancelBtn.textContent = 'Voltar';
+            cancelBtn.className = 'text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg transition';
+
+            currentAcademyChallenge = challenge;
+        }
+
+        // Submissão do formulário específico da Academy
+        document.getElementById('academy-answer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || !currentAcademyChallenge) return;
+
+            const userMass = parseFloat(document.getElementById('academy-mass-input').value);
+            const userVolume = parseFloat(document.getElementById('academy-volume-input').value);
+            
+            const correctMass = parseFloat(currentAcademyChallenge.mass);
+            const correctVolume = parseFloat(currentAcademyChallenge.volume);
+            const tolerance = parseFloat(currentAcademyChallenge.tolerance || 5);
+
+            const isMassCorrect = Math.abs(userMass - correctMass) <= correctMass * (tolerance / 100);
+            const isVolumeCorrect = Math.abs(userVolume - correctVolume) <= correctVolume * (tolerance / 100);
+            const isCorrect = isMassCorrect && isVolumeCorrect;
+            
+            let finalScore = parseInt(currentAcademyChallenge.score || 0);
+
+            const feedback = document.getElementById('academy-answer-feedback');
+            
+            if (isCorrect) {
+                feedback.textContent = `Aprovação Técnica! +${finalScore} pts`;
+                feedback.className = 'p-4 rounded-xl text-center text-sm font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 shadow-inner';
+                
+                const userDocRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    const userData = userDoc.data();
+                    
+                    const newScore = (userData.score || 0) + finalScore;
+                    const newXp = (userData.xp || 0) + finalScore;
+                    const newStats = userData.stats || { totalAttempts: 0, correctAttempts: 0, abandons: 0 };
+                    newStats.totalAttempts++;
+                    newStats.correctAttempts++;
+
+                    transaction.update(userDocRef, { 
+                        score: newScore, 
+                        xp: newXp,
+                        stats: newStats
+                    });
+                    
+                    const completedDocRef = doc(db, "users", currentUser.uid, "completedChallenges", currentAcademyChallenge.id);
+                    transaction.set(completedDocRef, { 
+                        challengeName: currentAcademyChallenge.name, 
+                        category: currentAcademyModule.title,
+                        completedAt: serverTimestamp(), 
+                        userAnswer: { mass: userMass, volume: userVolume } 
+                    });
+                });
+
+                currentUserData.score += finalScore;
+                currentUserData.xp += finalScore;
+                currentUserData.stats.totalAttempts++;
+                currentUserData.stats.correctAttempts++;
+                completedChallenges.set(currentAcademyChallenge.id, { challengeName: currentAcademyChallenge.name, category: currentAcademyModule.title });
+
+                updateXpBar();
+                updateConsumablesUI();
+                await checkAchievements();
+                
+                document.getElementById('academy-answer-form').classList.add('hidden');
+                
+                const cancelBtn = document.getElementById('academy-cancel-challenge-btn');
+                cancelBtn.textContent = 'Próximo Passo';
+                cancelBtn.classList.replace('bg-gray-700', 'bg-green-600');
+                cancelBtn.classList.replace('hover:bg-gray-600', 'hover:bg-green-500');
+
+            } else {
+                feedback.textContent = "Falha na Inspeção. Verifique os seus cálculos.";
+                feedback.className = 'p-4 rounded-xl text-center text-sm font-bold bg-red-500/20 border border-red-500/40 text-red-400 shadow-inner';
+                
+                const userRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (t) => {
+                    const uDoc = await t.get(userRef);
+                    const stats = uDoc.data().stats || { totalAttempts:0, correctAttempts:0, abandons:0 };
+                    stats.totalAttempts++;
+                    t.update(userRef, { stats: stats });
+                });
+                currentUserData.stats.totalAttempts++;
+            }
+            feedback.classList.remove('hidden');
+        });
+        
+        document.getElementById('academy-cancel-challenge-btn').addEventListener('click', () => {
+            currentAcademyChallenge = null;
+            renderAcademyChallengesList(currentAcademyModule);
+        });
+
+
         // --- SISTEMA DE DUELOS E APOSTAS ---
         function listenToDuels(uid) {
             if (incomingDuelsListener) incomingDuelsListener();
@@ -663,32 +1101,32 @@
                         <div class="glass-card bg-indigo-900/90 border border-indigo-500/50 p-4 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.4)] flex flex-col gap-3 animate-pulse">
                             <div>
                                 <h4 class="font-bold text-white flex items-center gap-2">⚔️ DESAFIO DE DUELO!</h4>
-                                <p class="text-sm text-indigo-200 mt-1"><strong class="text-white">${duel.challengerName}</strong> desafiou você na categoria <strong>${duel.category}</strong> apostando <strong class="text-yellow-400 text-base">${duel.betAmount} PTS</strong>!</p>
+                                <p class="text-sm text-indigo-200 mt-1"><strong class="text-white">${duel.challengerName}</strong> desafiou-o na categoria <strong>${duel.category}</strong> e apostou <strong class="text-yellow-400 text-base">${duel.betAmount} PTS</strong>!</p>
                             </div>
                             <div class="flex gap-2 mt-1">
                                 <button onclick="acceptDuel('${duel.id}')" class="flex-1 btn-success text-white text-sm font-bold py-2.5 rounded-lg shadow-lg">Entrar e Apostar</button>
-                                <button onclick="rejectDuel('${duel.id}')" class="flex-1 btn-danger text-white text-sm font-bold py-2.5 rounded-lg shadow-lg">Correr</button>
+                                <button onclick="rejectDuel('${duel.id}')" class="flex-1 btn-danger text-white text-sm font-bold py-2.5 rounded-lg shadow-lg">Fugir</button>
                             </div>
                         </div>
                     `;
                 });
             });
 
-            // Ouve status dos duelos enviados
+            // Ouve estado dos duelos enviados
             outboundDuelsListener = onSnapshot(query(collection(db, "duels"), where("challengerId", "==", uid)), (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     const duel = { id: change.doc.id, ...change.doc.data() };
                     if (change.type === "modified") {
                         if (duel.status === 'accepted' && duel.lobbyId) {
-                            createAlertModal("Duelo Aceito!", "Seu oponente aceitou a aposta. Preparando arena...", async () => {
+                            createAlertModal("Duelo Aceite!", "O seu oponente aceitou a aposta. A preparar a arena...", async () => {
                                 await deleteDoc(doc(db, "duels", duel.id));
-                                // Subtrai localmente para atualizar a UI, já foi deduzido no BD na transação do aceitador
+                                // Subtrai localmente para atualizar a IU, já foi deduzido no BD na transação de quem aceitou
                                 currentUserData.score -= duel.betAmount;
                                 updateConsumablesUI();
                                 joinLobby(duel.lobbyId, true);
                             });
                         } else if (duel.status === 'rejected') {
-                            createAlertModal("Desafio Recusado", `${duel.targetName} correu do duelo e não aceitou a aposta.`, async () => {
+                            createAlertModal("Desafio Recusado", `${duel.targetName} fugiu do duelo e não aceitou a aposta.`, async () => {
                                 await deleteDoc(doc(db, "duels", duel.id));
                             });
                         }
@@ -699,7 +1137,7 @@
 
         window.openDuelModal = (friendId, friendName) => {
             if ((currentUserData.score || 0) <= 0) {
-                return createAlertModal("Saldo Insuficiente", "Você precisa de pontos para poder apostar num duelo.");
+                return createAlertModal("Saldo Insuficiente", "Precisa de pontos para poder apostar num duelo.");
             }
             
             const categoriesOptions = [...new Set(allChallenges.map(c => c.category))]
@@ -707,9 +1145,9 @@
                 
             const content = `
                 <div class="space-y-5">
-                    <p class="text-sm text-gray-300">Desafiando <strong class="text-white">${friendName}</strong> para um duelo técnico 1x1. Quem perder ou abandonar, perde a aposta.</p>
+                    <p class="text-sm text-gray-300">A desafiar <strong class="text-white">${friendName}</strong> para um duelo técnico 1x1. Quem perder ou abandonar, perde a aposta.</p>
                     <div class="glass-panel border-white/5 p-4 rounded-xl">
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Pontos em Jogo (Sua Aposta)</label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Pontos em Jogo (A sua Aposta)</label>
                         <input type="number" id="duel-bet-input" max="${currentUserData.score}" min="1" value="10" class="w-full input-elegant p-3.5 rounded-xl font-mono text-2xl text-yellow-400 text-center shadow-inner">
                         <p class="text-xs text-gray-400 text-center mt-2">Saldo disponível: <span class="font-bold text-white">${currentUserData.score} PTS</span></p>
                     </div>
@@ -719,7 +1157,7 @@
                             ${categoriesOptions}
                         </select>
                     </div>
-                    <button id="send-duel-btn" class="w-full btn-gradient text-white font-bold py-4 rounded-xl shadow-lg mt-2 text-lg">Disparar Desafio ⚔️</button>
+                    <button id="send-duel-btn" class="w-full btn-gradient text-white font-bold py-4 rounded-xl shadow-lg mt-2 text-lg">Lançar Desafio ⚔️</button>
                 </div>
             `;
             createModal('duel-modal', 'Configurar Duelo', content, 'max-w-md');
@@ -744,12 +1182,12 @@
                 });
                 
                 document.getElementById('duel-modal')?.remove();
-                createAlertModal("Aposta Registrada", `Desafio enviado. Se ${friendName} aceitar, ${bet} PTS serão deduzidos do seu saldo e a partida começará.`);
+                createAlertModal("Aposta Registada", `Desafio enviado. Se ${friendName} aceitar, ${bet} PTS serão deduzidos do seu saldo e a partida começará.`);
             });
         }
 
         window.acceptDuel = async (duelId) => {
-            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da tela
+            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da ecrã
             const modal = document.getElementById('friends-modal');
             if(modal) modal.remove(); // Fecha o modal de amigos caso esteja aberto
 
@@ -762,7 +1200,7 @@
                     const duelDoc = await transaction.get(duelRef);
                     if (!duelDoc.exists()) throw "Desafio não encontrado ou expirado.";
                     const duel = duelDoc.data();
-                    if (duel.status !== 'pending') throw "Desafio já respondido.";
+                    if (duel.status !== 'pending') throw "O desafio já teve resposta.";
                     currentBet = duel.betAmount;
 
                     const challengerRef = doc(db, "users", duel.challengerId);
@@ -771,8 +1209,8 @@
                     const challengerDoc = await transaction.get(challengerRef);
                     const targetDoc = await transaction.get(targetRef);
 
-                    if ((challengerDoc.data().score || 0) < duel.betAmount) throw "O oponente não tem mais o saldo para cobrir a aposta.";
-                    if ((targetDoc.data().score || 0) < duel.betAmount) throw "Você não tem pontos suficientes no saldo para bancar esta aposta.";
+                    if ((challengerDoc.data().score || 0) < duel.betAmount) throw "O oponente já não tem saldo para cobrir a aposta.";
+                    if ((targetDoc.data().score || 0) < duel.betAmount) throw "Não tem pontos suficientes no saldo para bancar esta aposta.";
 
                     // Escrow: Tira os pontos de ambos
                     transaction.update(challengerRef, { score: (challengerDoc.data().score || 0) - duel.betAmount });
@@ -809,12 +1247,12 @@
 
             } catch (error) {
                 createAlertModal("Falha no Duelo", String(error));
-                await deleteDoc(duelRef); // Limpa o convite ruim
+                await deleteDoc(duelRef); // Limpa o convite inválido
             }
         }
 
         window.rejectDuel = async (duelId) => {
-            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da tela
+            document.getElementById('duel-alerts-container').innerHTML = ''; // Remove o alerta da ecrã
             const duelRef = doc(db, "duels", duelId);
             await updateDoc(duelRef, { status: 'rejected' });
         }
@@ -931,7 +1369,7 @@
             const name = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            if (password !== document.getElementById('register-confirm-password').value) return showMessage('As senhas não coincidem.', true);
+            if (password !== document.getElementById('register-confirm-password').value) return showMessage('As palavras-passe não coincidem.', true);
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await setDoc(doc(db, "users", userCredential.user.uid), { 
@@ -943,21 +1381,21 @@
                     stats: { totalAttempts: 0, correctAttempts: 0, abandons: 0 },
                     hasCompletedTutorial: true
                 });
-                showMessage('Cadastro realizado com sucesso! Faça o login.');
+                showMessage('Registo concluído com sucesso! Inicie a sessão.');
                 switchTabAuth(document.getElementById('tab-login'));
-            } catch (error) { showMessage('Erro ao cadastrar: ' + error.code, true); }
+            } catch (error) { showMessage('Erro no registo: ' + error.code, true); }
         });
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
-            } catch (error) { showMessage('Email ou senha inválidos.', true); }
+            } catch (error) { showMessage('E-mail ou palavra-passe inválidos.', true); }
         });
         document.getElementById('logout-button').addEventListener('click', async (e) => {
              e.preventDefault();
-             document.getElementById('menu-dropdown').classList.add('hidden'); // Esconder menu visualmente
+             document.getElementById('menu-dropdown').classList.add('hidden'); // Ocultar o menu visualmente
              
-             // Dispara a desconexão da sala atual, mas não bloqueia a execução do Logout
+             // Inicia a desconexão da sala atual, mas não impede a execução do Terminar Sessão
              if (currentLobbyId) {
                 leaveLobby().catch(console.error);
              }
@@ -969,7 +1407,7 @@
              
              try {
                  await signOut(auth);
-                 window.location.reload(); // Recarrega a página para limpar inteiramente o cache da sessão
+                 window.location.reload(); // Recarrega a página para limpar completamente a cache da sessão
              } catch (error) {
                  console.error(error);
                  window.location.reload(); 
@@ -978,12 +1416,12 @@
         document.getElementById('forgot-password').addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
-            if(!email) return showMessage('Por favor, digite seu e-mail no campo de login.', true);
+            if(!email) return showMessage('Por favor, introduza o seu e-mail no campo de início de sessão.', true);
             try {
                 await sendPasswordResetEmail(auth, email);
-                showMessage('Link para redefinição de senha enviado!');
+                showMessage('A hiperligação de reposição de palavra-passe foi enviada!');
             } catch (error) {
-                showMessage('Erro ao enviar e-mail.', true);
+                showMessage('Erro ao enviar o e-mail.', true);
             }
         });
 
@@ -1002,10 +1440,12 @@
 
         function displayChallenge(challenge, startTime) {
             const startContainer = document.getElementById('start-challenge-container');
+            const academyActiveContainer = document.getElementById('academy-module-active-container');
             const loader = document.getElementById('loader');
             const placeholderText = document.getElementById('placeholder-text');
 
-            switchView(startContainer, challengeContainer);
+            const fromContainer = isAcademyMode ? academyActiveContainer : startContainer;
+            switchView(fromContainer, challengeContainer);
             
             loader.classList.remove('hidden');
             placeholderText.classList.add('hidden');
@@ -1026,7 +1466,7 @@
                 placeholderText.classList.remove('hidden');
             }
 
-            // Timer Logic
+            // Lógica do Temporizador
             clearInterval(challengeTimerInterval);
             const timerContainer = document.getElementById('timer-container');
             const timerDisplay = document.getElementById('timer-display');
@@ -1034,7 +1474,7 @@
             const timeLimit = parseInt(challenge.timeLimit);
 
             if (timeLimit > 0) {
-                 timerBonus.textContent = `(Bônus x${challenge.bonusMultiplier || 1.5})`;
+                 timerBonus.textContent = `(Bónus x${challenge.bonusMultiplier || 1.5})`;
             } else {
                  timerBonus.textContent = '';
             }
@@ -1088,7 +1528,7 @@
             const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
 
             if (availableChallenges.length === 0) {
-                document.getElementById('start-message').textContent = 'Domínio Completo! Todos os desafios concluídos.';
+                document.getElementById('start-message').textContent = 'Domínio Completo! Todos os desafios foram concluídos.';
                 return;
             }
             
@@ -1136,16 +1576,16 @@
                     if (elapsed <= timeLimit) {
                         const multiplier = parseFloat(currentChallenge.bonusMultiplier || 1);
                         const bonusScore = Math.round(finalScore * multiplier);
-                        answerFeedback.textContent = `Aprovação Técnica! +${bonusScore} pts (Tempo Bônus)`;
+                        answerFeedback.textContent = `Aprovação Técnica! +${bonusScore} pts (Tempo Bónus)`;
                         finalScore = bonusScore;
                     } else {
-                        answerFeedback.textContent = `Aprovado! +${finalScore} pts (Fora do tempo bônus)`;
+                        answerFeedback.textContent = `Aprovado! +${finalScore} pts (Fora do tempo de bónus)`;
                     }
                 } else {
                     answerFeedback.textContent = `Aprovação Técnica! +${finalScore} pts`;
                 }
             } else {
-                answerFeedback.textContent = "Falha na Inspeção. Verifique seus cálculos.";
+                answerFeedback.textContent = "Falha na Inspeção. Verifique os seus cálculos.";
             }
             
             answerFeedback.className = `p-4 rounded-xl text-center text-sm font-bold border ${isCorrect ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'bg-red-500/20 border-red-500/40 text-red-400'}`;
@@ -1229,9 +1669,16 @@
         function resetToStartScreen() {
             const startContainer = document.getElementById('start-challenge-container');
             const challengeContainer = document.getElementById('challenge-container');
+            const academyActiveContainer = document.getElementById('academy-module-active-container');
             
             challengeContainer.classList.add('hidden', 'view-hidden');
-            startContainer.classList.remove('hidden', 'view-hidden');
+            
+            if (isAcademyMode && currentAcademyModule) {
+                academyActiveContainer.classList.remove('hidden', 'view-hidden');
+                renderAcademyChallengesList(currentAcademyModule);
+            } else {
+                startContainer.classList.remove('hidden', 'view-hidden');
+            }
 
             answerForm.classList.remove('hidden');
             nextChallengeButton.classList.add('hidden');
@@ -1240,7 +1687,8 @@
             
             currentChallenge = null;
             activeChallengeData = {};
-            selectedCategory = null;
+            if(!isAcademyMode) selectedCategory = null;
+            
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('start-button').disabled = true;
             document.getElementById('choice-button').disabled = true;
@@ -1255,9 +1703,9 @@
         rerollButton.addEventListener('click', async () => {
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.reroll || 0) <= 0) {
-                return createAlertModal("Sem Tokens", "Você não tem tokens de troca.");
+                return createAlertModal("Sem Tokens", "Não possui tokens de troca.");
             }
-            createConfirmationModal("Substituir Desafio", "Gastar 1 token para solicitar um novo projeto mecânico da mesma categoria? O cronômetro iniciará imediatamente.", async () => {
+            createConfirmationModal("Substituir Desafio", "Pretende gastar 1 token para solicitar um novo projeto mecânico da mesma categoria? O cronómetro iniciará imediatamente.", async () => {
                 const availableChallenges = allChallenges.filter(c => c.category === currentChallenge.category && !completedChallenges.has(c.id) && c.id !== currentChallenge.id);
 
                 if (availableChallenges.length === 0) {
@@ -1283,10 +1731,10 @@
             const userConsumables = currentUserData.consumables || {};
             const hasTokens = (userConsumables.abandon || 0) > 0;
             
-            const titulo = hasTokens ? "Retirada Estratégica" : "Desistir (Penalidade)";
+            const titulo = hasTokens ? "Retirada Estratégica" : "Desistir (Penalização)";
             const mensagem = hasTokens 
-                ? "Utilizar 1 token de abandono para sair sem registrar falha na sua eficiência? (O abandono ainda será registrado no seu perfil público)" 
-                : "Sem tokens. Se sair agora, o sistema registrará uma Falha de Inspeção E um Abandono no seu histórico. Deseja mesmo sair?";
+                ? "Utilizar 1 token de abandono para sair sem registar uma falha na sua eficiência? (O abandono ainda será registado no seu perfil público)" 
+                : "Sem tokens. Se sair agora, o sistema registará uma Falha de Inspeção E um Abandono no seu histórico. Deseja mesmo sair?";
 
             createConfirmationModal(titulo, mensagem, async () => {
                  const userDocRef = doc(db, "users", currentUser.uid);
@@ -1327,13 +1775,13 @@
         choiceButton.addEventListener('click', () => {
             const userConsumables = currentUserData.consumables || {};
             if ((userConsumables.choice || 0) <= 0) {
-                return createAlertModal("Acesso Negado", "Tokens de escolha insuficientes no inventário.");
+                return createAlertModal("Acesso Negado", "Não tem tokens de escolha suficientes no inventário.");
             }
             
             const availableChallenges = allChallenges.filter(c => c.category === selectedCategory && !completedChallenges.has(c.id));
             
             if (availableChallenges.length === 0) {
-                return createAlertModal("Aviso", "Arquivo de projetos vazio nesta categoria.");
+                return createAlertModal("Aviso", "O arquivo de projetos está vazio nesta categoria.");
             }
 
             let content = '<div class="grid grid-cols-2 md:grid-cols-3 gap-5 p-2">';
@@ -1396,7 +1844,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                     <span class="text-sm text-yellow-100 font-medium">Saldo Disponível: <strong class="text-yellow-400 text-lg">${currentUserData.score || 0}</strong> pts</span>
                 </div>
-                <div id="shop-items-list" class="max-h-[50vh] overflow-y-auto space-y-5 pr-2">Carregando inventário...</div>
+                <div id="shop-items-list" class="max-h-[50vh] overflow-y-auto space-y-5 pr-2">A carregar o inventário...</div>
             `, 'max-w-2xl');
         
             const listEl = document.getElementById('shop-items-list');
@@ -1417,7 +1865,7 @@
                     div.innerHTML = `
                         <div>
                             <p class="font-bold text-white">${item.name}</p>
-                            <p class="text-xs text-gray-400 mt-1">${item.type.startsWith('consumable') ? 'Licença de Uso Único' : (item.type === 'unico' ? 'Item de Patente' : 'Multi-uso')}</p>
+                            <p class="text-xs text-gray-400 mt-1">${item.type.startsWith('consumable') ? 'Licença de Uso Único' : (item.type === 'unico' ? 'Artigo de Patente' : 'Múltiplas Utilizações')}</p>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto bg-gray-900/50 p-2 sm:p-0 sm:bg-transparent rounded-lg">
                             <p class="text-yellow-400 font-bold text-lg px-2">${item.price} <span class="text-xs text-yellow-600">PTS</span></p>
@@ -1453,7 +1901,7 @@
             }
         
             if (itemsSnapshot.empty && shopThemes.length === 0) {
-                listEl.innerHTML = '<p class="text-gray-500 text-center py-8">Estoque indisponível no momento.</p>';
+                listEl.innerHTML = '<p class="text-gray-500 text-center py-8">Stock indisponível no momento.</p>';
             }
         
             listEl.querySelectorAll('.buy-item-btn').forEach(btn => btn.addEventListener('click', (e) => { buyItem(e); }));
@@ -1462,7 +1910,7 @@
         function openCompletedModal() {
             let content = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-2">';
             if (completedChallenges.size === 0) {
-                content += '<p class="text-gray-500 text-center col-span-full py-8">Nenhum registro no histórico de projetos.</p>';
+                content += '<p class="text-gray-500 text-center col-span-full py-8">Nenhum registo no histórico de projetos.</p>';
             } else {
                 completedChallenges.forEach((data, id) => {
                     content += `
@@ -1482,7 +1930,7 @@
                     <button id="show-all-users-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-white font-medium py-1.5 px-3 rounded-lg border border-slate-600 transition">Ver Global</button>
                 </div>`;
 
-            createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2 pt-2 space-y-2">Conectando ao satélite...</div>', 'max-w-lg');
+            createModal('ranking-modal', titleHtml, '<div id="ranking-list" class="max-h-[60vh] overflow-y-auto pr-2 pt-2 space-y-2">A ligar ao satélite...</div>', 'max-w-lg');
             document.getElementById('show-all-users-btn').addEventListener('click', () => { showFullRanking(); });
 
             const listEl = document.getElementById('ranking-list');
@@ -1501,7 +1949,7 @@
                 
                 listEl.innerHTML = '';
                 if (querySnapshot.empty) {
-                    listEl.innerHTML = '<p class="text-gray-500 text-center py-4">Sinal perdido. Nenhum dado.</p>';
+                    listEl.innerHTML = '<p class="text-gray-500 text-center py-4">Sinal perdido. Sem dados.</p>';
                     return;
                 }
 
@@ -1522,7 +1970,7 @@
                 }
 
             } catch (error) {
-                listEl.innerHTML = '<p class="text-red-400 text-center py-4">Falha ao carregar ranking.</p>';
+                listEl.innerHTML = '<p class="text-red-400 text-center py-4">Falha ao carregar a classificação.</p>';
             }
         }
 
@@ -1573,7 +2021,7 @@
                 
                 listEl.innerHTML = '';
                 if (querySnapshot.empty) {
-                    listEl.innerHTML = '<p class="text-gray-500 text-center">Nenhum registro.</p>';
+                    listEl.innerHTML = '<p class="text-gray-500 text-center">Nenhum registo.</p>';
                     return;
                 }
 
@@ -1584,7 +2032,7 @@
                 });
 
             } catch (error) {
-                listEl.innerHTML = '<p class="text-red-400 text-center">Erro crítico no banco de dados.</p>';
+                listEl.innerHTML = '<p class="text-red-400 text-center">Erro crítico na base de dados.</p>';
             } finally {
                  if(btn) btn.disabled = false;
             }
@@ -1601,7 +2049,7 @@
             const { id, price, type, name } = e.target.dataset;
             const itemPrice = parseInt(price);
             
-            createConfirmationModal('Autorização de Compra', `Transferir ${itemPrice} pts para adquirir "${name}"?`, async () => {
+            createConfirmationModal('Autorização de Compra', `Pretende transferir ${itemPrice} pts para adquirir "${name}"?`, async () => {
                 const userDocRef = doc(db, "users", currentUser.uid);
                 try {
                     await runTransaction(db, async (transaction) => {
@@ -1648,11 +2096,11 @@
                     
                     updateConsumablesUI();
                     document.getElementById('shop-modal')?.remove();
-                    createAlertModal("Transação Aprovada", `O item ${name} foi adicionado ao inventário.`);
+                    createAlertModal("Transação Aprovada", `O artigo ${name} foi adicionado ao inventário.`);
                     await checkAchievements();
 
                 } catch (error) {
-                    createAlertModal("Transação Negada", String(error));
+                    createAlertModal("Transação Recusada", String(error));
                 }
             });
         }
@@ -1722,7 +2170,7 @@
                     <div class="glass-panel p-5 rounded-2xl">
                         <label for="title-select" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Titulação Ativa</label>
                         <select id="title-select" class="w-full p-3 input-elegant rounded-xl text-blue-300 font-medium">
-                            <option value="">Sem Titulação</option>
+                            <option value="">Nenhuma Titulação</option>
                             ${titleOptions}
                         </select>
                     </div>
@@ -1765,7 +2213,7 @@
                         <label class="cursor-pointer relative">
                             <input type="radio" name="theme-select" value="" class="sr-only peer">
                             <div class="w-full p-5 rounded-2xl border-2 border-transparent peer-checked:border-blue-500 hover:border-gray-500 transition-all shadow-md bg-slate-900 text-white">
-                                <h4 class="font-bold text-lg">Padrão Sistema</h4>
+                                <h4 class="font-bold text-lg">Sistema Predefinido</h4>
                                 <p class="text-xs text-slate-400">A visualização original do desafio.</p>
                             </div>
                         </label>
@@ -1814,7 +2262,7 @@
                 await updateDoc(doc(db, "users", currentUser.uid), { "profile.title": newTitle, "profile.badgeUrl": newBadge });
                 currentUserData.profile.title = newTitle;
                 currentUserData.profile.badgeUrl = newBadge;
-                createAlertModal('Dados Gravados', 'Suas insígnias foram atualizadas no sistema.');
+                createAlertModal('Dados Gravados', 'As suas insígnias foram atualizadas no sistema.');
             });
             
             document.getElementById('save-theme-btn').addEventListener('click', async () => {
@@ -1857,7 +2305,7 @@
                     if (!requestSnapshot.empty) {
                         friendButtonHtml = `<button class="w-full mt-4 btn-gradient text-white font-bold py-2.5 rounded-xl" onclick="document.getElementById('public-profile-${userId}').remove(); document.getElementById('friends-button-menu').click();">Analisar Convite Pendente</button>`;
                     } else {
-                        friendButtonHtml = `<button id="add-friend-from-profile-btn" data-id="${userId}" data-name="${userData.name}" class="w-full mt-4 bg-blue-600/20 border border-blue-500/50 hover:bg-blue-600/40 text-blue-300 font-bold py-2.5 rounded-xl transition">Adicionar Aos Aliados</button>`;
+                        friendButtonHtml = `<button id="add-friend-from-profile-btn" data-id="${userId}" data-name="${userData.name}" class="w-full mt-4 bg-blue-600/20 border border-blue-500/50 hover:bg-blue-600/40 text-blue-300 font-bold py-2.5 rounded-xl transition">Adicionar aos Aliados</button>`;
                     }
                 }
             }
@@ -1892,9 +2340,9 @@
                     </div>
                 </div>
                 
-                <h4 class="font-title text-lg font-bold text-white mb-3">Registro de Honrarias</h4>
+                <h4 class="font-title text-lg font-bold text-white mb-3">Registo de Honrarias</h4>
                 <div class="max-h-[35vh] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    ${achievementsHtml || '<p class="text-gray-500 col-span-full py-4 text-center">Nenhuma honraria registrada.</p>'}
+                    ${achievementsHtml || '<p class="text-gray-500 col-span-full py-4 text-center">Nenhuma honraria registada.</p>'}
                 </div>
             `;
             createModal(`public-profile-${userId}`, `Dossiê: ${userData.name}`, content, 'max-w-2xl');
@@ -1982,7 +2430,7 @@
                 rewardsSummary.push(`Skin: ${themeReward.name}`);
             }
 
-            showToast(`UPGRADE! Nível ${newLevel.name} alcançado. Bônus: ${rewardsSummary.join(' | ')}`);
+            showToast(`ATUALIZAÇÃO! Nível ${newLevel.name} alcançado. Bónus: ${rewardsSummary.join(' | ')}`);
             updateConsumablesUI();
         }
 
@@ -2079,10 +2527,6 @@
                 <div class="bg-gray-900 rounded-xl p-4 flex justify-center shadow-inner mb-4">
                     <img src="https://lh3.googleusercontent.com/d/${id}" class="max-w-full h-auto max-h-[50vh] rounded-lg object-contain">
                 </div>
-                <div class="flex justify-between items-center text-sm text-gray-400 bg-gray-800/50 p-3 rounded-lg border border-white/5">
-                    <span>Massa Submetida: <strong class="text-white">${data.userAnswer?.mass || '-'} g</strong></span>
-                    <span>Volume Submetido: <strong class="text-white">${data.userAnswer?.volume || '-'} cm³</strong></span>
-                </div>
             `;
             createModal('details-modal', titleHtml, content, 'max-w-xl');
         }
@@ -2121,10 +2565,10 @@
         function openRedeemCodeModal() {
              const titleHtml = `<h2 class="font-title text-xl font-bold text-white flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg> Códigos de Acesso</h2>`;
              createModal('redeem-code-modal', titleHtml, `
-                <p class="text-gray-400 text-sm mb-6">Insira um código de autorização válido para descriptografar bônus no sistema.</p>
+                <p class="text-gray-400 text-sm mb-6">Insira um código de autorização válido para desencriptar bónus no sistema.</p>
                 <form id="redeem-code-form" class="space-y-5">
                     <input type="text" id="code-input" required class="w-full p-4 bg-gray-900 border border-white/10 focus:border-purple-500 rounded-xl font-mono tracking-[0.2em] text-center text-xl text-white shadow-inner uppercase placeholder:text-gray-600" placeholder="XXXX-XXXX">
-                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition">Decodificar</button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition">Descodificar</button>
                 </form>
             `, 'max-w-md');
             document.getElementById('redeem-code-form').addEventListener('submit', redeemCode);
@@ -2141,7 +2585,7 @@
 
             try {
                 const codeDoc = await getDoc(codeRef);
-                if (!codeDoc.exists()) throw new Error("Assinatura inválida no banco de dados.");
+                if (!codeDoc.exists()) throw new Error("Assinatura inválida na base de dados.");
                 const codeData = codeDoc.data();
                 
                 await runTransaction(db, async (transaction) => {
@@ -2150,14 +2594,14 @@
                     const freshCodeData = freshCodeDoc.data();
 
                     if (freshCodeData.expiresAt.toDate() < new Date()) throw new Error("Validade do código expirada.");
-                    if (freshCodeData.usesLeft === 0) throw new Error("Carga deste código foi esgotada.");
-                    if (userRedeemedDoc.exists()) throw new Error("Código já processado para o seu perfil.");
+                    if (freshCodeData.usesLeft === 0) throw new Error("A carga deste código foi esgotada.");
+                    if (userRedeemedDoc.exists()) throw new Error("O código já foi processado para o seu perfil.");
 
                     if (freshCodeData.effectType === 'PAUSE_TIMER') {
                         const userDoc = await transaction.get(userRef);
                         const userData = userDoc.data();
                         if (!userData.activeChallenge || !userData.activeChallengeStartTime) {
-                             throw new Error("Erro: Exige-se uma inspeção ativa em andamento.");
+                             throw new Error("Erro: Exige-se uma inspeção ativa em curso.");
                         }
                         const pauseMinutes = freshCodeData.effectValue;
                         const currentStartTime = userData.activeChallengeStartTime.toDate();
@@ -2184,14 +2628,14 @@
                 document.getElementById('redeem-code-modal')?.remove();
                 await loadGameData(currentUser); 
                 
-                let successMessage = "Protocolo aceito! Benefícios liberados.";
+                let successMessage = "Protocolo aceite! Benefícios libertados.";
                 if(codeData.effectType === 'PAUSE_TIMER') {
-                    successMessage = `Sucesso! Tempo de projeto estendido em ${codeData.effectValue} minutos.`;
+                    successMessage = `Sucesso! O tempo do projeto foi prolongado em ${codeData.effectValue} minutos.`;
                 }
-                createAlertModal("Decodificação Concluída", successMessage);
+                createAlertModal("Descodificação Concluída", successMessage);
 
             } catch (error) {
-                 createAlertModal("Falha na Decodificação", error.message);
+                 createAlertModal("Falha na Descodificação", error.message);
             }
         }
         
@@ -2281,7 +2725,7 @@
                         <label for="create-lobby-private" class="flex items-center cursor-pointer w-full justify-between">
                             <div>
                                 <span class="block font-bold text-white">Acesso Restrito</span>
-                                <span class="text-xs text-gray-400">Exigir senha para entrar</span>
+                                <span class="text-xs text-gray-400">Exigir palavra-passe para entrar</span>
                             </div>
                             <div class="relative">
                                 <input type="checkbox" id="create-lobby-private" class="sr-only peer">
@@ -2291,7 +2735,7 @@
                         </label>
                     </div>
                     <div id="create-lobby-password-container" class="hidden">
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Senha da Arena</label>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Palavra-passe da Arena</label>
                         <input type="password" id="create-lobby-password" class="w-full input-elegant p-3 rounded-xl font-mono" placeholder="••••">
                     </div>
                     <button id="confirm-create-lobby-btn" class="w-full mt-2 btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg">Inicializar Arena Livre</button>
@@ -2352,7 +2796,7 @@
              const lobbyDoc = await getDoc(lobbyRef);
 
              if (!lobbyDoc.exists()) {
-                return createAlertModal("Sinal Perdido", "Arena não encontrada nos registros.");
+                return createAlertModal("Sinal Perdido", "Arena não encontrada nos registos.");
              }
              const lobbyData = lobbyDoc.data();
              if (lobbyData.status !== 'waiting') {
@@ -2376,7 +2820,7 @@
 
             currentLobbyId = lobbyId;
             
-            // FORÇAR A EXIBIÇÃO DA TELA DA ARENA INDEPENDENTE DE ONDE O USUÁRIO ESTIVER
+            // FORÇAR A EXIBIÇÃO DO ECRÃ DA ARENA INDEPENDENTEMENTE DE ONDE O UTILIZADOR ESTIVER
             document.getElementById('main-view-container').classList.add('hidden', 'view-hidden');
             document.getElementById('competitive-container').classList.remove('hidden', 'view-hidden');
             document.getElementById('lobby-browser').classList.add('hidden', 'view-hidden');
@@ -2388,7 +2832,7 @@
                 if (doc.exists()) {
                     renderLobby(doc.data());
                 } else {
-                    createAlertModal("Conexão Cortada", "A sala foi encerrada pelo anfitrião ou pelo sistema.", () => leaveLobby(true));
+                    createAlertModal("Ligação Cortada", "A sala foi encerrada pelo anfitrião ou pelo sistema.", () => leaveLobby(true));
                 }
             });
         }
@@ -2397,11 +2841,11 @@
             const content = `
                  <p class="text-gray-400 text-sm mb-4 text-center">Acesso restrito à arena de <strong class="text-white">${lobbyData.hostName}</strong>.</p>
                  <form id="lobby-password-form" class="space-y-4">
-                    <input type="password" id="lobby-password-input" class="w-full input-elegant p-3.5 rounded-xl text-center tracking-widest font-mono text-lg" required placeholder="SENHA">
+                    <input type="password" id="lobby-password-input" class="w-full input-elegant p-3.5 rounded-xl text-center tracking-widest font-mono text-lg" required placeholder="PALAVRA-PASSE">
                     <button type="submit" class="w-full btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg">Infiltrar</button>
                  </form>
             `;
-            createModal('password-prompt-modal', 'Acesso Criptografado', content, 'max-w-sm');
+            createModal('password-prompt-modal', 'Acesso Encriptado', content, 'max-w-sm');
             document.getElementById('lobby-password-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const inputPassword = document.getElementById('lobby-password-input').value;
@@ -2409,7 +2853,7 @@
                     document.getElementById('password-prompt-modal')?.remove();
                     joinLobby(lobbyId, true);
                 } else {
-                    createAlertModal("Acesso Negado", "Senha incorreta.");
+                    createAlertModal("Acesso Negado", "Palavra-passe incorreta.");
                 }
             })
         }
@@ -2441,7 +2885,7 @@
                     
                     if (lobbyData.isDuel && lobbyData.status !== 'finished') {
                         if (lobbyData.status === 'waiting') {
-                            // Cancelado antes de começar, devolve pontos pra todo mundo
+                            // Cancelado antes de começar, devolve pontos a todos
                             for (const p of lobbyData.players) {
                                 await runTransaction(db, async (t) => {
                                     const uRef = doc(db, "users", p.uid);
@@ -2449,10 +2893,10 @@
                                     if(uDoc.exists()) t.update(uRef, { score: (uDoc.data().score || 0) + lobbyData.betAmount });
                                 });
                             }
-                            if(lobbyData.hostId === currentUser.uid) await deleteDoc(lobbyRef); // Deleta a sala
-                            currentUserData.score += lobbyData.betAmount; // Restaura visualmente pro cara que cancelou
+                            if(lobbyData.hostId === currentUser.uid) await deleteDoc(lobbyRef); // Elimina a sala
+                            currentUserData.score += lobbyData.betAmount; // Restaura visualmente para quem cancelou
                         } else if (lobbyData.status === 'in_progress') {
-                            // Correu no meio do jogo: oponente leva o pote (WO)
+                            // Fugiu a meio do jogo: oponente leva o pote (WO)
                             const otherPlayer = lobbyData.players.find(p => p.uid !== currentUser.uid);
                             if (otherPlayer) {
                                 await runTransaction(db, async (transaction) => {
@@ -2517,9 +2961,9 @@
         }
         
         abandonCompetitionBtn.addEventListener('click', () => {
-            const isDuel = document.getElementById('match-timer').dataset.isDuel === 'true'; // hackzinho pra saber se é duelo
+            const isDuel = document.getElementById('match-timer').dataset.isDuel === 'true'; // hackzinho para saber se é duelo
             const msg = isDuel 
-                ? "Abandonar agora fará você perder todo o dinheiro da aposta e ceder a vitória ao oponente. Deseja mesmo correr?" 
+                ? "Se abandonar agora, vai perder todo o dinheiro da aposta e ceder a vitória ao oponente. Deseja mesmo fugir?" 
                 : "O sistema reportará o seu abandono na sua ficha pública de eficiência. Deseja mesmo sair da partida?";
             createConfirmationModal("Desistir do Confronto", msg, () => leaveLobby());
         });
@@ -2557,7 +3001,7 @@
                                  <h3 class="font-title text-lg font-bold text-white mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg> Parâmetros (${arenaTypeStr})</h3>
                                  <div class="space-y-4">
                                     <div>
-                                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Dominío Base</label>
+                                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Domínio Base</label>
                                         <select id="lobby-category-select" class="w-full input-elegant p-3 rounded-xl" ${!isHost || lobbyData.isDuel ? 'disabled' : ''}>
                                             ${categoriesOptions}
                                         </select>
@@ -2567,7 +3011,7 @@
                                         <input type="number" id="lobby-time-input" value="${lobbyData.settings.timeLimitMinutes}" min="1" max="60" class="w-full input-elegant p-3 rounded-xl font-mono text-center" ${!isHost || lobbyData.isDuel ? 'disabled' : ''}>
                                     </div>
                                  </div>
-                                 ${isHost ? `<button id="start-lobby-btn" class="w-full mt-6 btn-success text-white font-bold py-3.5 rounded-xl shadow-lg text-lg uppercase tracking-wider">Acionar Jogo</button>` : '<div class="mt-6 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 p-3 rounded-xl text-center text-sm font-medium animate-pulse">Aguardando liberação do líder...</div>'}
+                                 ${isHost ? `<button id="start-lobby-btn" class="w-full mt-6 btn-success text-white font-bold py-3.5 rounded-xl shadow-lg text-lg uppercase tracking-wider">Acionar Jogo</button>` : '<div class="mt-6 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 p-3 rounded-xl text-center text-sm font-medium animate-pulse">A aguardar a autorização do líder...</div>'}
                             </div>
                             <div class="bg-gray-900/60 p-5 rounded-2xl border border-white/5 flex flex-col">
                                 <h3 class="font-title text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -2615,7 +3059,7 @@
                     const myAnswer = lobbyData.playerAnswers?.[currentUser.uid];
                     if (myAnswer) {
                         answerForm.classList.add('hidden');
-                        answerFeedback.textContent = 'Aprovado! Aguardando oponentes ou próximo projeto...';
+                        answerFeedback.textContent = 'Aprovado! A aguardar oponentes ou o próximo projeto...';
                         answerFeedback.className = 'p-4 rounded-xl text-center text-sm font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 shadow-inner';
                         answerFeedback.classList.remove('hidden');
 
@@ -2634,7 +3078,7 @@
                 
                 const rankingContainer = document.getElementById('mini-ranking-container');
                 const rankingList = document.getElementById('mini-ranking-list');
-                document.getElementById('ranking-title').textContent = lobbyData.isDuel ? '⚔️ DUELO EM ANDAMENTO' : 'Placar Live';
+                document.getElementById('ranking-title').textContent = lobbyData.isDuel ? '⚔️ DUELO EM ANDAMENTO' : 'Placar em Direto';
 
                 rankingContainer.classList.remove('hidden');
                 rankingList.innerHTML = lobbyData.players
@@ -2684,7 +3128,7 @@
                                 <span class="text-3xl">⚖️</span>
                             </div>
                             <h3 class="font-title text-2xl font-bold text-white">Empate Técnico!</h3>
-                            <p class="text-gray-400 mt-2">Apostas de <span class="font-bold text-yellow-400">${lobbyData.betAmount} PTS</span> devolvidas a ambos.</p>
+                            <p class="text-gray-400 mt-2">Apostas de <span class="font-bold text-yellow-400">${lobbyData.betAmount} PTS</span> foram devolvidas a ambos.</p>
                         `;
                     } else {
                         headerHtml = `
@@ -2736,7 +3180,7 @@
             
             const availableChallenges = allChallenges.filter(c => c.category === lobbyData.settings.category);
             if (availableChallenges.length === 0) {
-                return createAlertModal("Erro Tático", "Não há projetos registrados sob esta diretriz de categoria.");
+                return createAlertModal("Erro Tático", "Não existem projetos registados sob esta diretriz de categoria.");
             }
             const firstChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
 
@@ -2762,8 +3206,8 @@
 
             if (isCorrect) {
                 const lobbyRef = doc(db, "lobbies", currentLobbyId);
-                // No competitivo e duelo, acertos valem fixos (ex: 1 pt por acerto para desempatar) ou o score da peça
-                // Como não queremos quebrar a lógica de vitórias e apostas, vamos usar 1 para facilitar contagem.
+                // No competitivo e duelo, os acertos valem de forma fixa (ex: 1 pt por acerto para desempatar) ou o score da peça
+                // Como não queremos quebrar a lógica de vitórias e apostas, vamos usar 1 para facilitar a contagem.
                 const finalScore = 1; 
 
                 await runTransaction(db, async (transaction) => {
@@ -2848,7 +3292,7 @@
                     const p2 = players[1];
 
                     if (p1.score > p2.score) {
-                        // Vencedor leva tudo
+                        // O vencedor leva tudo
                         const winnerRef = doc(db, "users", p1.uid);
                         const wDoc = await transaction.get(winnerRef);
                         if(wDoc.exists()) {
@@ -2866,10 +3310,10 @@
                     }
                 }
             });
-            // O Listener de mudança de status para 'finished' vai cuidar de atualizar a UI.
+            // O Listener de mudança de status para 'finished' vai tratar de atualizar a IU.
         }
 
-        // --- FUNÇÕES DE UI/UX ---
+        // --- FUNÇÕES DE IU/UX ---
         function switchView(from, to) {
             if (!from || !to) return;
             from.classList.add('view-hidden');
@@ -2914,7 +3358,7 @@
                 
                 <div id="tab-content-add" class="friends-tab-content hidden space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="email" id="add-friend-email" placeholder="Email de Registro" class="w-full flex-1 p-3.5 input-elegant rounded-xl">
+                        <input type="email" id="add-friend-email" placeholder="Email de Registo" class="w-full flex-1 p-3.5 input-elegant rounded-xl">
                         <button id="search-friend-btn" class="btn-gradient text-white font-bold py-3.5 px-6 rounded-xl shadow-lg whitespace-nowrap">Rastrear Sinal</button>
                     </div>
                     <div id="friend-search-results" class="mt-4 space-y-3"></div>
@@ -2950,7 +3394,7 @@
             if (friendsListener) friendsListener();
             friendsListener = onSnapshot(friendsRef, (snapshot) => {
                 if (snapshot.empty) {
-                    container.innerHTML = '<div class="text-center py-8 text-gray-500 border border-dashed border-gray-600 rounded-xl">Nenhum aliado conectado à sua rede.</div>';
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500 border border-dashed border-gray-600 rounded-xl">Nenhum aliado ligado à sua rede.</div>';
                     return;
                 }
                 container.innerHTML = '';
@@ -3062,7 +3506,7 @@
                 friendName: targetName,
                 status: 'sent'
             });
-            createAlertModal("Transmissão Realizada", `Convite de aliança disparado para ${targetName}.`);
+            createAlertModal("Transmissão Realizada", `Convite de aliança enviado a ${targetName}.`);
         }
 
         async function acceptFriendRequest(requesterId, requesterName, docId) {
@@ -3083,7 +3527,7 @@
         }
 
         async function removeFriend(friendId) {
-            createConfirmationModal("Cortar Conexão", "Isto removerá o acesso desta conta aos seus dados aliados de forma permanente. Prosseguir?", async () => {
+            createConfirmationModal("Cortar Ligação", "Esta ação removerá o acesso desta conta aos seus dados aliados de forma permanente. Deseja prosseguir?", async () => {
                 const myFriendRef = doc(db, "users", currentUser.uid, "friends", friendId);
                 const theirFriendRef = doc(db, "users", friendId, "friends", currentUser.uid);
                 await deleteDoc(myFriendRef);
